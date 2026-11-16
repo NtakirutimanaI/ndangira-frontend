@@ -13,12 +13,14 @@ import AdminDashboard from './pages/AdminDashboard';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import ProtectedRoute from './components/ProtectedRoute';
+import AdvertiseBanner from './components/AdvertiseBanner';
 
 const App = () => {
   const location = useLocation();
   const isDashboard = location.pathname === '/dashboard' || location.pathname === '/admin';
   return (
     <>
+      <AdvertiseBanner />
       <Navbar />
       <Routes>
         <Route path="/" element={<Home />} />

@@ -1,9 +1,11 @@
-import { Image, PlayCircle } from 'lucide-react';
+import { Image, PlayCircle } from './icons';
+import { useLanguage } from '../context/LanguageContext';
 
 const ImageGallery = ({ images, videos }) => {
+  const { t } = useLanguage();
   const media = [...(images || []).map((src) => ({ type: 'image', src })), ...(videos || []).map((src) => ({ type: 'video', src }))];
   if (media.length === 0) {
-    return <div className="h-64 bg-gray-100 flex items-center justify-center rounded-lg text-gray-400"><Image className="h-12 w-12 mx-auto mb-2" /> No media available</div>;
+    return <div className="h-64 bg-gray-100 flex items-center justify-center rounded-lg text-gray-400"><Image className="h-12 w-12 mx-auto mb-2" /> {t('property.noImage')}</div>;
   }
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-2">

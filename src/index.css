@@ -6,3 +6,87 @@ body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
+
+@keyframes ad-kenburns {
+  0% { transform: scale(1) translate(0, 0); }
+  50% { transform: scale(1.08) translate(-1.5%, -1%); }
+  100% { transform: scale(1) translate(0, 0); }
+}
+
+@keyframes ad-fade-zoom {
+  0% { opacity: 0; transform: scale(1.03); }
+  10% { opacity: 1; transform: scale(1.02); }
+  90% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(0.99); }
+}
+
+@keyframes ad-float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes ad-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes ad-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.15); }
+  50% { box-shadow: 0 0 0 6px rgba(245, 158, 11, 0.08); }
+}
+
+@keyframes ad-slide-up {
+  0% { opacity: 0; transform: translateY(18px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes ad-pulse-bg {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+
+.ad-card-enter {
+  animation: ad-slide-up 0.6s ease both, ad-float 6s ease-in-out infinite 0.6s;
+}
+
+.ad-img-kenburns {
+  animation: ad-kenburns 12s ease-in-out infinite;
+  will-change: transform;
+}
+
+.ad-img-fade {
+  animation: ad-fade-zoom 4s ease-in-out;
+}
+
+.ad-badge-shimmer {
+  background: linear-gradient(90deg, rgba(255,255,255,0.9) 0%, rgba(254,243,199,1) 50%, rgba(255,255,255,0.9) 100%);
+  background-size: 200% 100%;
+  animation: ad-shimmer 3s linear infinite;
+}
+
+.ad-glow {
+  animation: ad-glow 3s ease-in-out infinite;
+}
+
+.ad-placeholder-pulse {
+  animation: ad-pulse-bg 4s ease-in-out infinite;
+}
+
+@keyframes banner-marquee-left {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes banner-marquee-right {
+  0% { transform: translateX(-50%); }
+  100% { transform: translateX(0); }
+}
+
+@keyframes banner-text-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; letter-spacing: 0.02em; }
+  50% { transform: scale(1.06); opacity: 0.92; letter-spacing: 0.08em; }
+}
+
+.banner-text-animate {
+  animation: banner-text-pulse 2.2s ease-in-out infinite;
+}

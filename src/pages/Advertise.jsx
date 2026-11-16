@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
-import { Megaphone, ExternalLink, Calendar, Sparkles, PlayCircle } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { Megaphone, ExternalLink, Calendar, PlayCircle, ChevronLeft, ChevronRight } from '../components/icons';
 import api from '../services/api';
 import { LoadingSpinner } from '../components/LoadingSpinner';
+import { useLanguage } from '../context/LanguageContext';
 
 const API_BASE = 'http://localhost:5000';
 
@@ -15,10 +16,10 @@ const toEmbedUrl = (url) => {
   if (!url) return '';
   try {
     const u = new URL(url);
-    const host = u.hostname.replace(/^www\./, '');
-    if (host.includes('youtu.be')) {
+    const host = u.hostname.replace(/^www\./, '').toLowerCase();
+    if (host === 'youtu.be') {
       const id = u.pathname.replace('/', '');
-      return id ? `https://www.youtube.com/embed/${id}` : url;
+      return id ? `https://www.youtube.com/embed/${id}` : '';
     }
     if (host.includes('youtube.com')) {
       const id = u.searchParams.get('v');
@@ -26,101 +27,195 @@ const toEmbedUrl = (url) => {
       if (u.pathname.startsWith('/embed/')) return url;
       if (u.pathname.startsWith('/shorts/')) return `https://www.youtube.com/embed/${u.pathname.split('/')[2] || ''}`;
     }
+    if (host.includes('linkedin.com')) {
+      return '';
+    }
+    if (host.includes('tiktok.com')) {
+      const parts = u.pathname.split('/').filter(Boolean);
+      const vidIdx = parts.indexOf('video');
+      if (vidIdx >= 0 && parts[vidIdx + 1]) return `https://www.tiktok.com/embed/v2/${parts[vidIdx + 1]}`;
+      return '';
+    }
+    if (host.includes('instagram.com')) {
+      const m = u.pathname.match(/\/(p|reel|tv)\/([^/]+)/);
+      if (m) return `https://www.instagram.com/${m[1]}/${m[2]}/embed`;
+      return '';
+    }
   } catch (_) {}
   return '';
+};
+
+const getYoutubeId = (src) => {
+  if (!src) return '';
+  const m = src.match(/\/embed\/([^?]+)/);
+  return m ? m[1] : '';
+};
+
+const VideoThumb = ({ slide, active }) => {
+  const ytId = slide.type === 'embed' ? getYoutubeId(slide.src) : '';
+  const thumb = ytId ? `https://img.youtube.com/vi/${ytId}/mqdefault.jpg` : '';
+  const title = slide.ad?.title || 'Video';
+  const company = slide.ad?.companyName || '';
+
+  return (
+    <div className={`w-full flex gap-2 p-1.5 rounded-lg transition text-left ${active ? 'bg-gray-800' : 'hover:bg-gray-900'}`}>
+      <div className="relative w-28 sm:w-32 aspect-video bg-gray-800 rounded overflow-hidden shrink-0 border border-gray-700">
+        {thumb ? (
+          <img src={thumb} alt="" className="w-full h-full object-cover" />
+        ) : slide.type === 'file' ? (
+          <video src={slide.src} className="w-full h-full object-cover" muted preload="metadata" />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-gray-800">
+            <PlayCircle className="h-6 w-6 text-amber-400" />
+          </div>
+        )}
+        <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+          <PlayCircle className="h-5 w-5 text-white drop-shadow" />
+        </div>
+      </div>
+      <div className="min-w-0 flex-1 py-0.5">
+        <p className={`text-xs sm:text-sm font-medium leading-snug line-clamp-2 ${active ? 'text-amber-400' : 'text-white'}`}>{title}</p>
+        <p className="text-[11px] text-gray-400 mt-0.5 truncate">{company}</p>
+      </div>
+    </div>
+  );
 };
 
 const Advertise = () => {
   const [ads, setAds] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [idx, setIdx] = useState(0);
+  const [visible, setVisible] = useState(true);
+  const { t } = useLanguage();
 
   useEffect(() => {
     (async () => {
       setLoading(true);
       try { const res = await api.get('/ads'); setAds(res.data?.data || []); }
-      catch { setError('Failed to load advertisements'); }
+      catch { setError(t('ads.failed')); }
       finally { setLoading(false); }
     })();
-  }, []);
+  }, [t]);
+
+  const slides = useMemo(() => {
+    const out = [];
+    ads.forEach((ad) => {
+      (ad.videos || []).forEach((v, i) => out.push({ type: 'file', src: resolveMediaUrl(v), ad, key: `${ad._id}-vf${i}` }));
+      (ad.videoLinks || []).forEach((link, i) => {
+        const embed = toEmbedUrl(link);
+        if (embed) out.push({ type: 'embed', src: embed, ad, key: `${ad._id}-ve${i}` });
+        else out.push({ type: 'link', src: link, ad, key: `${ad._id}-vl${i}` });
+      });
+    });
+    return out;
+  }, [ads]);
+
+  useEffect(() => { setIdx(0); }, [slides.length]);
+
+  useEffect(() => {
+    if (slides.length <= 1) return;
+    const cur = slides[idx % slides.length];
+    const delay = cur?.type === 'file' ? 15000 : 10000;
+    const id = setInterval(() => {
+      setVisible(false);
+      setTimeout(() => {
+        setIdx((i) => (i + 1) % slides.length);
+        setVisible(true);
+      }, 350);
+    }, delay);
+    return () => clearInterval(id);
+  }, [slides.length, idx]);
+
+  const go = (dir) => {
+    if (slides.length <= 1) return;
+    setVisible(false);
+    setTimeout(() => {
+      setIdx((i) => (i + dir + slides.length) % slides.length);
+      setVisible(true);
+    }, 250);
+  };
+
+  const select = (i) => {
+    if (i === idx) return;
+    setVisible(false);
+    setTimeout(() => { setIdx(i); setVisible(true); }, 200);
+  };
+
+  const current = slides[idx % (slides.length || 1)];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50 via-white to-white pt-24 pb-16 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-6xl mx-auto">
-        <div className="mb-10 text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-medium mb-3"><Sparkles className="h-3.5 w-3.5" /> Partner Spotlight</div>
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 flex items-center justify-center gap-3"><Megaphone className="h-9 w-9 text-amber-600" /> Featured Advertisements</h1>
-          <p className="text-gray-600 mt-3 max-w-2xl mx-auto">Discover businesses and partners promoting homes, vehicles, plots, and machinery on Ndangira.</p>
+    <div className="min-h-screen bg-gray-950 pt-32 pb-8 px-4">
+      <div className="max-w-7xl mx-auto">
+        <div className="flex items-center gap-2 text-white mb-4">
+          <Megaphone className="h-5 w-5 text-amber-400" />
+          <h1 className="text-lg sm:text-xl font-bold">{t('ads.featured')}</h1>
         </div>
 
-        {error && <div className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 text-center">{error}</div>}
+        {error && <div className="mb-4 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">{error}</div>}
 
         {loading ? (
-          <div className="py-16 flex justify-center"><LoadingSpinner /></div>
-        ) : ads.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-amber-200 bg-white p-12 text-center text-gray-500">No active advertisements right now. Check back soon for partner offers.</div>
+          <div className="py-20 flex justify-center"><LoadingSpinner /></div>
+        ) : slides.length === 0 ? (
+          <div className="py-20 flex items-center justify-center">
+            <div className="text-center text-gray-400 max-w-md">
+              <Megaphone className="h-14 w-14 mx-auto mb-3 text-amber-500/50" />
+              <p className="font-medium text-white mb-1">{t('ads.none')}</p>
+              <p className="text-sm">No ad videos available yet. Add YouTube, TikTok, Instagram, LinkedIn links or upload short videos from the Dashboard.</p>
+            </div>
+          </div>
         ) : (
-          <div className="columns-1 sm:columns-2 lg:columns-3 gap-5 space-y-5">
-            {ads.map((ad) => {
-              const images = (ad.images && ad.images.length ? ad.images : (ad.imageUrl ? [ad.imageUrl] : [])).map(resolveMediaUrl).filter(Boolean);
-              const cover = images[0];
-              const videos = (ad.videoLinks || []).filter(Boolean);
-              return (
-                <article key={ad._id} className="block break-inside-avoid rounded-2xl border border-amber-100 bg-white shadow-sm hover:shadow-lg transition overflow-hidden group">
-                  {cover ? (
-                    <div className="relative h-44 bg-amber-50">
-                      <img src={cover} alt={ad.title} className="h-full w-full object-cover" />
-                      <span className="absolute top-3 left-3 text-[11px] font-semibold uppercase tracking-wide px-2 py-1 rounded bg-white/90 text-amber-700">{ad.plan}</span>
-                      {images.length > 1 && <span className="absolute bottom-3 right-3 text-[11px] font-medium px-2 py-1 rounded bg-black/60 text-white">+{images.length - 1} photos</span>}
+          <div className="flex flex-col lg:flex-row gap-6">
+            <div className="flex-1 min-w-0">
+              <div className="relative w-full max-w-2xl mx-auto aspect-video bg-black rounded-xl overflow-hidden border border-gray-800 shadow-xl">
+                <div className={`absolute inset-0 transition-opacity duration-300 ${visible ? 'opacity-100' : 'opacity-0'}`}>
+                  {current?.type === 'file' ? (
+                    <video key={current.key} src={current.src} className="w-full h-full object-contain bg-black" controls autoPlay muted playsInline />
+                  ) : current?.type === 'embed' ? (
+                    <iframe key={current.key} src={current.src} title={current.ad?.title || 'Ad video'} className="w-full h-full" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
+                  ) : current?.type === 'link' ? (
+                    <div className="w-full h-full flex flex-col items-center justify-center bg-gray-900 text-center p-6">
+                      <PlayCircle className="h-14 w-14 text-amber-400 mb-3" />
+                      <p className="text-white font-semibold mb-3">{current.ad?.title || 'Video'}</p>
+                      <a href={current.src} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-black px-4 py-2 rounded-lg text-sm font-semibold">Open Video <ExternalLink className="h-4 w-4" /></a>
                     </div>
-                  ) : (
-                    <div className="h-32 bg-gradient-to-r from-amber-100 to-orange-100 flex items-center justify-center relative">
-                      <Megaphone className="h-10 w-10 text-amber-500/60" />
-                      <span className="absolute top-3 left-3 text-[11px] font-semibold uppercase tracking-wide px-2 py-1 rounded bg-white/90 text-amber-700">{ad.plan}</span>
-                    </div>
+                  ) : null}
+                </div>
+                {slides.length > 1 && (
+                  <>
+                    <button onClick={() => go(-1)} className="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-black/50 hover:bg-black/70 text-white flex items-center justify-center border border-white/20" aria-label="Previous"><ChevronLeft className="h-4 w-4" /></button>
+                    <button onClick={() => go(1)} className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-black/50 hover:bg-black/70 text-white flex items-center justify-center border border-white/20" aria-label="Next"><ChevronRight className="h-4 w-4" /></button>
+                  </>
+                )}
+              </div>
+
+              <div className="max-w-2xl mx-auto mt-3">
+                <h2 className="text-white text-base sm:text-lg font-bold leading-tight">{current?.ad?.title}</h2>
+                <div className="mt-2 flex flex-wrap items-center gap-3">
+                  {current?.ad?.targetUrl && (
+                    <a href={current.ad.targetUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 bg-amber-500 hover:bg-amber-600 text-black px-3 py-1.5 rounded text-xs font-semibold">
+                      {t('ads.visit')} <ExternalLink className="h-3.5 w-3.5" />
+                    </a>
                   )}
-                  <div className="p-5">
-                    <p className="text-xs font-medium text-amber-700 mb-1">{ad.companyName}</p>
-                    <h3 className="text-lg font-bold text-gray-900 mb-2 group-hover:text-amber-700 transition">{ad.title}</h3>
-                    <p className="text-sm text-gray-600 leading-relaxed mb-4 whitespace-pre-line">{ad.description}</p>
+                </div>
+              </div>
+            </div>
 
-                    {images.length > 1 && (
-                      <div className="flex gap-2 overflow-x-auto pb-2 mb-3">
-                        {images.slice(1, 6).map((src, i) => (
-                          <img key={i} src={src} alt="" className="h-16 w-20 object-cover rounded border border-amber-100 shrink-0" />
-                        ))}
-                      </div>
-                    )}
-
-                    {videos.length > 0 && (
-                      <div className="mb-4 space-y-2">
-                        {videos.slice(0, 2).map((link, i) => {
-                          const embed = toEmbedUrl(link);
-                          if (embed) {
-                            return (
-                              <div key={i} className="aspect-video w-full rounded-lg overflow-hidden border border-gray-200">
-                                <iframe src={embed} title={`Ad video ${i + 1}`} className="w-full h-full" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
-                              </div>
-                            );
-                          }
-                          return (
-                            <a key={i} href={link} target="_blank" rel="noreferrer" className="flex items-center gap-2 text-sm text-amber-700 hover:text-amber-800 font-medium">
-                              <PlayCircle className="h-4 w-4" /> Watch video {videos.length > 1 ? i + 1 : ''} <ExternalLink className="h-3.5 w-3.5" />
-                            </a>
-                          );
-                        })}
-                        {videos.length > 2 && <p className="text-xs text-gray-500">+{videos.length - 2} more video link(s)</p>}
-                      </div>
-                    )}
-
-                    <div className="flex items-center justify-between text-xs text-gray-500 gap-2">
-                      <span className="inline-flex items-center gap-1"><Calendar className="h-3.5 w-3.5" /> {ad.expiresAt ? `Until ${new Date(ad.expiresAt).toLocaleDateString()}` : 'Active'}</span>
-                      {ad.targetUrl && <a href={ad.targetUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-amber-700 font-medium hover:text-amber-800">Visit <ExternalLink className="h-3.5 w-3.5" /></a>}
-                    </div>
-                  </div>
-                </article>
-              );
-            })}
+            <aside className="w-full lg:w-80 xl:w-96 shrink-0">
+              <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+                <div className="px-3 py-2 border-b border-gray-800 flex items-center justify-between">
+                  <h3 className="text-sm font-semibold text-white">Videos</h3>
+                  <span className="text-xs text-gray-400">{idx + 1}/{slides.length}</span>
+                </div>
+                <div className="max-h-[70vh] overflow-y-auto p-1.5 space-y-1">
+                  {slides.map((s, i) => (
+                    <button key={s.key} type="button" onClick={() => select(i)} className="w-full">
+                      <VideoThumb slide={s} active={i === idx} />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </aside>
           </div>
         )}
       </div>

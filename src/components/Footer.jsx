@@ -1,175 +1,178 @@
-import { Link } from 'react-router-dom';
-import { DollarSign, Phone, Mail, MapPin, Clock, Globe, Building2, Shield, CheckCircle2 } from 'lucide-react';
-
-const footerLinks = {
-  company: [
-    { label: 'About', href: '/about' },
-    { label: 'How It Works', href: '/how-it-works' },
-    { label: 'Blog', href: '/blog' },
-  ],
-  forOwners: [
-    { label: 'Publish Property', href: '/dashboard' },
-    { label: 'Plans', href: '/subscribe' },
-    { label: 'Dashboard', href: '/dashboard' },
-  ],
-  forClients: [
-    { label: 'Search', href: '/search' },
-    { label: 'Listings', href: '/listings' },
-    { label: 'Rent House', href: '/search?type=house&category=rent' },
-  ],
-  support: [
-    { label: 'Help', href: '/help' },
-    { label: 'Contact', href: '/contact' },
-    { label: 'FAQ', href: '/faq' },
-  ],
-};
+﻿import { Link } from 'react-router-dom';
+import { Phone, Mail, MapPin, Globe, Building2, Shield, CheckCircle2, Facebook, Twitter, Instagram, Linkedin } from './icons';
+import { useLanguage } from '../context/LanguageContext';
 
 const socialLinks = [
-  { label: 'Facebook', href: 'https://facebook.com/ndangira' },
-  { label: 'Twitter', href: 'https://twitter.com/ndangira' },
-  { label: 'Instagram', href: 'https://instagram.com/ndangira' },
-  { label: 'LinkedIn', href: 'https://linkedin.com/company/ndangira' },
+  { label: 'Facebook', href: 'https://facebook.com/ndangira', Icon: Facebook, className: 'bg-[#1877F2] hover:bg-[#166FE5] text-white' },
+  { label: 'X (Twitter)', href: 'https://twitter.com/ndangira', Icon: Twitter, className: 'bg-black hover:bg-neutral-800 text-white' },
+  { label: 'Instagram', href: 'https://instagram.com/ndangira', Icon: Instagram, className: 'bg-gradient-to-tr from-[#F58529] via-[#DD2A7B] to-[#515BD4] hover:brightness-110 text-white' },
+  { label: 'LinkedIn', href: 'https://linkedin.com/company/ndangira', Icon: Linkedin, className: 'bg-[#0A66C2] hover:bg-[#004182] text-white' },
 ];
 
-const Footer = () => (
-  <footer className="bg-gray-900 text-gray-300 border-t border-gray-800 py-10">
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
-        <div className="max-w-[150px]">
-          <div className="flex items-center gap-2 mb-3">
-            <DollarSign className="h-5 w-5 text-green-500" />
-            <span className="text-lg font-bold text-white">Ndangira</span>
+const Footer = () => {
+  const { t } = useLanguage();
+  const footerLinks = {
+    company: [
+      { label: t('footer.about'), href: '/about' },
+      { label: t('footer.howItWorks'), href: '/how-it-works' },
+      { label: t('footer.blog'), href: '/blog' },
+    ],
+    forOwners: [
+      { label: t('footer.publishProperty'), href: '/dashboard' },
+      { label: t('footer.plans'), href: '/subscribe' },
+      { label: t('footer.dashboard'), href: '/dashboard' },
+    ],
+    forClients: [
+      { label: t('footer.search'), href: '/search' },
+      { label: t('footer.listings'), href: '/listings' },
+      { label: t('footer.rentHouse'), href: '/search?type=house&category=rent' },
+    ],
+    support: [
+      { label: t('footer.help'), href: '/help' },
+      { label: t('footer.contact'), href: '/contact' },
+      { label: t('footer.faq'), href: '/faq' },
+    ],
+  };
+
+  return (
+    <footer className="bg-gray-900 text-gray-300 border-t border-gray-800 py-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 mb-8">
+          <div className="sm:col-span-2 lg:col-span-1">
+            <div className="flex items-center mb-3">
+              <img src="/ndangira-logo.png" alt="Ndangira Real Estate" className="h-12 w-auto max-w-[170px] object-contain" />
+            </div>
+            <p className="text-sm text-gray-300 mb-3 leading-relaxed">
+              {t('footer.tagline')}
+            </p>
+            <div className="flex flex-wrap gap-3">
+              {socialLinks.map((s) => (
+                <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer" aria-label={s.label} title={s.label} className={`w-9 h-9 rounded-full flex items-center justify-center shadow-sm transition-transform duration-200 hover:scale-110 ${s.className}`}>
+                  <s.Icon className="w-4 h-4" />
+                </a>
+              ))}
+            </div>
           </div>
-          <p className="text-xs text-gray-400 mb-3 leading-relaxed">
-            Rwanda property marketplace connecting owners directly with renters and buyers.
-          </p>
-          <div className="flex gap-2">
-            {socialLinks.map((s) => (
-              <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer" className="w-7 h-7 rounded bg-gray-800 flex items-center justify-center text-xs text-gray-400 hover:text-white hover:bg-green-600 transition">
-                {s.label[0]}
-              </a>
-            ))}
+          <div>
+            <h4 className="text-base font-semibold text-white uppercase tracking-wider mb-3">{t('footer.company')}</h4>
+            <ul className="space-y-2">
+              {footerLinks.company.map((item) => (
+                <li key={item.href + item.label}>
+                  <Link to={item.href} className="text-sm text-gray-300 hover:text-green-400 transition break-words">
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <h4 className="text-base font-semibold text-white uppercase tracking-wider mb-3">{t('footer.forOwners')}</h4>
+            <ul className="space-y-2">
+              {footerLinks.forOwners.map((item) => (
+                <li key={item.href + item.label}>
+                  <Link to={item.href} className="text-sm text-gray-300 hover:text-green-400 transition break-words">
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <h4 className="text-base font-semibold text-white uppercase tracking-wider mb-3">{t('footer.forClients')}</h4>
+            <ul className="space-y-2">
+              {footerLinks.forClients.map((item) => (
+                <li key={item.href + item.label}>
+                  <Link to={item.href} className="text-sm text-gray-300 hover:text-green-400 transition break-words">
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <h4 className="text-base font-semibold text-white uppercase tracking-wider mb-3">{t('footer.support')}</h4>
+            <ul className="space-y-2">
+              {footerLinks.support.map((item) => (
+                <li key={item.href + item.label}>
+                  <Link to={item.href} className="text-sm text-gray-300 hover:text-green-400 transition break-words">
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
-        <div className="max-w-[150px]">
-          <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-2">Company</h4>
-          <ul className="space-y-1">
-            {footerLinks.company.map((item) => (
-              <li key={item.label}>
-                <Link to={item.href} className="text-xs text-gray-400 hover:text-green-400 transition">
-                  {item.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div className="max-w-[150px]">
-          <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-2">For Property Owners</h4>
-          <ul className="space-y-1">
-            {footerLinks.forOwners.map((item) => (
-              <li key={item.label}>
-                <Link to={item.href} className="text-xs text-gray-400 hover:text-green-400 transition">
-                  {item.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div className="max-w-[150px]">
-          <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-2">For Clients</h4>
-          <ul className="space-y-1">
-            {footerLinks.forClients.map((item) => (
-              <li key={item.label}>
-                <Link to={item.href} className="text-xs text-gray-400 hover:text-green-400 transition">
-                  {item.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div className="max-w-[150px]">
-          <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-2">Support</h4>
-          <ul className="space-y-1">
-            {footerLinks.support.map((item) => (
-              <li key={item.label}>
-                <Link to={item.href} className="text-xs text-gray-400 hover:text-green-400 transition">
-                  {item.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
+
+        <div className="border-t border-gray-800 pt-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+            <div>
+              <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-3">{t('footer.contactUs')}</h4>
+              <div className="space-y-2 text-sm text-gray-300">
+                <div className="flex items-start gap-2">
+                  <MapPin className="h-4 w-4 mt-0.5 shrink-0" />
+                  <span>KG 123 St, Nyarugunga, Kigali, Rwanda</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Phone className="h-4 w-4 shrink-0" />
+                  <a href="tel:+250788000000" className="hover:text-green-400 transition break-all">+250 788 000 000</a>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Mail className="h-4 w-4 shrink-0" />
+                  <a href="mailto:info@ndangira.com" className="hover:text-green-400 transition break-all">info@ndangira.com</a>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-3">{t('footer.platformFacts')}</h4>
+              <div className="space-y-2 text-sm text-gray-300">
+                <div className="flex items-start gap-2">
+                  <Shield className="h-4 w-4 mt-0.5 shrink-0 text-green-500" />
+                  <span>{t('footer.noCommission')}</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <CheckCircle2 className="h-4 w-4 mt-0.5 shrink-0 text-green-500" />
+                  <span>{t('footer.verifiedListings')}</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <Building2 className="h-4 w-4 mt-0.5 shrink-0 text-green-500" />
+                  <span>{t('footer.propertyTypes')}</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <Globe className="h-4 w-4 mt-0.5 shrink-0 text-green-500" />
+                  <span>{t('footer.servingRwanda')}</span>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-3">{t('footer.subscriptionPlans')}</h4>
+              <div className="space-y-2 text-sm text-gray-300">
+                <div className="flex items-start gap-2">
+                  <span className="text-green-500">●</span>
+                  <span>{t('footer.planPerProperty')}</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-green-500">●</span>
+                  <span>{t('footer.planUnlimited')}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="border-t border-gray-800 pt-4">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-3 text-sm text-gray-400 text-center md:text-left">
+              <p>&copy; {new Date().getFullYear()} {t('footer.copyright')}</p>
+              <div className="flex flex-wrap justify-center gap-4">
+                <Link to="/privacy" className="hover:text-green-400 transition">{t('footer.privacy')}</Link>
+                <Link to="/terms" className="hover:text-green-400 transition">{t('footer.terms')}</Link>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-
-      <div className="border-t border-gray-800 pt-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-          <div className="max-w-[200px]">
-            <h4 className="text-xs font-semibold text-white uppercase tracking-wider mb-2">Contact Us</h4>
-            <div className="space-y-1 text-xs text-gray-400">
-              <div className="flex items-start gap-1">
-                <MapPin className="h-3 w-3 mt-0.5 shrink-0" />
-                <span>KG 123 St, Nyarugunga, Kigali, Rwanda</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <Phone className="h-3 w-3 shrink-0" />
-                <a href="tel:+250788000000" className="hover:text-green-400 transition">+250 788 000 000</a>
-              </div>
-              <div className="flex items-center gap-1">
-                <Mail className="h-3 w-3 shrink-0" />
-                <a href="mailto:info@ndangira.com" className="hover:text-green-400 transition">info@ndangira.com</a>
-              </div>
-            </div>
-          </div>
-
-          <div className="max-w-[200px]">
-            <h4 className="text-xs font-semibold text-white uppercase tracking-wider mb-2">Platform Facts</h4>
-            <div className="space-y-1 text-xs text-gray-400">
-              <div className="flex items-start gap-1">
-                <Shield className="h-3 w-3 mt-0.5 shrink-0 text-green-500" />
-                <span>No commission charges</span>
-              </div>
-              <div className="flex items-start gap-1">
-                <CheckCircle2 className="h-3 w-3 mt-0.5 shrink-0 text-green-500" />
-                <span>Admin-verified listings</span>
-              </div>
-              <div className="flex items-start gap-1">
-                <Building2 className="h-3 w-3 shrink-0 text-green-500" />
-                <span>Houses, Cars, Plots, Materials</span>
-              </div>
-              <div className="flex items-start gap-1">
-                <Globe className="h-3 w-3 shrink-0 text-green-500" />
-                <span>Serving all Rwanda</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="max-w-[200px]">
-            <h4 className="text-xs font-semibold text-white uppercase tracking-wider mb-2">Subscription Plans</h4>
-            <div className="space-y-1 text-xs text-gray-400">
-              <div className="flex items-start gap-1">
-                <span className="text-green-500">●</span>
-                <span>2,000 RWF - Per property</span>
-              </div>
-              <div className="flex items-start gap-1">
-                <span className="text-green-500">●</span>
-                <span>10,000 RWF - Unlimited (30 days)</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="border-t border-gray-800 pt-4">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-3 text-xs text-gray-500">
-            <p>&copy; {new Date().getFullYear()} Ndangira by MAKE IT SOLUTIONS Ltd.</p>
-            <div className="flex gap-3">
-              <Link to="/privacy" className="hover:text-green-400 transition">Privacy</Link>
-              <Link to="/terms" className="hover:text-green-400 transition">Terms</Link>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </footer>
-);
+    </footer>
+  );
+};
 
 export default Footer;

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import { Alert } from '../components/Alert';
@@ -6,19 +7,21 @@ import {
   LayoutDashboard, Users, Building2, Shield, CheckCircle2, XCircle,
   Home, CreditCard, FileText, Settings, Plus, Search, Phone, Mail, LogOut,
   ChevronRight, ArrowLeft, Eye, Trash2, X, Download, Calendar, Menu, Briefcase, Megaphone
-} from 'lucide-react';
+} from '../components/icons';
 
 const sidebarLinks = [
-  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { id: 'users', label: 'Users', icon: Users },
-  { id: 'properties', label: 'Properties', icon: Building2 },
-  { id: 'categories', label: 'Categories', icon: Settings },
-  { id: 'jobs', label: 'Jobs', icon: Briefcase },
-  { id: 'ads', label: 'Advertisements', icon: Megaphone },
-  { id: 'reports', label: 'Reports', icon: FileText },
+  { id: 'dashboard', labelKey: 'nav.dashboard', icon: LayoutDashboard },
+  { id: 'users', labelKey: 'admin.users', icon: Users },
+  { id: 'properties', labelKey: 'admin.properties', icon: Building2 },
+  { id: 'categories', labelKey: 'admin.categories', icon: Settings },
+  { id: 'jobs', labelKey: 'nav.jobs', icon: Briefcase },
+  { id: 'ads', labelKey: 'admin.ads', icon: Megaphone },
+  { id: 'subscribers', label: 'Subscribers', icon: Mail },
+  { id: 'reports', labelKey: 'admin.reports', icon: FileText },
 ];
 
 const AdminDashboard = () => {
+  const { t } = useLanguage();
   const { logout } = useAuth();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [users, setUsers] = useState([]);
@@ -31,6 +34,12 @@ const AdminDashboard = () => {
   const [userPageSize, setUserPageSize] = useState(10);
   const [propPage, setPropPage] = useState(1);
   const [propPageSize, setPropPageSize] = useState(10);
+  const [jobPage, setJobPage] = useState(1);
+  const [jobPageSize, setJobPageSize] = useState(10);
+  const [adPage, setAdPage] = useState(1);
+  const [adPageSize, setAdPageSize] = useState(10);
+  const [subPage, setSubPage] = useState(1);
+  const [subPageSize, setSubPageSize] = useState(10);
   const [viewItem, setViewItem] = useState(null); // { type: 'user'|'property', data }
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [categories, setCategories] = useState([]);
@@ -41,6 +50,8 @@ const AdminDashboard = () => {
   const [jobsLoading, setJobsLoading] = useState(false);
   const [ads, setAds] = useState([]);
   const [adsLoading, setAdsLoading] = useState(false);
+  const [subscribers, setSubscribers] = useState([]);
+  const [subscribersLoading, setSubscribersLoading] = useState(false);
 
   const [reportFrom, setReportFrom] = useState('');
   const [reportTo, setReportTo] = useState('');
@@ -54,15 +65,22 @@ const AdminDashboard = () => {
   const loadJobs = async () => {
     setJobsLoading(true);
     try { const res = await api.get('/admin/jobs'); setJobs(res.data?.data || []); }
-    catch (err) { setError(err.response?.data?.error || 'Failed to load jobs'); }
+    catch (err) { setError(err.response?.data?.error || t('admin.failedJobs')); }
     finally { setJobsLoading(false); }
   };
 
   const loadAds = async () => {
     setAdsLoading(true);
     try { const res = await api.get('/admin/ads'); setAds(res.data?.data || []); }
-    catch (err) { setError(err.response?.data?.error || 'Failed to load advertisements'); }
+    catch (err) { setError(err.response?.data?.error || t('admin.failedAds')); }
     finally { setAdsLoading(false); }
+  };
+
+  const loadSubscribers = async () => {
+    setSubscribersLoading(true);
+    try { const res = await api.get('/admin/subscribers'); setSubscribers(res.data?.data || []); }
+    catch (err) { setError(err.response?.data?.error || 'Failed to load subscribers'); }
+    finally { setSubscribersLoading(false); }
   };
 
   const loadCategories = async () => {
@@ -71,7 +89,7 @@ const AdminDashboard = () => {
       const res = await api.get('/admin/categories');
       setCategories(res.data?.data || []);
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to load categories');
+      setError(err.response?.data?.error || t('admin.failedCats'));
     } finally {
       setCatLoading(false);
     }
@@ -86,10 +104,10 @@ const AdminDashboard = () => {
         setCategories(c.data?.data || []);
         setJobs(j.data?.data || []);
         setAds(a.data?.data || []);
-        setUserPage(1); setPropPage(1);
+        setUserPage(1); setPropPage(1); setJobPage(1); setAdPage(1); setSubPage(1);
         setLoading(false);
       })
-      .catch(() => { setError('Failed to load admin data'); setLoading(false); });
+      .catch(() => { setError(t('admin.failedData')); setLoading(false); });
   };
 
   useEffect(() => {
@@ -97,20 +115,24 @@ const AdminDashboard = () => {
   }, []);
 
   useEffect(() => {
-    if (activeTab === 'jobs') loadJobs();
-    if (activeTab === 'ads') loadAds();
+    if (activeTab === 'jobs') { setJobPage(1); loadJobs(); }
+    if (activeTab === 'ads') { setAdPage(1); loadAds(); }
+    if (activeTab === 'subscribers') { setSubPage(1); loadSubscribers(); }
   }, [activeTab]);
 
-  const approveJob = async (id) => { setJobsLoading(true); setError(null); try { const res = await api.put(`/admin/jobs/${id}/approve`); setJobs(jobs.map(j => j._id === id ? (res.data?.data || j) : j)); } catch (err) { setError(err.response?.data?.error || 'Failed to approve job'); } finally { setJobsLoading(false); } };
-  const rejectJob = async (id) => { setJobsLoading(true); setError(null); try { const res = await api.put(`/admin/jobs/${id}/reject`); setJobs(jobs.map(j => j._id === id ? (res.data?.data || j) : j)); } catch (err) { setError(err.response?.data?.error || 'Failed to reject job'); } finally { setJobsLoading(false); } };
-  const unpublishJob = async (id) => { setJobsLoading(true); setError(null); try { const res = await api.put(`/admin/jobs/${id}/unpublish`); setJobs(jobs.map(j => j._id === id ? (res.data?.data || j) : j)); } catch (err) { setError(err.response?.data?.error || 'Failed to update job'); } finally { setJobsLoading(false); } };
-  const deleteJob = async (id) => { if (!window.confirm('Delete this job?')) return; setJobsLoading(true); setError(null); try { await api.delete(`/admin/jobs/${id}`); setJobs(jobs.filter(j => j._id !== id)); } catch (err) { setError(err.response?.data?.error || 'Failed to delete job'); } finally { setJobsLoading(false); } };
+  const approveJob = async (id) => { setJobsLoading(true); setError(null); try { const res = await api.put(`/admin/jobs/${id}/approve`); const updated = res.data?.data; setJobs((prev) => prev.map(j => j._id === id ? { ...j, ...updated } : j)); } catch (err) { setError(err.response?.data?.error || 'Failed to approve job'); } finally { setJobsLoading(false); } };
+  const rejectJob = async (id) => { setJobsLoading(true); setError(null); try { const res = await api.put(`/admin/jobs/${id}/reject`); const updated = res.data?.data; setJobs((prev) => prev.map(j => j._id === id ? { ...j, ...updated } : j)); } catch (err) { setError(err.response?.data?.error || 'Failed to reject job'); } finally { setJobsLoading(false); } };
+  const unpublishJob = async (id) => { setJobsLoading(true); setError(null); try { const res = await api.put(`/admin/jobs/${id}/unpublish`); const updated = res.data?.data; setJobs((prev) => prev.map(j => j._id === id ? { ...j, ...updated } : j)); } catch (err) { setError(err.response?.data?.error || 'Failed to update job'); } finally { setJobsLoading(false); } };
+  const deleteJob = async (id) => { if (!window.confirm(t('admin.confirmDeleteJob'))) return; setJobsLoading(true); setError(null); try { await api.delete(`/admin/jobs/${id}`); setJobs((prev) => prev.filter(j => j._id !== id)); } catch (err) { setError(err.response?.data?.error || 'Failed to delete job'); } finally { setJobsLoading(false); } };
 
-  const markAdPaid = async (id) => { setAdsLoading(true); setError(null); try { const res = await api.put(`/admin/ads/${id}/mark-paid`); setAds(ads.map(a => a._id === id ? (res.data?.data || a) : a)); } catch (err) { setError(err.response?.data?.error || 'Failed to mark ad paid'); } finally { setAdsLoading(false); } };
-  const approveAd = async (id) => { setAdsLoading(true); setError(null); try { const res = await api.put(`/admin/ads/${id}/approve`); setAds(ads.map(a => a._id === id ? (res.data?.data || a) : a)); } catch (err) { setError(err.response?.data?.error || 'Failed to approve ad'); } finally { setAdsLoading(false); } };
-  const rejectAd = async (id) => { setAdsLoading(true); setError(null); try { const res = await api.put(`/admin/ads/${id}/reject`); setAds(ads.map(a => a._id === id ? (res.data?.data || a) : a)); } catch (err) { setError(err.response?.data?.error || 'Failed to reject ad'); } finally { setAdsLoading(false); } };
-  const deactivateAd = async (id) => { setAdsLoading(true); setError(null); try { const res = await api.put(`/admin/ads/${id}/deactivate`); setAds(ads.map(a => a._id === id ? (res.data?.data || a) : a)); } catch (err) { setError(err.response?.data?.error || 'Failed to deactivate ad'); } finally { setAdsLoading(false); } };
-  const deleteAd = async (id) => { if (!window.confirm('Delete this advertisement?')) return; setAdsLoading(true); setError(null); try { await api.delete(`/admin/ads/${id}`); setAds(ads.filter(a => a._id !== id)); } catch (err) { setError(err.response?.data?.error || 'Failed to delete ad'); } finally { setAdsLoading(false); } };
+  const markAdPaid = async (id) => { setAdsLoading(true); setError(null); try { const res = await api.put(`/admin/ads/${id}/mark-paid`); const updated = res.data?.data; setAds((prev) => prev.map(a => a._id === id ? { ...a, ...updated } : a)); } catch (err) { setError(err.response?.data?.error || 'Failed to mark ad paid'); } finally { setAdsLoading(false); } };
+  const approveAd = async (id) => { setAdsLoading(true); setError(null); try { const res = await api.put(`/admin/ads/${id}/approve`); const updated = res.data?.data; setAds((prev) => prev.map(a => a._id === id ? { ...a, ...updated } : a)); } catch (err) { setError(err.response?.data?.error || 'Failed to approve ad'); } finally { setAdsLoading(false); } };
+  const rejectAd = async (id) => { setAdsLoading(true); setError(null); try { const res = await api.put(`/admin/ads/${id}/reject`); const updated = res.data?.data; setAds((prev) => prev.map(a => a._id === id ? { ...a, ...updated } : a)); } catch (err) { setError(err.response?.data?.error || 'Failed to reject ad'); } finally { setAdsLoading(false); } };
+  const deactivateAd = async (id) => { setAdsLoading(true); setError(null); try { const res = await api.put(`/admin/ads/${id}/deactivate`); const updated = res.data?.data; setAds((prev) => prev.map(a => a._id === id ? { ...a, ...updated } : a)); } catch (err) { setError(err.response?.data?.error || 'Failed to deactivate ad'); } finally { setAdsLoading(false); } };
+  const deleteAd = async (id) => { if (!window.confirm(t('admin.confirmDeleteAd'))) return; setAdsLoading(true); setError(null); try { await api.delete(`/admin/ads/${id}`); setAds((prev) => prev.filter(a => a._id !== id)); } catch (err) { setError(err.response?.data?.error || 'Failed to delete ad'); } finally { setAdsLoading(false); } };
+
+  const toggleSubscriber = async (id) => { setSubscribersLoading(true); setError(null); try { const res = await api.put(`/admin/subscribers/${id}/toggle`); const updated = res.data?.data; setSubscribers((prev) => prev.map(s => s._id === id ? { ...s, ...updated } : s)); } catch (err) { setError(err.response?.data?.error || 'Failed to update subscriber'); } finally { setSubscribersLoading(false); } };
+  const deleteSubscriber = async (id) => { if (!window.confirm('Delete this subscriber?')) return; setSubscribersLoading(true); setError(null); try { await api.delete(`/admin/subscribers/${id}`); setSubscribers((prev) => prev.filter(s => s._id !== id)); } catch (err) { setError(err.response?.data?.error || 'Failed to delete subscriber'); } finally { setSubscribersLoading(false); } };
 
   const verifyUser = async (id, current) => {
     setUserLoading(true);
@@ -120,14 +142,14 @@ const AdminDashboard = () => {
       const updated = res.data?.data;
       setUsers(users.map(u => u._id === id ? { ...u, ...(updated || {}), isVerified: updated?.isVerified ?? !current } : u));
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to verify user');
+      setError(err.response?.data?.error || t('admin.failedVerifyUser'));
     } finally {
       setUserLoading(false);
     }
   };
 
   const deleteUser = async (id) => {
-    if (!window.confirm('Delete this user and their properties?')) return;
+    if (!window.confirm(t('admin.confirmDeleteUser'))) return;
     setUserLoading(true);
     setError(null);
     try {
@@ -135,7 +157,7 @@ const AdminDashboard = () => {
       setUsers(users.filter(u => u._id !== id));
       setProperties(properties.filter(p => p.owner?._id !== id && p.owner !== id));
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to delete user');
+      setError(err.response?.data?.error || t('admin.failedDeleteUser'));
     } finally {
       setUserLoading(false);
     }
@@ -149,7 +171,7 @@ const AdminDashboard = () => {
       const updated = res.data?.data;
       setProperties(properties.map(p => p._id === id ? { ...p, ...(updated || {}), isPublished: true, isActive: true } : p));
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to approve property');
+      setError(err.response?.data?.error || t('admin.failedApproveProp'));
     } finally {
       setPropLoading(false);
     }
@@ -324,7 +346,7 @@ const AdminDashboard = () => {
     return (
       <div className="bg-white p-3 shadow border border-gray-200">
         <h3 className="text-xs font-semibold text-gray-900 mb-2">{title}</h3>
-        {!hasData ? <p className="text-xs text-gray-500">No data available</p> : (
+        {!hasData ? <p className="text-xs text-gray-500">{t('admin.noData')}</p> : (
           <div className="space-y-2">
             {data.map((d, i) => (
               <div key={d.label}>
@@ -357,7 +379,7 @@ const AdminDashboard = () => {
     return (
       <div className="bg-white p-3 shadow border border-gray-200">
         <h3 className="text-xs font-semibold text-gray-900 mb-2">{title}</h3>
-        {total === 0 ? <p className="text-xs text-gray-500">No data available</p> : (
+        {total === 0 ? <p className="text-xs text-gray-500">{t('admin.noData')}</p> : (
           <div className="flex items-center gap-3">
             <div className="w-20 h-20 rounded-full shrink-0 border border-gray-100" style={{ background: gradient }} />
             <div className="w-full space-y-1 min-w-0">
@@ -390,32 +412,32 @@ const AdminDashboard = () => {
     ads.forEach((a) => { adStatusCounts[a.status || 'pending'] = (adStatusCounts[a.status || 'pending'] || 0) + 1; });
 
     const overviewBars = [
-      { label: 'Users', value: stats.totalUsers, color: '#16a34a' },
-      { label: 'Properties', value: stats.totalProperties, color: '#3b82f6' },
-      { label: 'Jobs', value: stats.totalJobs, color: '#8b5cf6' },
-      { label: 'Advertisements', value: stats.totalAds, color: '#f59e0b' },
+      { label: t('admin.users'), value: stats.totalUsers, color: '#16a34a' },
+      { label: t('admin.properties'), value: stats.totalProperties, color: '#3b82f6' },
+      { label: t('nav.jobs'), value: stats.totalJobs, color: '#8b5cf6' },
+      { label: t('admin.ads'), value: stats.totalAds, color: '#f59e0b' },
     ];
     const propertyStatusPie = [
-      { label: 'Published', value: stats.publishedProperties, color: '#16a34a' },
-      { label: 'Pending Approval', value: stats.pendingProperties, color: '#f59e0b' },
+      { label: t('admin.published'), value: stats.publishedProperties, color: '#16a34a' },
+      { label: t('admin.pendingApproval'), value: stats.pendingProperties, color: '#f59e0b' },
     ];
     const userVerifyPie = [
-      { label: 'Verified', value: stats.verifiedUsers, color: '#16a34a' },
-      { label: 'Unverified', value: stats.unverifiedUsers, color: '#94a3b8' },
+      { label: t('admin.verified'), value: stats.verifiedUsers, color: '#16a34a' },
+      { label: t('admin.unverified'), value: stats.unverifiedUsers, color: '#94a3b8' },
     ];
     const paymentPie = [
-      { label: 'Completed', value: stats.completedPayments, color: '#16a34a' },
-      { label: 'Pending/Other', value: stats.pendingPayments, color: '#f59e0b' },
+      { label: t('admin.paid'), value: stats.completedPayments, color: '#16a34a' },
+      { label: t('admin.pendingOther'), value: stats.pendingPayments, color: '#f59e0b' },
     ];
     const jobsPie = [
-      { label: 'Pending', value: jobStatusCounts.pending || 0, color: '#f59e0b' },
-      { label: 'Approved', value: jobStatusCounts.approved || 0, color: '#16a34a' },
-      { label: 'Rejected', value: jobStatusCounts.rejected || 0, color: '#ef4444' },
+      { label: t('admin.pending'), value: jobStatusCounts.pending || 0, color: '#f59e0b' },
+      { label: t('admin.approved'), value: jobStatusCounts.approved || 0, color: '#16a34a' },
+      { label: t('admin.rejected'), value: jobStatusCounts.rejected || 0, color: '#ef4444' },
     ];
     const adsPie = [
-      { label: 'Pending', value: adStatusCounts.pending || 0, color: '#f59e0b' },
-      { label: 'Approved', value: adStatusCounts.approved || 0, color: '#16a34a' },
-      { label: 'Rejected', value: adStatusCounts.rejected || 0, color: '#ef4444' },
+      { label: t('admin.pending'), value: adStatusCounts.pending || 0, color: '#f59e0b' },
+      { label: t('admin.approved'), value: adStatusCounts.approved || 0, color: '#16a34a' },
+      { label: t('admin.rejected'), value: adStatusCounts.rejected || 0, color: '#ef4444' },
     ];
     const propertyTypeBars = Object.entries(typeCounts).map(([label, value], i) => ({ label: label.charAt(0).toUpperCase() + label.slice(1), value, color: chartColors[i % chartColors.length] }));
     const propertyCategoryBars = Object.entries(categoryCounts).map(([label, value], i) => ({ label, value, color: chartColors[(i + 2) % chartColors.length] })).sort((a,b) => b.value - a.value).slice(0, 8);
@@ -424,79 +446,79 @@ const AdminDashboard = () => {
     return (
       <div className="mb-8 grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] gap-6 items-start">
         <section className="min-w-0">
-          <h2 className="text-base font-semibold text-gray-900 mb-3">Overview</h2>
+          <h2 className="text-base font-semibold text-gray-900 mb-3">{t('admin.overview')}</h2>
           <div className="grid grid-cols-2 gap-3">
             <div className="bg-white p-3 shadow border border-gray-200">
               <div className="flex items-center justify-between gap-2">
-                <div><p className="text-xs text-gray-500">Total Users</p><h3 className="text-lg font-bold text-gray-900">{stats.totalUsers}</h3></div>
+                <div><p className="text-xs text-gray-500">{t('admin.totalUsers')}</p><h3 className="text-lg font-bold text-gray-900">{stats.totalUsers}</h3></div>
                 <Users className="h-6 w-6 text-green-600 bg-green-50 p-1.5 rounded" />
               </div>
-              <p className="text-[11px] text-gray-400 mt-1">Registered users</p>
+              <p className="text-[11px] text-gray-400 mt-1">{t('admin.registeredUsers')}</p>
             </div>
             <div className="bg-white p-3 shadow border border-gray-200">
               <div className="flex items-center justify-between gap-2">
-                <div><p className="text-xs text-gray-500">Verified Users</p><h3 className="text-lg font-bold text-green-600">{stats.verifiedUsers}</h3></div>
+                <div><p className="text-xs text-gray-500">{t('admin.verifiedUsers')}</p><h3 className="text-lg font-bold text-green-600">{stats.verifiedUsers}</h3></div>
                 <Shield className="h-6 w-6 text-green-600 bg-green-50 p-1.5 rounded" />
               </div>
-              <p className="text-[11px] text-gray-400 mt-1">Verified accounts</p>
+              <p className="text-[11px] text-gray-400 mt-1">{t('admin.verifiedAccounts')}</p>
             </div>
             <div className="bg-white p-3 shadow border border-gray-200">
               <div className="flex items-center justify-between gap-2">
-                <div><p className="text-xs text-gray-500">Total Properties</p><h3 className="text-lg font-bold text-gray-900">{stats.totalProperties}</h3></div>
+                <div><p className="text-xs text-gray-500">{t('admin.totalProperties')}</p><h3 className="text-lg font-bold text-gray-900">{stats.totalProperties}</h3></div>
                 <Building2 className="h-6 w-6 text-green-600 bg-green-50 p-1.5 rounded" />
               </div>
-              <p className="text-[11px] text-gray-400 mt-1">Listed properties</p>
+              <p className="text-[11px] text-gray-400 mt-1">{t('admin.listedProperties')}</p>
             </div>
             <div className="bg-white p-3 shadow border border-gray-200">
               <div className="flex items-center justify-between gap-2">
-                <div><p className="text-xs text-gray-500">Published</p><h3 className="text-lg font-bold text-green-600">{stats.publishedProperties}</h3></div>
+                <div><p className="text-xs text-gray-500">{t('admin.published')}</p><h3 className="text-lg font-bold text-green-600">{stats.publishedProperties}</h3></div>
                 <CheckCircle2 className="h-6 w-6 text-green-600 bg-green-50 p-1.5 rounded" />
               </div>
-              <p className="text-[11px] text-gray-400 mt-1">Live on website</p>
+              <p className="text-[11px] text-gray-400 mt-1">{t('admin.liveOnSite')}</p>
             </div>
             <div className="bg-white p-3 shadow border border-gray-200">
               <div className="flex items-center justify-between gap-2">
-                <div><p className="text-xs text-gray-500">Pending Approval</p><h3 className="text-lg font-bold text-amber-600">{stats.pendingProperties}</h3></div>
+                <div><p className="text-xs text-gray-500">{t('admin.pendingApproval')}</p><h3 className="text-lg font-bold text-amber-600">{stats.pendingProperties}</h3></div>
                 <XCircle className="h-6 w-6 text-amber-600 bg-amber-50 p-1.5 rounded" />
               </div>
-              <p className="text-[11px] text-gray-400 mt-1">Awaiting review</p>
+              <p className="text-[11px] text-gray-400 mt-1">{t('admin.awaitingReview')}</p>
             </div>
             <div className="bg-white p-3 shadow border border-gray-200">
               <div className="flex items-center justify-between gap-2">
-                <div><p className="text-xs text-gray-500">Paid Payments</p><h3 className="text-lg font-bold text-green-600">{stats.completedPayments}</h3></div>
+                <div><p className="text-xs text-gray-500">{t('admin.paidPayments')}</p><h3 className="text-lg font-bold text-green-600">{stats.completedPayments}</h3></div>
                 <CreditCard className="h-6 w-6 text-green-600 bg-green-50 p-1.5 rounded" />
               </div>
-              <p className="text-[11px] text-gray-400 mt-1">Verified payments</p>
+              <p className="text-[11px] text-gray-400 mt-1">{t('admin.verifiedPayments')}</p>
             </div>
             <div className="bg-white p-3 shadow border border-gray-200">
               <div className="flex items-center justify-between gap-2">
-                <div><p className="text-xs text-gray-500">Jobs</p><h3 className="text-lg font-bold text-gray-900">{stats.totalJobs}</h3></div>
+                <div><p className="text-xs text-gray-500">{t('nav.jobs')}</p><h3 className="text-lg font-bold text-gray-900">{stats.totalJobs}</h3></div>
                 <Briefcase className="h-6 w-6 text-green-600 bg-green-50 p-1.5 rounded" />
               </div>
-              <p className="text-[11px] text-gray-400 mt-1">Job submissions</p>
+              <p className="text-[11px] text-gray-400 mt-1">{t('admin.jobSubmissions')}</p>
             </div>
             <div className="bg-white p-3 shadow border border-gray-200">
               <div className="flex items-center justify-between gap-2">
-                <div><p className="text-xs text-gray-500">Advertisements</p><h3 className="text-lg font-bold text-gray-900">{stats.totalAds}</h3></div>
+                <div><p className="text-xs text-gray-500">{t('admin.ads')}</p><h3 className="text-lg font-bold text-gray-900">{stats.totalAds}</h3></div>
                 <Megaphone className="h-6 w-6 text-green-600 bg-green-50 p-1.5 rounded" />
               </div>
-              <p className="text-[11px] text-gray-400 mt-1">Ad requests</p>
+              <p className="text-[11px] text-gray-400 mt-1">{t('admin.adRequests')}</p>
             </div>
           </div>
         </section>
 
         <section className="min-w-0">
-          <h2 className="text-base font-semibold text-gray-900 mb-3">Analytics</h2>
+          <h2 className="text-base font-semibold text-gray-900 mb-3">{t('admin.analytics')}</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <SimpleBarChart title="Platform Overview" data={overviewBars} />
-            <SimplePieChart title="Property Status" data={propertyStatusPie} />
-            <SimplePieChart title="User Verification" data={userVerifyPie} />
-            <SimplePieChart title="Property Payments" data={paymentPie} />
-            {propertyTypeBars.length > 0 && <SimpleBarChart title="Properties by Type" data={propertyTypeBars} />}
-            {propertyCategoryBars.length > 0 && <SimpleBarChart title="Properties by Category" data={propertyCategoryBars} />}
-            {userRoleBars.length > 0 && <SimpleBarChart title="Users by Role" data={userRoleBars} />}
-            {stats.totalJobs > 0 && <SimplePieChart title="Jobs by Status" data={jobsPie} />}
-            {stats.totalAds > 0 && <SimplePieChart title="Advertisements by Status" data={adsPie} />}
+            <SimpleBarChart title={t('admin.platformOverview')} data={overviewBars} />
+            <SimplePieChart title={t('admin.propertyStatus')} data={propertyStatusPie} />
+            <SimplePieChart title={t('admin.userVerification')} data={userVerifyPie} />
+            <SimplePieChart title={t('admin.propertyPayments')} data={paymentPie} />
+            {propertyTypeBars.length > 0 && <SimpleBarChart title={t('admin.propertiesByType')} data={propertyTypeBars} />}
+            {propertyCategoryBars.length > 0 && <SimpleBarChart title={t('admin.propertiesByCategory')} data={propertyCategoryBars} />}
+            {userRoleBars.length > 0 && <SimpleBarChart title={t('admin.usersByRole')} data={userRoleBars} />}
+            {stats.totalJobs > 0 && <SimplePieChart title={t('admin.jobsByStatus')} data={jobsPie} />}
+            {stats.totalAds > 0 && <SimplePieChart title={t('admin.adsByStatus')} data={adsPie} />}
           </div>
         </section>
       </div>
@@ -522,16 +544,16 @@ const AdminDashboard = () => {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b bg-gray-50 text-gray-500 uppercase text-xs">
-                <th className="pb-3 text-left px-3">Name</th>
-                <th className="pb-3 text-left px-3">Email</th>
-                <th className="pb-3 text-left px-3">Role</th>
-                <th className="pb-3 text-left px-3">Verified</th>
-                <th className="pb-3 text-left px-3">Action</th>
+                <th className="pb-3 text-left px-3">{t('admin.name')}</th>
+                <th className="pb-3 text-left px-3">{t('admin.email')}</th>
+                <th className="pb-3 text-left px-3">{t('admin.role')}</th>
+                <th className="pb-3 text-left px-3">{t('admin.verified')}</th>
+                <th className="pb-3 text-left px-3">{t('admin.action')}</th>
               </tr>
             </thead>
             <tbody>
               {pageItems.length === 0 ? (
-                <tr><td colSpan="5" className="py-8 text-center text-gray-500">No users found</td></tr>
+                <tr><td colSpan="5" className="py-8 text-center text-gray-500">{t('admin.noUsers')}</td></tr>
               ) : (
                 pageItems.map((u) => (
                   <tr key={u._id} className="border-b last:border-0 hover:bg-gray-50">
@@ -560,10 +582,10 @@ const AdminDashboard = () => {
         </div>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mt-4">
           <div className="text-sm text-gray-600">
-            Showing {users.length > 0 ? ((userPage - 1) * userPageSize + 1) : 0} to {Math.min(userPage * userPageSize, users.length)} of {users.length} entries
+            {t('admin.showingEntries', { from: users.length > 0 ? ((userPage - 1) * userPageSize + 1) : 0, to: Math.min(userPage * userPageSize, users.length), total: users.length })}
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <label className="text-xs text-gray-600">Rows per page:</label>
+            <label className="text-xs text-gray-600">{t('admin.rowsPerPage')}</label>
             <select
               value={userPageSize}
               onChange={(e) => { setUserPageSize(parseInt(e.target.value)); setUserPage(1); }}
@@ -610,28 +632,28 @@ const AdminDashboard = () => {
           <table className="w-full min-w-[980px] text-sm">
             <thead>
               <tr className="border-b bg-gray-50 text-gray-500 uppercase text-xs">
-                <th className="pb-3 text-left px-3">Title</th>
-                <th className="pb-3 text-left px-3">Owner</th>
-                <th className="pb-3 text-left px-3">Price</th>
-                <th className="pb-3 text-left px-3">Location</th>
-                <th className="pb-3 text-left px-3">Status</th>
-                <th className="pb-3 text-left px-3">Payment</th>
-                <th className="pb-3 text-left px-3">Action</th>
+                <th className="pb-3 text-left px-3">{t('admin.title')}</th>
+                <th className="pb-3 text-left px-3">{t('admin.owner')}</th>
+                <th className="pb-3 text-left px-3">{t('admin.price')}</th>
+                <th className="pb-3 text-left px-3">{t('admin.location')}</th>
+                <th className="pb-3 text-left px-3">{t('admin.status')}</th>
+                <th className="pb-3 text-left px-3">{t('admin.payment')}</th>
+                <th className="pb-3 text-left px-3">{t('admin.action')}</th>
               </tr>
             </thead>
             <tbody>
               {pageItems.length === 0 ? (
-                <tr><td colSpan="7" className="py-8 text-center text-gray-500">No properties found</td></tr>
+                <tr><td colSpan="7" className="py-8 text-center text-gray-500">{t('admin.noProperties')}</td></tr>
               ) : (
                 pageItems.map((p) => (
                   <tr key={p._id} className="border-b last:border-0 hover:bg-gray-50">
                     <td className="py-3 px-3 font-medium text-gray-900">{p.title}</td>
                     <td className="py-3 px-3">{p.owner?.name || 'Unknown'}</td>
                     <td className="py-3 px-3">{p.price ? p.price.toLocaleString() : 'N/A'} {p.currency || 'RWF'}</td>
-                    <td className="py-3 px-3">{p.area || '—'}</td>
+                    <td className="py-3 px-3">{p.area || 'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â'}</td>
                     <td className="py-3 px-3">
                       {p.isPublished ? (
-                        <span className="flex items-center gap-1 text-green-600 text-xs"><CheckCircle2 className="h-3.5 w-3.5" /> Published</span>
+                        <span className="flex items-center gap-1 text-green-600 text-xs"><CheckCircle2 className="h-3.5 w-3.5" /> {t('admin.published')}</span>
                       ) : (
                         <span className="flex items-center gap-1 text-amber-600 text-xs"><XCircle className="h-3.5 w-3.5" /> Hidden</span>
                       )}
@@ -643,9 +665,9 @@ const AdminDashboard = () => {
                       <div className="flex items-center gap-2 flex-wrap">
                         <button onClick={() => setViewItem({ type: 'property', data: p })} title="View" className="text-xs px-2 py-1 border border-gray-300 text-gray-700 hover:bg-gray-100 flex items-center gap-1"><Eye className="h-3.5 w-3.5" /> View</button>
                         {p.isPublished ? (
-                          <button onClick={() => rejectProperty(p._id)} disabled={propLoading} className="text-xs px-2 py-1 border border-amber-300 text-amber-700 hover:bg-amber-50">Reject</button>
+                          <button onClick={() => rejectProperty(p._id)} disabled={propLoading} className="text-xs px-2 py-1 border border-amber-300 text-amber-700 hover:bg-amber-50">{t('admin.reject')}</button>
                         ) : (
-                          <button onClick={() => approveProperty(p._id)} disabled={propLoading} className="text-xs px-2 py-1 border border-green-300 text-green-700 hover:bg-green-50">Approve</button>
+                          <button onClick={() => approveProperty(p._id)} disabled={propLoading} className="text-xs px-2 py-1 border border-green-300 text-green-700 hover:bg-green-50">{t('admin.approve')}</button>
                         )}
                         <button onClick={() => deleteProperty(p._id)} disabled={propLoading} title="Delete" className="text-xs px-2 py-1 border border-red-300 text-red-600 hover:bg-red-50 flex items-center gap-1"><Trash2 className="h-3.5 w-3.5" /> Delete</button>
                       </div>
@@ -658,10 +680,10 @@ const AdminDashboard = () => {
         </div>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mt-4">
           <div className="text-sm text-gray-600">
-            Showing {properties.length > 0 ? ((propPage - 1) * propPageSize + 1) : 0} to {Math.min(propPage * propPageSize, properties.length)} of {properties.length} entries
+            {t('admin.showingEntries', { from: properties.length > 0 ? ((propPage - 1) * propPageSize + 1) : 0, to: Math.min(propPage * propPageSize, properties.length), total: properties.length })}
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <label className="text-xs text-gray-600">Rows per page:</label>
+            <label className="text-xs text-gray-600">{t('admin.rowsPerPage')}</label>
             <select
               value={propPageSize}
               onChange={(e) => { setPropPageSize(parseInt(e.target.value)); setPropPage(1); }}
@@ -700,18 +722,18 @@ const AdminDashboard = () => {
         <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2"><Settings className="h-5 w-5 text-green-600" /> Create Category</h3>
         <form onSubmit={createCategory} className="flex flex-col sm:flex-row gap-3 sm:items-end">
           <div className="flex-1">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Category name</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin.categoryName')}</label>
             <input
               className="w-full border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
               value={catName}
               onChange={(e) => setCatName(e.target.value)}
-              placeholder="e.g. Rent, Sale, Lease"
+              placeholder={t('admin.catPlaceholder')}
               required
             />
           </div>
           <label className="inline-flex items-center gap-2 text-sm text-gray-700 pb-2 sm:pb-0">
             <input type="checkbox" checked={catPublished} onChange={(e) => setCatPublished(e.target.checked)} />
-            Published (visible in search)
+            {t('admin.published')} (visible in search)
           </label>
           <button type="submit" disabled={catLoading} className="inline-flex items-center justify-center gap-2 bg-green-600 text-white px-4 py-2 text-sm font-medium hover:bg-green-700 disabled:opacity-60">
             <Plus className="h-4 w-4" /> {catLoading ? 'Saving...' : 'Create'}
@@ -721,21 +743,21 @@ const AdminDashboard = () => {
 
       <div className="bg-white shadow border border-gray-200 overflow-x-auto">
         <div className="px-4 py-3 border-b border-gray-200">
-          <h3 className="text-lg font-bold text-gray-900">Categories</h3>
-          <p className="text-xs text-gray-500">Only published categories appear in search and property forms.</p>
+          <h3 className="text-lg font-bold text-gray-900">{t('admin.categories')}</h3>
+          <p className="text-xs text-gray-500">{t('admin.catHint')}</p>
         </div>
         <table className="w-full min-w-[640px] text-sm">
           <thead>
             <tr className="border-b bg-gray-50 text-gray-500 uppercase text-xs">
-              <th className="pb-3 pt-3 text-left px-4">Name</th>
-              <th className="pb-3 pt-3 text-left px-4">Slug</th>
-              <th className="pb-3 pt-3 text-left px-4">Status</th>
-              <th className="pb-3 pt-3 text-left px-4">Action</th>
+              <th className="pb-3 pt-3 text-left px-4">{t('admin.name')}</th>
+              <th className="pb-3 pt-3 text-left px-4">{t('admin.slug')}</th>
+              <th className="pb-3 pt-3 text-left px-4">{t('admin.status')}</th>
+              <th className="pb-3 pt-3 text-left px-4">{t('admin.action')}</th>
             </tr>
           </thead>
           <tbody>
             {categories.length === 0 ? (
-              <tr><td colSpan="4" className="py-8 text-center text-gray-500">No categories yet. Create one above.</td></tr>
+              <tr><td colSpan="4" className="py-8 text-center text-gray-500">{t('admin.noCategories')}</td></tr>
             ) : (
               categories.map((c) => (
                 <tr key={c._id} className="border-b last:border-0 hover:bg-gray-50">
@@ -743,7 +765,7 @@ const AdminDashboard = () => {
                   <td className="py-3 px-4 text-gray-600">{c.slug}</td>
                   <td className="py-3 px-4">
                     {c.isPublished ? (
-                      <span className="inline-flex items-center gap-1 text-green-600 text-xs"><CheckCircle2 className="h-3.5 w-3.5" /> Published</span>
+                      <span className="inline-flex items-center gap-1 text-green-600 text-xs"><CheckCircle2 className="h-3.5 w-3.5" /> {t('admin.published')}</span>
                     ) : (
                       <span className="inline-flex items-center gap-1 text-amber-600 text-xs"><XCircle className="h-3.5 w-3.5" /> Draft</span>
                     )}
@@ -770,17 +792,17 @@ const AdminDashboard = () => {
   const renderReports = () => {
     const applied = reportApplied;
     const d = reportSummary || {};
-    const fmt = (v) => (v ? new Date(v).toLocaleString() : '—');
-    const typeLabel = { summary: 'Summary', users: 'Users', properties: 'Properties', payments: 'Payments', categories: 'Categories', jobs: 'Jobs', ads: 'Advertisements', all: 'All (Summary + Details)' };
+    const fmt = (v) => (v ? new Date(v).toLocaleString() : 'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â');
+    const typeLabel = { summary: t('admin.summary'), users: t('admin.users'), properties: t('admin.properties'), payments: t('admin.payments'), categories: t('admin.categories'), jobs: t('nav.jobs'), ads: t('admin.ads'), subscribers: 'Subscribers', all: 'All (Summary + Details)' };
     const c = d.counts || {};
     const summaryMetrics = [
-      ['Total Users', c.users ?? 0],
-      ['Verified Users', c.verifiedUsers ?? 0],
-      ['Total Properties', c.properties ?? 0],
-      ['Published Properties', c.publishedProperties ?? 0],
-      ['Pending Approval', c.pendingProperties ?? 0],
-      ['Completed Payments', c.completedPayments ?? 0],
-      ['Pending Payments', c.pendingPayments ?? 0],
+      [t('admin.totalUsers'), c.users ?? 0],
+      [t('admin.verifiedUsers'), c.verifiedUsers ?? 0],
+      [t('admin.totalProperties'), c.properties ?? 0],
+      [t('admin.published') + ' Properties', c.publishedProperties ?? 0],
+      [t('admin.pendingApproval'), c.pendingProperties ?? 0],
+      [t('admin.paidPayments'), c.completedPayments ?? 0],
+      [t('admin.pendingPaymentsCount'), c.pendingPayments ?? 0],
     ];
     const hasSummaryData = summaryMetrics.some(([, v]) => Number(v) > 0);
     const hasUsers = (d.users || []).length > 0;
@@ -789,6 +811,7 @@ const AdminDashboard = () => {
     const hasCategories = (d.categories || []).length > 0;
     const hasJobs = (d.jobs || []).length > 0;
     const hasAds = (d.ads || []).length > 0;
+    const hasSubscribers = (d.subscribers || []).length > 0;
     const hasTypeData = !applied ? false :
       reportAppliedType === 'summary' ? hasSummaryData :
       reportAppliedType === 'users' ? hasUsers :
@@ -797,7 +820,8 @@ const AdminDashboard = () => {
       reportAppliedType === 'categories' ? hasCategories :
       reportAppliedType === 'jobs' ? hasJobs :
       reportAppliedType === 'ads' ? hasAds :
-      (hasSummaryData || hasUsers || hasProperties || hasPayments || hasCategories || hasJobs || hasAds);
+      reportAppliedType === 'subscribers' ? hasSubscribers :
+      (hasSummaryData || hasUsers || hasProperties || hasPayments || hasCategories || hasJobs || hasAds || hasSubscribers);
 
     const renderSummaryTable = (counts = c) => (
       <table className="w-full text-sm">
@@ -806,7 +830,7 @@ const AdminDashboard = () => {
             ['Total Users', counts.users ?? 0, 'text-gray-900'],
             ['Verified Users', counts.verifiedUsers ?? 0, 'text-green-600'],
             ['Total Properties', counts.properties ?? 0, 'text-gray-900'],
-            ['Published Properties', counts.publishedProperties ?? 0, 'text-green-600'],
+            [t('admin.published') + ' Properties', counts.publishedProperties ?? 0, 'text-green-600'],
             ['Pending Approval', counts.pendingProperties ?? 0, 'text-amber-600'],
             ['Completed Payments', counts.completedPayments ?? 0, 'text-green-600'],
             ['Pending Payments', counts.pendingPayments ?? 0, 'text-amber-600'],
@@ -814,6 +838,8 @@ const AdminDashboard = () => {
             ['Paid Jobs', counts.paidJobs ?? 0, 'text-green-600'],
             ['Advertisements', counts.ads ?? 0, 'text-gray-900'],
             ['Active Ads', counts.activeAds ?? 0, 'text-green-600'],
+            ['Subscribers', counts.subscribers ?? 0, 'text-gray-900'],
+            ['Active Subscribers', counts.activeSubscribers ?? 0, 'text-green-600'],
           ].map(([label, val, cls], i, arr) => (
             <tr key={label} className={i < arr.length - 1 ? 'border-b' : ''}>
               <td className="py-2 text-gray-500">{label}</td>
@@ -829,55 +855,56 @@ const AdminDashboard = () => {
         <div className="bg-white p-4 shadow border border-gray-200">
           <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2"><Calendar className="h-5 w-5 text-green-600" /> Report Filters</h3>
           <div className="flex flex-wrap gap-2 mb-4">
-            <button onClick={() => setReportPreset('today')} className="px-3 py-1.5 text-xs border border-gray-300 hover:bg-gray-50">Today</button>
-            <button onClick={() => setReportPreset('yesterday')} className="px-3 py-1.5 text-xs border border-gray-300 hover:bg-gray-50">Yesterday</button>
-            <button onClick={() => setReportPreset('7d')} className="px-3 py-1.5 text-xs border border-gray-300 hover:bg-gray-50">Last 7 Days</button>
-            <button onClick={() => setReportPreset('month')} className="px-3 py-1.5 text-xs border border-gray-300 hover:bg-gray-50">This Month</button>
-            <button onClick={() => setReportPreset('lastMonth')} className="px-3 py-1.5 text-xs border border-gray-300 hover:bg-gray-50">Last Month</button>
-            <button onClick={() => setReportPreset('all')} className="px-3 py-1.5 text-xs border border-gray-300 hover:bg-gray-50">All Time</button>
+            <button onClick={() => setReportPreset('today')} className="px-3 py-1.5 text-xs border border-gray-300 hover:bg-gray-50">{t('admin.today')}</button>
+            <button onClick={() => setReportPreset('yesterday')} className="px-3 py-1.5 text-xs border border-gray-300 hover:bg-gray-50">{t('admin.yesterday')}</button>
+            <button onClick={() => setReportPreset('7d')} className="px-3 py-1.5 text-xs border border-gray-300 hover:bg-gray-50">{t('admin.last7Days')}</button>
+            <button onClick={() => setReportPreset('month')} className="px-3 py-1.5 text-xs border border-gray-300 hover:bg-gray-50">{t('admin.thisMonth')}</button>
+            <button onClick={() => setReportPreset('lastMonth')} className="px-3 py-1.5 text-xs border border-gray-300 hover:bg-gray-50">{t('admin.lastMonth')}</button>
+            <button onClick={() => setReportPreset('all')} className="px-3 py-1.5 text-xs border border-gray-300 hover:bg-gray-50">{t('admin.allTime')}</button>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">From (date & time)</label>
+              <label className="block text-xs font-medium text-gray-700 mb-1">{t('admin.fromDate')}</label>
               <input type="datetime-local" value={reportFrom} onChange={(e) => setReportFrom(e.target.value)} className="w-full border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">To (date & time)</label>
+              <label className="block text-xs font-medium text-gray-700 mb-1">{t('admin.toDate')}</label>
               <input type="datetime-local" value={reportTo} onChange={(e) => setReportTo(e.target.value)} className="w-full border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">Report Type</label>
+              <label className="block text-xs font-medium text-gray-700 mb-1">{t('admin.reportType')}</label>
               <select value={reportType} onChange={(e) => setReportType(e.target.value)} className="w-full border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500">
-                <option value="summary">Summary</option>
-                <option value="users">Users</option>
-                <option value="properties">Properties</option>
-                <option value="payments">Payments</option>
-                <option value="categories">Categories</option>
-                <option value="jobs">Jobs</option>
-                <option value="ads">Advertisements</option>
-                <option value="all">All (Summary + Details)</option>
+                <option value="summary">{t('admin.summary')}</option>
+                <option value="users">{t('admin.users')}</option>
+                <option value="properties">{t('admin.properties')}</option>
+                <option value="payments">{t('admin.payments')}</option>
+                <option value="categories">{t('admin.categories')}</option>
+                <option value="jobs">{t('nav.jobs')}</option>
+                <option value="ads">{t('admin.ads')}</option>
+                <option value="subscribers">Subscribers</option>
+                <option value="all">{t('admin.allDetails')}</option>
               </select>
             </div>
             <div className="flex gap-2">
-              <button onClick={() => loadReportSummary()} disabled={reportLoading} className="flex-1 bg-gray-800 text-white px-3 py-2 text-sm hover:bg-gray-900 disabled:opacity-60">{reportLoading ? 'Loading...' : 'Apply'}</button>
+              <button onClick={() => loadReportSummary()} disabled={reportLoading} className="flex-1 bg-gray-800 text-white px-3 py-2 text-sm hover:bg-gray-900 disabled:opacity-60">{reportLoading ? t('common.loading') : t('admin.apply')}</button>
             </div>
           </div>
           <div className="flex flex-wrap gap-2 mt-4">
-            <button onClick={() => downloadReport('pdf')} disabled={reportDownloading || !applied} className="inline-flex items-center gap-2 bg-red-600 text-white px-4 py-2 text-sm hover:bg-red-700 disabled:opacity-60"><Download className="h-4 w-4" /> Download PDF</button>
-            <button onClick={() => downloadReport('excel')} disabled={reportDownloading || !applied} className="inline-flex items-center gap-2 bg-green-600 text-white px-4 py-2 text-sm hover:bg-green-700 disabled:opacity-60"><Download className="h-4 w-4" /> Download Excel</button>
+            <button onClick={() => downloadReport('pdf')} disabled={reportDownloading || !applied} className="inline-flex items-center gap-2 bg-red-600 text-white px-4 py-2 text-sm hover:bg-red-700 disabled:opacity-60"><Download className="h-4 w-4" /> {t('admin.downloadPdf')}</button>
+            <button onClick={() => downloadReport('excel')} disabled={reportDownloading || !applied} className="inline-flex items-center gap-2 bg-green-600 text-white px-4 py-2 text-sm hover:bg-green-700 disabled:opacity-60"><Download className="h-4 w-4" /> {t('admin.downloadExcel')}</button>
           </div>
-          <p className="text-xs text-gray-500 mt-2">Select type/range and click <strong>Apply</strong> to view data. Downloads include only the applied report type and range.</p>
+          <p className="text-xs text-gray-500 mt-2">{t('admin.reportHint')}</p>
           {(!applied || reportStateMismatch) && (
             <div className="mt-3 bg-amber-50 border border-amber-200 p-3 text-sm text-amber-800">
-              {!reportSummary ? 'Click Apply to load the selected report type and date range before viewing or downloading.' : 'Report type or date range changed. Click Apply to load and enable download for the selected report.'}
+              {!reportSummary ? t('admin.reportApplyPrompt') : t('admin.reportChanged')}
             </div>
           )}
           {applied && (
-            <p className="text-xs text-green-700 mt-2">Showing: <strong>{typeLabel[reportAppliedType] || reportAppliedType}</strong> | Range: {reportAppliedRange.from ? new Date(reportAppliedRange.from).toLocaleString() : 'All'} — {reportAppliedRange.to ? new Date(reportAppliedRange.to).toLocaleString() : 'Now'}</p>
+            <p className="text-xs text-green-700 mt-2">{t('admin.reportShowing', { type: typeLabel[reportAppliedType] || reportAppliedType, from: reportAppliedRange.from ? new Date(reportAppliedRange.from).toLocaleString() : t('admin.all'), to: reportAppliedRange.to ? new Date(reportAppliedRange.to).toLocaleString() : t('admin.now') })}</p>
           )}
         </div>
 
-        {reportLoading && <div className="bg-white p-4 shadow border border-gray-200 text-sm text-gray-500">Loading report...</div>}
+        {reportLoading && <div className="bg-white p-4 shadow border border-gray-200 text-sm text-gray-500">{t('admin.loadingReport')}</div>}
 
         {applied && !reportLoading && !hasTypeData && (
           <div className="bg-amber-50 border border-amber-200 p-4 text-sm text-amber-800">
@@ -899,11 +926,11 @@ const AdminDashboard = () => {
                 <div className="px-4 py-3 border-b border-gray-200"><h3 className="text-lg font-bold text-gray-900">Users ({(d.users || []).length})</h3></div>
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
-                    <thead><tr className="border-b bg-gray-50 text-gray-500 uppercase text-xs"><th className="text-left px-4 py-2">Name</th><th className="text-left px-4 py-2">Email</th><th className="text-left px-4 py-2">Phone</th><th className="text-left px-4 py-2">Role</th><th className="text-left px-4 py-2">Verified</th><th className="text-left px-4 py-2">Created</th></tr></thead>
+                    <thead><tr className="border-b bg-gray-50 text-gray-500 uppercase text-xs"><th className="text-left px-4 py-2">{t('admin.name')}</th><th className="text-left px-4 py-2">{t('admin.email')}</th><th className="text-left px-4 py-2">{t('admin.phone')}</th><th className="text-left px-4 py-2">{t('admin.role')}</th><th className="text-left px-4 py-2">{t('admin.verified')}</th><th className="text-left px-4 py-2">{t('admin.created')}</th></tr></thead>
                     <tbody>
-                      {(d.users || []).length === 0 ? <tr><td colSpan="6" className="py-6 text-center text-gray-500">No users in range</td></tr> :
+                      {(d.users || []).length === 0 ? <tr><td colSpan="6" className="py-6 text-center text-gray-500">{t('admin.noUsersRange')}</td></tr> :
                         (d.users || []).map((u) => (
-                          <tr key={u._id} className="border-b last:border-0"><td className="px-4 py-2">{u.name}</td><td className="px-4 py-2">{u.email}</td><td className="px-4 py-2">{u.phone || '—'}</td><td className="px-4 py-2 capitalize">{u.role}</td><td className="px-4 py-2">{u.isVerified ? 'Yes' : 'No'}</td><td className="px-4 py-2">{fmt(u.createdAt)}</td></tr>
+                          <tr key={u._id} className="border-b last:border-0"><td className="px-4 py-2">{u.name}</td><td className="px-4 py-2">{u.email}</td><td className="px-4 py-2">{u.phone || 'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â'}</td><td className="px-4 py-2 capitalize">{u.role}</td><td className="px-4 py-2">{u.isVerified ? 'Yes' : 'No'}</td><td className="px-4 py-2">{fmt(u.createdAt)}</td></tr>
                         ))}
                     </tbody>
                   </table>
@@ -916,11 +943,11 @@ const AdminDashboard = () => {
                 <div className="px-4 py-3 border-b border-gray-200"><h3 className="text-lg font-bold text-gray-900">Properties ({(d.properties || []).length})</h3></div>
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
-                    <thead><tr className="border-b bg-gray-50 text-gray-500 uppercase text-xs"><th className="text-left px-4 py-2">Title</th><th className="text-left px-4 py-2">Owner</th><th className="text-left px-4 py-2">Type</th><th className="text-left px-4 py-2">Category</th><th className="text-left px-4 py-2">Price</th><th className="text-left px-4 py-2">Status</th><th className="text-left px-4 py-2">Created</th></tr></thead>
+                    <thead><tr className="border-b bg-gray-50 text-gray-500 uppercase text-xs"><th className="text-left px-4 py-2">{t('admin.title')}</th><th className="text-left px-4 py-2">{t('admin.owner')}</th><th className="text-left px-4 py-2">{t('admin.type')}</th><th className="text-left px-4 py-2">{t('admin.category')}</th><th className="text-left px-4 py-2">{t('admin.price')}</th><th className="text-left px-4 py-2">{t('admin.status')}</th><th className="text-left px-4 py-2">{t('admin.created')}</th></tr></thead>
                     <tbody>
-                      {(d.properties || []).length === 0 ? <tr><td colSpan="7" className="py-6 text-center text-gray-500">No properties in range</td></tr> :
+                      {(d.properties || []).length === 0 ? <tr><td colSpan="7" className="py-6 text-center text-gray-500">{t('admin.noPropsRange')}</td></tr> :
                         (d.properties || []).map((p) => (
-                          <tr key={p._id} className="border-b last:border-0"><td className="px-4 py-2 font-medium">{p.title}</td><td className="px-4 py-2">{p.owner?.name || '—'}</td><td className="px-4 py-2 capitalize">{p.type}</td><td className="px-4 py-2">{p.category}</td><td className="px-4 py-2">{p.price != null ? `${Number(p.price).toLocaleString()} ${p.currency || 'RWF'}` : '—'}</td><td className="px-4 py-2">{p.isPublished ? 'Published' : 'Pending'}</td><td className="px-4 py-2">{fmt(p.createdAt)}</td></tr>
+                          <tr key={p._id} className="border-b last:border-0"><td className="px-4 py-2 font-medium">{p.title}</td><td className="px-4 py-2">{p.owner?.name || 'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â'}</td><td className="px-4 py-2 capitalize">{p.type}</td><td className="px-4 py-2">{p.category}</td><td className="px-4 py-2">{p.price != null ? `${Number(p.price).toLocaleString()} ${p.currency || 'RWF'}` : 'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â'}</td><td className="px-4 py-2">{p.isPublished ? t('admin.published') + '' : 'Pending'}</td><td className="px-4 py-2">{fmt(p.createdAt)}</td></tr>
                         ))}
                     </tbody>
                   </table>
@@ -933,11 +960,11 @@ const AdminDashboard = () => {
                 <div className="px-4 py-3 border-b border-gray-200"><h3 className="text-lg font-bold text-gray-900">Payments ({(d.payments || []).length})</h3></div>
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
-                    <thead><tr className="border-b bg-gray-50 text-gray-500 uppercase text-xs"><th className="text-left px-4 py-2">User</th><th className="text-left px-4 py-2">Property</th><th className="text-left px-4 py-2">Type</th><th className="text-left px-4 py-2">Amount</th><th className="text-left px-4 py-2">Status</th><th className="text-left px-4 py-2">Method</th><th className="text-left px-4 py-2">Created</th></tr></thead>
+                    <thead><tr className="border-b bg-gray-50 text-gray-500 uppercase text-xs"><th className="text-left px-4 py-2">{t('admin.user')}</th><th className="text-left px-4 py-2">{t('admin.property')}</th><th className="text-left px-4 py-2">{t('admin.type')}</th><th className="text-left px-4 py-2">{t('admin.amount')}</th><th className="text-left px-4 py-2">{t('admin.status')}</th><th className="text-left px-4 py-2">{t('admin.method')}</th><th className="text-left px-4 py-2">{t('admin.created')}</th></tr></thead>
                     <tbody>
-                      {(d.payments || []).length === 0 ? <tr><td colSpan="7" className="py-6 text-center text-gray-500">No payments in range</td></tr> :
+                      {(d.payments || []).length === 0 ? <tr><td colSpan="7" className="py-6 text-center text-gray-500">{t('admin.noPaymentsRange')}</td></tr> :
                         (d.payments || []).map((p) => (
-                          <tr key={p._id} className="border-b last:border-0"><td className="px-4 py-2">{p.user?.name || p.user?.email || '—'}</td><td className="px-4 py-2">{p.property?.title || '—'}</td><td className="px-4 py-2">{p.type}</td><td className="px-4 py-2">{Number(p.amount || 0).toLocaleString()} {p.currency || 'RWF'}</td><td className="px-4 py-2 capitalize">{p.status}</td><td className="px-4 py-2">{p.method || '—'}</td><td className="px-4 py-2">{fmt(p.createdAt)}</td></tr>
+                          <tr key={p._id} className="border-b last:border-0"><td className="px-4 py-2">{p.user?.name || p.user?.email || 'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â'}</td><td className="px-4 py-2">{p.property?.title || 'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â'}</td><td className="px-4 py-2">{p.type}</td><td className="px-4 py-2">{Number(p.amount || 0).toLocaleString()} {p.currency || 'RWF'}</td><td className="px-4 py-2 capitalize">{p.status}</td><td className="px-4 py-2">{p.method || 'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â'}</td><td className="px-4 py-2">{fmt(p.createdAt)}</td></tr>
                         ))}
                     </tbody>
                   </table>
@@ -950,9 +977,9 @@ const AdminDashboard = () => {
                 <div className="px-4 py-3 border-b border-gray-200"><h3 className="text-lg font-bold text-gray-900">Categories ({(d.categories || []).length})</h3></div>
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
-                    <thead><tr className="border-b bg-gray-50 text-gray-500 uppercase text-xs"><th className="text-left px-4 py-2">Name</th><th className="text-left px-4 py-2">Slug</th><th className="text-left px-4 py-2">Published</th><th className="text-left px-4 py-2">Created</th></tr></thead>
+                    <thead><tr className="border-b bg-gray-50 text-gray-500 uppercase text-xs"><th className="text-left px-4 py-2">{t('admin.name')}</th><th className="text-left px-4 py-2">{t('admin.slug')}</th><th className="text-left px-4 py-2">{t('admin.published')}</th><th className="text-left px-4 py-2">{t('admin.created')}</th></tr></thead>
                     <tbody>
-                      {(d.categories || []).length === 0 ? <tr><td colSpan="4" className="py-6 text-center text-gray-500">No categories in range</td></tr> :
+                      {(d.categories || []).length === 0 ? <tr><td colSpan="4" className="py-6 text-center text-gray-500">{t('admin.noCatsRange')}</td></tr> :
                         (d.categories || []).map((cat) => (
                           <tr key={cat._id} className="border-b last:border-0"><td className="px-4 py-2 font-medium">{cat.name}</td><td className="px-4 py-2">{cat.slug}</td><td className="px-4 py-2">{cat.isPublished ? 'Yes' : 'No'}</td><td className="px-4 py-2">{fmt(cat.createdAt)}</td></tr>
                         ))}
@@ -967,11 +994,11 @@ const AdminDashboard = () => {
                 <div className="px-4 py-3 border-b border-gray-200"><h3 className="text-lg font-bold text-gray-900">Jobs ({(d.jobs || []).length})</h3></div>
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
-                    <thead><tr className="border-b bg-gray-50 text-gray-500 uppercase text-xs"><th className="text-left px-4 py-2">Title</th><th className="text-left px-4 py-2">Company</th><th className="text-left px-4 py-2">Location</th><th className="text-left px-4 py-2">Type</th><th className="text-left px-4 py-2">Payment</th><th className="text-left px-4 py-2">Status</th><th className="text-left px-4 py-2">Submitted By</th><th className="text-left px-4 py-2">Created</th></tr></thead>
+                    <thead><tr className="border-b bg-gray-50 text-gray-500 uppercase text-xs"><th className="text-left px-4 py-2">{t('admin.title')}</th><th className="text-left px-4 py-2">{t('admin.company')}</th><th className="text-left px-4 py-2">{t('admin.location')}</th><th className="text-left px-4 py-2">{t('admin.type')}</th><th className="text-left px-4 py-2">{t('admin.payment')}</th><th className="text-left px-4 py-2">{t('admin.status')}</th><th className="text-left px-4 py-2">{t('admin.submittedBy')}</th><th className="text-left px-4 py-2">{t('admin.created')}</th></tr></thead>
                     <tbody>
-                      {(d.jobs || []).length === 0 ? <tr><td colSpan="8" className="py-6 text-center text-gray-500">No jobs in range</td></tr> :
+                      {(d.jobs || []).length === 0 ? <tr><td colSpan="8" className="py-6 text-center text-gray-500">{t('admin.noJobsRange')}</td></tr> :
                         (d.jobs || []).map((j) => (
-                          <tr key={j._id} className="border-b last:border-0"><td className="px-4 py-2 font-medium">{j.title}</td><td className="px-4 py-2">{j.company}</td><td className="px-4 py-2">{j.location}</td><td className="px-4 py-2">{j.type}</td><td className="px-4 py-2 capitalize">{j.paymentStatus || 'unpaid'}{j.amount != null ? ` (${Number(j.amount).toLocaleString()} ${j.currency || 'RWF'})` : ''}</td><td className="px-4 py-2 capitalize">{j.status}{j.isPublished ? ' (published)' : ''}</td><td className="px-4 py-2">{j.submittedBy?.email || j.submittedBy?.name || '�'}</td><td className="px-4 py-2">{fmt(j.createdAt)}</td></tr>
+                          <tr key={j._id} className="border-b last:border-0"><td className="px-4 py-2 font-medium">{j.title}</td><td className="px-4 py-2">{j.company}</td><td className="px-4 py-2">{j.location}</td><td className="px-4 py-2">{j.type}</td><td className="px-4 py-2 capitalize">{j.paymentStatus || 'unpaid'}{j.amount != null ? ` (${Number(j.amount).toLocaleString()} ${j.currency || 'RWF'})` : ''}</td><td className="px-4 py-2 capitalize">{j.status}{j.isPublished ? ' (published)' : ''}</td><td className="px-4 py-2">{j.submittedBy?.email || j.submittedBy?.name || 'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¿ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â½'}</td><td className="px-4 py-2">{fmt(j.createdAt)}</td></tr>
                         ))}
                     </tbody>
                   </table>
@@ -984,11 +1011,11 @@ const AdminDashboard = () => {
                 <div className="px-4 py-3 border-b border-gray-200"><h3 className="text-lg font-bold text-gray-900">Advertisements ({(d.ads || []).length})</h3></div>
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
-                    <thead><tr className="border-b bg-gray-50 text-gray-500 uppercase text-xs"><th className="text-left px-4 py-2">Company</th><th className="text-left px-4 py-2">Title</th><th className="text-left px-4 py-2">Plan</th><th className="text-left px-4 py-2">Amount</th><th className="text-left px-4 py-2">Payment</th><th className="text-left px-4 py-2">Status</th><th className="text-left px-4 py-2">Expires</th><th className="text-left px-4 py-2">Created</th></tr></thead>
+                    <thead><tr className="border-b bg-gray-50 text-gray-500 uppercase text-xs"><th className="text-left px-4 py-2">{t('admin.company')}</th><th className="text-left px-4 py-2">{t('admin.title')}</th><th className="text-left px-4 py-2">{t('admin.plan')}</th><th className="text-left px-4 py-2">{t('admin.amount')}</th><th className="text-left px-4 py-2">{t('admin.payment')}</th><th className="text-left px-4 py-2">{t('admin.status')}</th><th className="text-left px-4 py-2">{t('admin.expires')}</th><th className="text-left px-4 py-2">{t('admin.created')}</th></tr></thead>
                     <tbody>
-                      {(d.ads || []).length === 0 ? <tr><td colSpan="8" className="py-6 text-center text-gray-500">No advertisements in range</td></tr> :
+                      {(d.ads || []).length === 0 ? <tr><td colSpan="8" className="py-6 text-center text-gray-500">{t('admin.noAdsRange')}</td></tr> :
                         (d.ads || []).map((a) => (
-                          <tr key={a._id} className="border-b last:border-0"><td className="px-4 py-2"><div className="font-medium">{a.companyName}</div><div className="text-xs text-gray-500">{a.contactEmail || ''}</div></td><td className="px-4 py-2">{a.title}</td><td className="px-4 py-2 capitalize">{a.plan}</td><td className="px-4 py-2">{Number(a.amount || 0).toLocaleString()} {a.currency || 'RWF'}</td><td className="px-4 py-2 capitalize">{a.paymentStatus}</td><td className="px-4 py-2 capitalize">{a.status}{a.isActive ? ' (active)' : ''}</td><td className="px-4 py-2">{a.expiresAt ? fmt(a.expiresAt) : '�'}</td><td className="px-4 py-2">{fmt(a.createdAt)}</td></tr>
+                          <tr key={a._id} className="border-b last:border-0"><td className="px-4 py-2"><div className="font-medium">{a.companyName}</div><div className="text-xs text-gray-500">{a.contactEmail || ''}</div></td><td className="px-4 py-2">{a.title}</td><td className="px-4 py-2 capitalize">{a.plan}</td><td className="px-4 py-2">{Number(a.amount || 0).toLocaleString()} {a.currency || 'RWF'}</td><td className="px-4 py-2 capitalize">{a.paymentStatus}</td><td className="px-4 py-2 capitalize">{a.status}{a.isActive ? ' (active)' : ''}</td><td className="px-4 py-2">{a.expiresAt ? fmt(a.expiresAt) : 'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¿ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â½'}</td><td className="px-4 py-2">{fmt(a.createdAt)}</td></tr>
                         ))}
                     </tbody>
                   </table>
@@ -1001,73 +1028,171 @@ const AdminDashboard = () => {
     );
   };
 
-  const renderJobs = () => (
-    <div className="bg-white shadow border border-gray-200 overflow-x-auto">
-      <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
-        <div>
-          <h3 className="text-lg font-bold text-gray-900">Job Requests & Opportunities</h3>
-          <p className="text-xs text-gray-500">Review submissions and approve to publish on /jobs.</p>
+  const renderJobs = () => {
+    const pageItems = paginate(jobs, jobPage, jobPageSize);
+    const totalPages = Math.ceil(jobs.length / jobPageSize) || 1;
+    return (
+      <div className="bg-white shadow border border-gray-200 overflow-x-auto">
+        <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
+          <div>
+            <h3 className="text-lg font-bold text-gray-900">{t('admin.jobRequests')}</h3>
+            <p className="text-xs text-gray-500">{t('admin.jobsHint')}</p>
+          </div>
+        </div>
+        <table className="w-full min-w-[1080px] text-sm">
+          <thead><tr className="border-b bg-gray-50 text-gray-500 uppercase text-xs"><th className="text-left px-4 py-2">{t('admin.title')}</th><th className="text-left px-4 py-2">{t('admin.company')}</th><th className="text-left px-4 py-2">{t('admin.location')}</th><th className="text-left px-4 py-2">{t('admin.type')}</th><th className="text-left px-4 py-2">{t('admin.payment')}</th><th className="text-left px-4 py-2">{t('admin.status')}</th><th className="text-left px-4 py-2">{t('admin.submittedBy')}</th><th className="text-left px-4 py-2">{t('admin.action')}</th></tr></thead>
+          <tbody>
+            {pageItems.length === 0 ? <tr><td colSpan="8" className="py-8 text-center text-gray-500">{t('admin.noJobs')}</td></tr> : pageItems.map((j) => (
+              <tr key={j._id} className="border-b last:border-0 hover:bg-gray-50">
+                <td className="px-4 py-3 font-medium text-gray-900">{j.title}</td>
+                <td className="px-4 py-3">{j.company}</td>
+                <td className="px-4 py-3">{j.location}</td>
+                <td className="px-4 py-3">{j.type}</td>
+                <td className="px-4 py-3"><span className={`text-xs px-2 py-1 ${j.paymentStatus === 'paid' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>{j.paymentStatus || 'unpaid'}</span> <span className="text-xs text-gray-500">({Number(j.amount || 0).toLocaleString()} RWF)</span></td>
+                <td className="px-4 py-3"><span className={`text-xs px-2 py-1 ${j.status === 'approved' && j.isPublished ? 'bg-green-100 text-green-700' : j.status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>{j.status}{j.isPublished ? ' (published)' : ''}</span></td>
+                <td className="px-4 py-3">{j.submittedBy?.email || 'ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â'}</td>
+                <td className="px-4 py-3"><div className="flex flex-wrap gap-2">
+                  <button onClick={() => setViewItem({ type: 'job', data: j })} className="text-xs px-2 py-1 border border-gray-300 text-gray-700 hover:bg-gray-100 flex items-center gap-1"><Eye className="h-3.5 w-3.5" /> View</button>
+                  <button onClick={() => approveJob(j._id)} disabled={jobsLoading || j.paymentStatus !== 'paid'} className="text-xs px-2 py-1 border border-green-300 text-green-700 hover:bg-green-50 disabled:opacity-50">{t('admin.approve')}</button>
+                  <button onClick={() => rejectJob(j._id)} disabled={jobsLoading} className="text-xs px-2 py-1 border border-amber-300 text-amber-700 hover:bg-amber-50">{t('admin.reject')}</button>
+                  <button onClick={() => unpublishJob(j._id)} disabled={jobsLoading} className="text-xs px-2 py-1 border border-gray-300 text-gray-700 hover:bg-gray-50">{t('admin.unpublish')}</button>
+                  <button onClick={() => deleteJob(j._id)} disabled={jobsLoading} className="text-xs px-2 py-1 border border-red-300 text-red-600 hover:bg-red-50 flex items-center gap-1"><Trash2 className="h-3.5 w-3.5" /> Delete</button>
+                </div></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mt-4 pt-4 px-4 pb-4 border-t border-gray-200">
+          <p className="text-xs text-gray-500">
+            {t('admin.showingEntries', { from: jobs.length > 0 ? ((jobPage - 1) * jobPageSize + 1) : 0, to: Math.min(jobPage * jobPageSize, jobs.length), total: jobs.length })}
+          </p>
+          <div className="flex items-center gap-2">
+            <label className="text-xs text-gray-600">{t('admin.rowsPerPage')}</label>
+            <select
+              value={jobPageSize}
+              onChange={(e) => { setJobPageSize(parseInt(e.target.value)); setJobPage(1); }}
+              className="border border-gray-300 px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-green-500"
+            >
+              {[5, 10, 20, 50].map(n => <option key={n} value={n}>{n}</option>)}
+            </select>
+          </div>
+          <div className="flex items-center gap-1">
+            <button onClick={() => setJobPage((p) => Math.max(1, p - 1))} disabled={jobPage === 1} className="px-2 py-1 text-xs border hover:bg-gray-100 disabled:opacity-50">Prev</button>
+            <span className="px-2 py-1 text-xs font-medium">{jobPage} / {totalPages}</span>
+            <button onClick={() => setJobPage((p) => Math.min(totalPages, p + 1))} disabled={jobPage === totalPages} className="px-2 py-1 text-xs border hover:bg-gray-100 disabled:opacity-50">Next</button>
+          </div>
         </div>
       </div>
-      <table className="w-full min-w-[1080px] text-sm">
-        <thead><tr className="border-b bg-gray-50 text-gray-500 uppercase text-xs"><th className="text-left px-4 py-2">Title</th><th className="text-left px-4 py-2">Company</th><th className="text-left px-4 py-2">Location</th><th className="text-left px-4 py-2">Type</th><th className="text-left px-4 py-2">Payment</th><th className="text-left px-4 py-2">Status</th><th className="text-left px-4 py-2">Submitted By</th><th className="text-left px-4 py-2">Action</th></tr></thead>
-        <tbody>
-          {jobs.length === 0 ? <tr><td colSpan="8" className="py-8 text-center text-gray-500">No job submissions</td></tr> : jobs.map((j) => (
-            <tr key={j._id} className="border-b last:border-0 hover:bg-gray-50">
-              <td className="px-4 py-3 font-medium text-gray-900">{j.title}</td>
-              <td className="px-4 py-3">{j.company}</td>
-              <td className="px-4 py-3">{j.location}</td>
-              <td className="px-4 py-3">{j.type}</td>
-              <td className="px-4 py-3"><span className={`text-xs px-2 py-1 ${j.paymentStatus === 'paid' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>{j.paymentStatus || 'unpaid'}</span> <span className="text-xs text-gray-500">({Number(j.amount || 0).toLocaleString()} RWF)</span></td>
-              <td className="px-4 py-3"><span className={`text-xs px-2 py-1 ${j.status === 'approved' && j.isPublished ? 'bg-green-100 text-green-700' : j.status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>{j.status}{j.isPublished ? ' (published)' : ''}</span></td>
-              <td className="px-4 py-3">{j.submittedBy?.email || '�'}</td>
-              <td className="px-4 py-3"><div className="flex flex-wrap gap-2">
-                <button onClick={() => setViewItem({ type: 'job', data: j })} className="text-xs px-2 py-1 border border-gray-300 text-gray-700 hover:bg-gray-100 flex items-center gap-1"><Eye className="h-3.5 w-3.5" /> View</button>
-                <button onClick={() => approveJob(j._id)} disabled={jobsLoading || j.paymentStatus !== 'paid'} className="text-xs px-2 py-1 border border-green-300 text-green-700 hover:bg-green-50 disabled:opacity-50">Approve</button>
-                <button onClick={() => rejectJob(j._id)} disabled={jobsLoading} className="text-xs px-2 py-1 border border-amber-300 text-amber-700 hover:bg-amber-50">Reject</button>
-                <button onClick={() => unpublishJob(j._id)} disabled={jobsLoading} className="text-xs px-2 py-1 border border-gray-300 text-gray-700 hover:bg-gray-50">Unpublish</button>
-                <button onClick={() => deleteJob(j._id)} disabled={jobsLoading} className="text-xs px-2 py-1 border border-red-300 text-red-600 hover:bg-red-50 flex items-center gap-1"><Trash2 className="h-3.5 w-3.5" /> Delete</button>
-              </div></td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
+    );
+  };
 
-  const renderAds = () => (
-    <div className="bg-white shadow border border-gray-200 overflow-x-auto">
-      <div className="px-4 py-3 border-b border-gray-200">
-        <h3 className="text-lg font-bold text-gray-900">Partnership & Advertisement Requests</h3>
-        <p className="text-xs text-gray-500">Confirm payment, then approve to publish. Plans: 50,000 RWF/month, 500,000 RWF/year.</p>
+
+  const renderSubscribers = () => {
+    const pageItems = paginate(subscribers, subPage, subPageSize);
+    const totalPages = Math.ceil(subscribers.length / subPageSize) || 1;
+    return (
+      <div className="bg-white shadow border border-gray-200 overflow-x-auto">
+        <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
+          <div>
+            <h3 className="text-lg font-bold text-gray-900">Subscribers ({subscribers.length})</h3>
+            <p className="text-xs text-gray-500">Subscribed emails for updates</p>
+          </div>
+        </div>
+        {subscribersLoading ? (
+          <div className="py-10 text-center text-gray-500">Loading...</div>
+        ) : (
+          <>
+            <table className="w-full min-w-[700px] text-sm">
+              <thead><tr className="border-b bg-gray-50 text-gray-500 uppercase text-xs"><th className="text-left px-4 py-2">Email</th><th className="text-left px-4 py-2">Status</th><th className="text-left px-4 py-2">Subscribed</th><th className="text-left px-4 py-2">Action</th></tr></thead>
+              <tbody>
+                {pageItems.length === 0 ? <tr><td colSpan="4" className="py-8 text-center text-gray-500">No subscribers yet</td></tr> : pageItems.map((s) => (
+                  <tr key={s._id} className="border-b last:border-0 hover:bg-gray-50">
+                    <td className="px-4 py-3 font-medium text-gray-900 break-all">{s.email}</td>
+                    <td className="px-4 py-3"><span className={`text-xs px-2 py-1 ${s.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>{s.isActive ? 'Active' : 'Inactive'}</span></td>
+                    <td className="px-4 py-3 text-gray-600">{s.createdAt ? new Date(s.createdAt).toLocaleString() : 'ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â'}</td>
+                    <td className="px-4 py-3"><div className="flex flex-wrap gap-2">
+                      <button onClick={() => toggleSubscriber(s._id)} disabled={subscribersLoading} className="text-xs px-2 py-1 border border-amber-300 text-amber-700 hover:bg-amber-50 disabled:opacity-50">{s.isActive ? 'Deactivate' : 'Activate'}</button>
+                      <button onClick={() => deleteSubscriber(s._id)} disabled={subscribersLoading} className="text-xs px-2 py-1 border border-red-300 text-red-600 hover:bg-red-50 disabled:opacity-50 flex items-center gap-1"><Trash2 className="h-3.5 w-3.5" /> Delete</button>
+                    </div></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mt-4 pt-4 px-4 pb-4 border-t border-gray-200">
+              <p className="text-xs text-gray-500">{t('admin.showingEntries', { from: subscribers.length > 0 ? ((subPage - 1) * subPageSize + 1) : 0, to: Math.min(subPage * subPageSize, subscribers.length), total: subscribers.length })}</p>
+              <div className="flex items-center gap-2">
+                <label className="text-xs text-gray-600">{t('admin.rowsPerPage')}</label>
+                <select value={subPageSize} onChange={(e) => { setSubPageSize(parseInt(e.target.value)); setSubPage(1); }} className="border border-gray-300 px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-green-500">
+                  {[5, 10, 20, 50].map(n => <option key={n} value={n}>{n}</option>)}
+                </select>
+              </div>
+              <div className="flex items-center gap-1">
+                <button onClick={() => setSubPage((p) => Math.max(1, p - 1))} disabled={subPage === 1} className="px-2 py-1 text-xs border hover:bg-gray-100 disabled:opacity-50">Prev</button>
+                <span className="px-2 py-1 text-xs font-medium">{subPage} / {totalPages}</span>
+                <button onClick={() => setSubPage((p) => Math.min(totalPages, p + 1))} disabled={subPage === totalPages} className="px-2 py-1 text-xs border hover:bg-gray-100 disabled:opacity-50">Next</button>
+              </div>
+            </div>
+          </>
+        )}
       </div>
-      <table className="w-full min-w-[1100px] text-sm">
-        <thead><tr className="border-b bg-gray-50 text-gray-500 uppercase text-xs"><th className="text-left px-4 py-2">Company</th><th className="text-left px-4 py-2">Title</th><th className="text-left px-4 py-2">Plan</th><th className="text-left px-4 py-2">Amount</th><th className="text-left px-4 py-2">Payment</th><th className="text-left px-4 py-2">Status</th><th className="text-left px-4 py-2">Expires</th><th className="text-left px-4 py-2">Action</th></tr></thead>
-        <tbody>
-          {ads.length === 0 ? <tr><td colSpan="8" className="py-8 text-center text-gray-500">No advertisement requests</td></tr> : ads.map((a) => (
-            <tr key={a._id} className="border-b last:border-0 hover:bg-gray-50">
-              <td className="px-4 py-3"><div className="font-medium text-gray-900">{a.companyName}</div><div className="text-xs text-gray-500">{a.contactEmail}</div></td>
-              <td className="px-4 py-3">{a.title}</td>
-              <td className="px-4 py-3 capitalize">{a.plan}</td>
-              <td className="px-4 py-3">{Number(a.amount || 0).toLocaleString()} {a.currency || 'RWF'}</td>
-              <td className="px-4 py-3"><span className={`text-xs px-2 py-1 ${a.paymentStatus === 'paid' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>{a.paymentStatus}</span></td>
-              <td className="px-4 py-3"><span className={`text-xs px-2 py-1 ${a.status === 'approved' && a.isActive ? 'bg-green-100 text-green-700' : a.status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>{a.status}{a.isActive ? ' (active)' : ''}</span></td>
-              <td className="px-4 py-3">{a.expiresAt ? new Date(a.expiresAt).toLocaleDateString() : '—'}</td>
-              <td className="px-4 py-3"><div className="flex flex-wrap gap-2">
-                <button onClick={() => setViewItem({ type: 'ad', data: a })} className="text-xs px-2 py-1 border border-gray-300 text-gray-700 hover:bg-gray-100 flex items-center gap-1"><Eye className="h-3.5 w-3.5" /> View</button>
-                <button onClick={() => markAdPaid(a._id)} disabled={adsLoading || a.paymentStatus === 'paid'} className="text-xs px-2 py-1 border border-blue-300 text-blue-700 hover:bg-blue-50 disabled:opacity-50">Mark Paid</button>
-                <button onClick={() => approveAd(a._id)} disabled={adsLoading || a.paymentStatus !== 'paid'} className="text-xs px-2 py-1 border border-green-300 text-green-700 hover:bg-green-50 disabled:opacity-50">Approve</button>
-                <button onClick={() => rejectAd(a._id)} disabled={adsLoading} className="text-xs px-2 py-1 border border-amber-300 text-amber-700 hover:bg-amber-50">Reject</button>
-                <button onClick={() => deactivateAd(a._id)} disabled={adsLoading} className="text-xs px-2 py-1 border border-gray-300 text-gray-700 hover:bg-gray-50">Deactivate</button>
-                <button onClick={() => deleteAd(a._id)} disabled={adsLoading} className="text-xs px-2 py-1 border border-red-300 text-red-600 hover:bg-red-50 flex items-center gap-1"><Trash2 className="h-3.5 w-3.5" /> Delete</button>
-              </div></td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
+    );
+  };
 
+  const renderAds = () => {
+    const pageItems = paginate(ads, adPage, adPageSize);
+    const totalPages = Math.ceil(ads.length / adPageSize) || 1;
+    return (
+      <div className="bg-white shadow border border-gray-200 overflow-x-auto">
+        <div className="px-4 py-3 border-b border-gray-200">
+          <h3 className="text-lg font-bold text-gray-900">{t('admin.adRequestsTitle')}</h3>
+          <p className="text-xs text-gray-500">{t('admin.adsHint')}</p>
+        </div>
+        <table className="w-full min-w-[1100px] text-sm">
+          <thead><tr className="border-b bg-gray-50 text-gray-500 uppercase text-xs"><th className="text-left px-4 py-2">{t('admin.company')}</th><th className="text-left px-4 py-2">{t('admin.title')}</th><th className="text-left px-4 py-2">{t('admin.plan')}</th><th className="text-left px-4 py-2">{t('admin.amount')}</th><th className="text-left px-4 py-2">{t('admin.payment')}</th><th className="text-left px-4 py-2">{t('admin.status')}</th><th className="text-left px-4 py-2">{t('admin.expires')}</th><th className="text-left px-4 py-2">{t('admin.action')}</th></tr></thead>
+          <tbody>
+            {pageItems.length === 0 ? <tr><td colSpan="8" className="py-8 text-center text-gray-500">{t('admin.noAds')}</td></tr> : pageItems.map((a) => (
+              <tr key={a._id} className="border-b last:border-0 hover:bg-gray-50">
+                <td className="px-4 py-3"><div className="font-medium text-gray-900">{a.companyName}</div><div className="text-xs text-gray-500">{a.contactEmail}</div></td>
+                <td className="px-4 py-3">{a.title}</td>
+                <td className="px-4 py-3 capitalize">{a.plan}</td>
+                <td className="px-4 py-3">{Number(a.amount || 0).toLocaleString()} {a.currency || 'RWF'}</td>
+                <td className="px-4 py-3"><span className={`text-xs px-2 py-1 ${a.paymentStatus === 'paid' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>{a.paymentStatus || 'unpaid'}</span></td>
+                <td className="px-4 py-3">
+                  <div className="flex flex-col gap-1 items-start">
+                    <span className={`text-xs px-2 py-1 ${a.status === 'approved' ? 'bg-green-100 text-green-700' : a.status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>{a.status || 'pending'}</span>
+                    <span className={`text-xs px-2 py-0.5 ${a.isActive ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-gray-100 text-gray-600 border border-gray-200'}`}>{a.isActive ? 'Active' : 'Inactive'}</span>
+                  </div>
+                </td>
+                <td className="px-4 py-3">{a.expiresAt ? new Date(a.expiresAt).toLocaleDateString() : '—'}</td>
+                <td className="px-4 py-3"><div className="flex flex-wrap gap-2">
+                  <button onClick={() => setViewItem({ type: 'ad', data: a })} className="text-xs px-2 py-1 border border-gray-300 text-gray-700 hover:bg-gray-100 flex items-center gap-1"><Eye className="h-3.5 w-3.5" /> View</button>
+                  <button onClick={() => markAdPaid(a._id)} disabled={adsLoading || a.paymentStatus === 'paid'} className="text-xs px-2 py-1 border border-blue-300 text-blue-700 hover:bg-blue-50 disabled:opacity-50">{t('admin.markPaid')}</button>
+                  <button onClick={() => approveAd(a._id)} disabled={adsLoading || a.paymentStatus !== 'paid'} className="text-xs px-2 py-1 border border-green-300 text-green-700 hover:bg-green-50 disabled:opacity-50">{(a.status === 'approved' && !a.isActive) ? 'Activate' : t('admin.approve')}</button>
+                  <button onClick={() => rejectAd(a._id)} disabled={adsLoading} className="text-xs px-2 py-1 border border-amber-300 text-amber-700 hover:bg-amber-50">{t('admin.reject')}</button>
+                  <button onClick={() => deactivateAd(a._id)} disabled={adsLoading || !a.isActive} className="text-xs px-2 py-1 border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50">{t('admin.deactivate')}</button>
+                  <button onClick={() => deleteAd(a._id)} disabled={adsLoading} className="text-xs px-2 py-1 border border-red-300 text-red-600 hover:bg-red-50 flex items-center gap-1"><Trash2 className="h-3.5 w-3.5" /> Delete</button>
+                </div></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mt-4 pt-4 px-4 pb-4 border-t border-gray-200">
+          <p className="text-xs text-gray-500">{t('admin.showingEntries', { from: ads.length > 0 ? ((adPage - 1) * adPageSize + 1) : 0, to: Math.min(adPage * adPageSize, ads.length), total: ads.length })}</p>
+          <div className="flex items-center gap-2">
+            <label className="text-xs text-gray-600">{t('admin.rowsPerPage')}</label>
+            <select value={adPageSize} onChange={(e) => { setAdPageSize(parseInt(e.target.value)); setAdPage(1); }} className="border border-gray-300 px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-green-500">
+              {[5, 10, 20, 50].map(n => <option key={n} value={n}>{n}</option>)}
+            </select>
+          </div>
+          <div className="flex items-center gap-1">
+            <button onClick={() => setAdPage((p) => Math.max(1, p - 1))} disabled={adPage === 1} className="px-2 py-1 text-xs border hover:bg-gray-100 disabled:opacity-50">Prev</button>
+            <span className="px-2 py-1 text-xs font-medium">{adPage} / {totalPages}</span>
+            <button onClick={() => setAdPage((p) => Math.min(totalPages, p + 1))} disabled={adPage === totalPages} className="px-2 py-1 text-xs border hover:bg-gray-100 disabled:opacity-50">Next</button>
+          </div>
+        </div>
+      </div>
+    );
+  };
   const renderTab = () => {
     switch (activeTab) {
       case 'dashboard': return renderDashboard();
@@ -1076,12 +1201,13 @@ const AdminDashboard = () => {
       case 'categories': return renderCategories();
       case 'jobs': return renderJobs();
       case 'ads': return renderAds();
+      case 'subscribers': return renderSubscribers();
       case 'reports': return renderReports();
       default: return renderDashboard();
     }
   };
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center">Loading admin panel...</div>;
+  if (loading) return <div className="min-h-screen flex items-center justify-center">{t('admin.loadingPanel')}</div>;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -1105,7 +1231,7 @@ const AdminDashboard = () => {
                 className={`w-full flex items-center gap-4 px-3 py-2.5 transition overflow-hidden ${isActive ? 'bg-green-50 text-green-700 font-medium border-r-2 border-green-600' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'}`}
               >
                 <Icon className="h-5 w-5 shrink-0" />
-                <span className={`text-sm whitespace-nowrap transition-opacity duration-300 ${sidebarOpen ? 'opacity-100' : 'opacity-0 lg:group-hover:opacity-100'} ${isActive ? 'font-medium' : 'font-normal'}`}>{link.label}</span>
+                <span className={`text-sm whitespace-nowrap transition-opacity duration-300 ${sidebarOpen ? 'opacity-100' : 'opacity-0 lg:group-hover:opacity-100'} ${isActive ? 'font-medium' : 'font-normal'}`}>{link.label || t(link.labelKey)}</span>
               </button>
             );
           })}
@@ -1116,7 +1242,7 @@ const AdminDashboard = () => {
             className="flex items-center gap-4 w-full px-3 py-2.5 text-sm text-red-600 hover:bg-red-50 border border-red-100 transition overflow-hidden"
           >
             <LogOut className="h-5 w-5 shrink-0" />
-            <span className={`text-sm whitespace-nowrap transition-opacity duration-300 ${sidebarOpen ? 'opacity-100' : 'opacity-0 lg:group-hover:opacity-100'}`}>Logout</span>
+            <span className={`text-sm whitespace-nowrap transition-opacity duration-300 ${sidebarOpen ? 'opacity-100' : 'opacity-0 lg:group-hover:opacity-100'}`}>{t('nav.logout')}</span>
           </button>
         </div>
       </aside>
@@ -1128,8 +1254,8 @@ const AdminDashboard = () => {
               <Menu className="h-5 w-5" />
             </button>
             <div>
-              <h1 className="text-xl sm:text-2xl font-bold text-gray-900">{sidebarLinks.find(l => l.id === activeTab)?.label}</h1>
-              <p className="text-sm sm:text-base text-gray-600">Admin platform management</p>
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900">{(() => { const l = sidebarLinks.find(x => x.id === activeTab); return l?.label || t(l?.labelKey || 'nav.dashboard'); })()}</h1>
+              <p className="text-sm sm:text-base text-gray-600">{t('admin.platformManagement')}</p>
             </div>
           </div>
         </div>
@@ -1140,7 +1266,7 @@ const AdminDashboard = () => {
       </div>
 
       {viewItem && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-20 bg-black/50 overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-[117px] bg-black/50 overflow-y-auto">
           <div className="bg-white border border-gray-200 shadow-xl w-full max-w-lg max-h-[75vh] overflow-y-auto">
             <div className="sticky top-0 bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
               <h3 className="text-base font-bold text-gray-900">{viewItem.type === 'user' ? 'User Details' : viewItem.type === 'property' ? 'Property Details' : viewItem.type === 'job' ? 'Job Details' : 'Advertisement Details'}</h3>
@@ -1149,61 +1275,61 @@ const AdminDashboard = () => {
             <div className="p-4 text-sm">
               {viewItem.type === 'user' ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div><p className="text-gray-500 text-xs">Name</p><p className="font-medium text-gray-900">{viewItem.data.name || '�'}</p></div>
-                  <div><p className="text-gray-500 text-xs">Email</p><p className="font-medium text-gray-900 break-all">{viewItem.data.email || '�'}</p></div>
-                  <div><p className="text-gray-500 text-xs">Phone</p><p className="font-medium text-gray-900">{viewItem.data.phone || '�'}</p></div>
-                  <div><p className="text-gray-500 text-xs">Role</p><p className="font-medium text-gray-900 capitalize">{viewItem.data.role || '�'}</p></div>
-                  <div><p className="text-gray-500 text-xs">Verified</p><p className="font-medium text-gray-900">{viewItem.data.isVerified ? 'Yes' : 'No'}</p></div>
+                  <div><p className="text-gray-500 text-xs">{t('admin.name')}</p><p className="font-medium text-gray-900">{viewItem.data.name || 'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¿ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â½'}</p></div>
+                  <div><p className="text-gray-500 text-xs">{t('admin.email')}</p><p className="font-medium text-gray-900 break-all">{viewItem.data.email || 'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¿ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â½'}</p></div>
+                  <div><p className="text-gray-500 text-xs">{t('admin.phone')}</p><p className="font-medium text-gray-900">{viewItem.data.phone || 'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¿ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â½'}</p></div>
+                  <div><p className="text-gray-500 text-xs">{t('admin.role')}</p><p className="font-medium text-gray-900 capitalize">{viewItem.data.role || 'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¿ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â½'}</p></div>
+                  <div><p className="text-gray-500 text-xs">{t('admin.verified')}</p><p className="font-medium text-gray-900">{viewItem.data.isVerified ? 'Yes' : 'No'}</p></div>
                   <div><p className="text-gray-500 text-xs">ID</p><p className="font-medium text-gray-900 break-all text-xs">{viewItem.data._id}</p></div>
                 </div>
               ) : viewItem.type === 'property' ? (
                 <div className="space-y-3">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div className="sm:col-span-2"><p className="text-gray-500 text-xs">Title</p><p className="font-medium text-gray-900">{viewItem.data.title || '�'}</p></div>
-                    <div><p className="text-gray-500 text-xs">Owner</p><p className="font-medium text-gray-900">{viewItem.data.owner?.name || '�'}</p></div>
-                    <div><p className="text-gray-500 text-xs">Owner Email</p><p className="font-medium text-gray-900 break-all">{viewItem.data.owner?.email || '�'}</p></div>
-                    <div><p className="text-gray-500 text-xs">Type</p><p className="font-medium text-gray-900 capitalize">{viewItem.data.type || '�'}</p></div>
-                    <div><p className="text-gray-500 text-xs">Category</p><p className="font-medium text-gray-900 capitalize">{viewItem.data.category || '�'}</p></div>
-                    <div><p className="text-gray-500 text-xs">Price</p><p className="font-medium text-gray-900">{viewItem.data.price != null ? `${Number(viewItem.data.price).toLocaleString()} ${viewItem.data.currency || 'RWF'}` : '�'}</p></div>
-                    <div><p className="text-gray-500 text-xs">Location</p><p className="font-medium text-gray-900">{[viewItem.data.area, viewItem.data.city].filter(Boolean).join(', ') || '�'}</p></div>
-                    <div><p className="text-gray-500 text-xs">Published</p><p className="font-medium text-gray-900">{viewItem.data.isPublished ? 'Yes' : 'No'}</p></div>
-                    <div><p className="text-gray-500 text-xs">Payment</p><p className="font-medium text-gray-900 capitalize">{viewItem.data.paymentStatus || 'pending'}</p></div>
-                    <div><p className="text-gray-500 text-xs">Contact Phone</p><p className="font-medium text-gray-900">{viewItem.data.contactPhone || '�'}</p></div>
-                    <div><p className="text-gray-500 text-xs">Contact Email</p><p className="font-medium text-gray-900 break-all">{viewItem.data.contactEmail || '�'}</p></div>
+                    <div className="sm:col-span-2"><p className="text-gray-500 text-xs">{t('admin.title')}</p><p className="font-medium text-gray-900">{viewItem.data.title || 'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¿ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â½'}</p></div>
+                    <div><p className="text-gray-500 text-xs">{t('admin.owner')}</p><p className="font-medium text-gray-900">{viewItem.data.owner?.name || 'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¿ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â½'}</p></div>
+                    <div><p className="text-gray-500 text-xs">{t('admin.ownerEmail')}</p><p className="font-medium text-gray-900 break-all">{viewItem.data.owner?.email || 'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¿ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â½'}</p></div>
+                    <div><p className="text-gray-500 text-xs">{t('admin.type')}</p><p className="font-medium text-gray-900 capitalize">{viewItem.data.type || 'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¿ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â½'}</p></div>
+                    <div><p className="text-gray-500 text-xs">{t('admin.category')}</p><p className="font-medium text-gray-900 capitalize">{viewItem.data.category || 'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¿ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â½'}</p></div>
+                    <div><p className="text-gray-500 text-xs">{t('admin.price')}</p><p className="font-medium text-gray-900">{viewItem.data.price != null ? `${Number(viewItem.data.price).toLocaleString()} ${viewItem.data.currency || 'RWF'}` : 'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¿ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â½'}</p></div>
+                    <div><p className="text-gray-500 text-xs">{t('admin.location')}</p><p className="font-medium text-gray-900">{[viewItem.data.area, viewItem.data.city].filter(Boolean).join(', ') || 'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¿ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â½'}</p></div>
+                    <div><p className="text-gray-500 text-xs">{t('admin.published')}</p><p className="font-medium text-gray-900">{viewItem.data.isPublished ? 'Yes' : 'No'}</p></div>
+                    <div><p className="text-gray-500 text-xs">{t('admin.payment')}</p><p className="font-medium text-gray-900 capitalize">{viewItem.data.paymentStatus || 'pending'}</p></div>
+                    <div><p className="text-gray-500 text-xs">{t('admin.contactPhone')}</p><p className="font-medium text-gray-900">{viewItem.data.contactPhone || 'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¿ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â½'}</p></div>
+                    <div><p className="text-gray-500 text-xs">{t('admin.contactEmail')}</p><p className="font-medium text-gray-900 break-all">{viewItem.data.contactEmail || 'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¿ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â½'}</p></div>
                   </div>
-                  {viewItem.data.description && <div><p className="text-gray-500 text-xs mb-1">Description</p><p className="text-gray-900 whitespace-pre-wrap">{viewItem.data.description}</p></div>}
+                  {viewItem.data.description && <div><p className="text-gray-500 text-xs mb-1">{t('admin.description')}</p><p className="text-gray-900 whitespace-pre-wrap">{viewItem.data.description}</p></div>}
                 </div>
               ) : viewItem.type === 'job' ? (
                 <div className="space-y-3">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div className="sm:col-span-2"><p className="text-gray-500 text-xs">Title</p><p className="font-medium text-gray-900">{viewItem.data.title || '�'}</p></div>
-                    <div><p className="text-gray-500 text-xs">Company</p><p className="font-medium text-gray-900">{viewItem.data.company || '�'}</p></div>
-                    <div><p className="text-gray-500 text-xs">Location</p><p className="font-medium text-gray-900">{viewItem.data.location || '�'}</p></div>
-                    <div><p className="text-gray-500 text-xs">Type</p><p className="font-medium text-gray-900">{viewItem.data.type || '�'}</p></div>
-                    <div><p className="text-gray-500 text-xs">Category</p><p className="font-medium text-gray-900">{viewItem.data.category || '�'}</p></div>
-                    <div><p className="text-gray-500 text-xs">Status</p><p className="font-medium text-gray-900 capitalize">{viewItem.data.status} {viewItem.data.isPublished ? '(published)' : ''}</p></div>
-                    <div className="sm:col-span-2"><p className="text-gray-500 text-xs">Apply Email</p><p className="font-medium text-gray-900 break-all">{viewItem.data.applyEmail || '�'}</p></div>
-                    <div className="sm:col-span-2"><p className="text-gray-500 text-xs">Apply URL</p><p className="font-medium text-gray-900 break-all">{viewItem.data.applyUrl || '�'}</p></div>
+                    <div className="sm:col-span-2"><p className="text-gray-500 text-xs">{t('admin.title')}</p><p className="font-medium text-gray-900">{viewItem.data.title || 'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¿ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â½'}</p></div>
+                    <div><p className="text-gray-500 text-xs">{t('admin.company')}</p><p className="font-medium text-gray-900">{viewItem.data.company || 'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¿ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â½'}</p></div>
+                    <div><p className="text-gray-500 text-xs">{t('admin.location')}</p><p className="font-medium text-gray-900">{viewItem.data.location || 'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¿ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â½'}</p></div>
+                    <div><p className="text-gray-500 text-xs">{t('admin.type')}</p><p className="font-medium text-gray-900">{viewItem.data.type || 'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¿ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â½'}</p></div>
+                    <div><p className="text-gray-500 text-xs">{t('admin.category')}</p><p className="font-medium text-gray-900">{viewItem.data.category || 'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¿ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â½'}</p></div>
+                    <div><p className="text-gray-500 text-xs">{t('admin.status')}</p><p className="font-medium text-gray-900 capitalize">{viewItem.data.status} {viewItem.data.isPublished ? '(published)' : ''}</p></div>
+                    <div className="sm:col-span-2"><p className="text-gray-500 text-xs">{t('admin.applyEmail')}</p><p className="font-medium text-gray-900 break-all">{viewItem.data.applyEmail || 'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¿ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â½'}</p></div>
+                    <div className="sm:col-span-2"><p className="text-gray-500 text-xs">{t('admin.applyUrl')}</p><p className="font-medium text-gray-900 break-all">{viewItem.data.applyUrl || 'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¿ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â½'}</p></div>
                   </div>
-                  {viewItem.data.description && <div><p className="text-gray-500 text-xs mb-1">Description</p><p className="text-gray-900 whitespace-pre-wrap">{viewItem.data.description}</p></div>}
+                  {viewItem.data.description && <div><p className="text-gray-500 text-xs mb-1">{t('admin.description')}</p><p className="text-gray-900 whitespace-pre-wrap">{viewItem.data.description}</p></div>}
                 </div>
               ) : (
                 <div className="space-y-3">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div className="sm:col-span-2"><p className="text-gray-500 text-xs">Company</p><p className="font-medium text-gray-900">{viewItem.data.companyName || '�'}</p></div>
-                    <div><p className="text-gray-500 text-xs">Contact</p><p className="font-medium text-gray-900">{viewItem.data.contactName || '�'}</p></div>
-                    <div><p className="text-gray-500 text-xs">Email</p><p className="font-medium text-gray-900 break-all">{viewItem.data.contactEmail || '�'}</p></div>
-                    <div><p className="text-gray-500 text-xs">Phone</p><p className="font-medium text-gray-900">{viewItem.data.contactPhone || '�'}</p></div>
-                    <div><p className="text-gray-500 text-xs">Plan</p><p className="font-medium text-gray-900 capitalize">{viewItem.data.plan || '�'}</p></div>
-                    <div><p className="text-gray-500 text-xs">Amount</p><p className="font-medium text-gray-900">{Number(viewItem.data.amount || 0).toLocaleString()} {viewItem.data.currency || 'RWF'}</p></div>
-                    <div><p className="text-gray-500 text-xs">Payment</p><p className="font-medium text-gray-900 capitalize">{viewItem.data.paymentStatus || '�'}</p></div>
-                    <div><p className="text-gray-500 text-xs">Status</p><p className="font-medium text-gray-900 capitalize">{viewItem.data.status} {viewItem.data.isActive ? '(active)' : ''}</p></div>
-                    <div><p className="text-gray-500 text-xs">Starts</p><p className="font-medium text-gray-900">{viewItem.data.startsAt ? new Date(viewItem.data.startsAt).toLocaleString() : '�'}</p></div>
-                    <div><p className="text-gray-500 text-xs">Expires</p><p className="font-medium text-gray-900">{viewItem.data.expiresAt ? new Date(viewItem.data.expiresAt).toLocaleString() : '�'}</p></div>
-                    <div className="sm:col-span-2"><p className="text-gray-500 text-xs">Target URL</p><p className="font-medium text-gray-900 break-all">{viewItem.data.targetUrl || '�'}</p></div>
-                    <div className="sm:col-span-2"><p className="text-gray-500 text-xs">Title</p><p className="font-medium text-gray-900">{viewItem.data.title || '�'}</p></div>
+                    <div className="sm:col-span-2"><p className="text-gray-500 text-xs">{t('admin.company')}</p><p className="font-medium text-gray-900">{viewItem.data.companyName || 'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¿ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â½'}</p></div>
+                    <div><p className="text-gray-500 text-xs">{t('admin.contact')}</p><p className="font-medium text-gray-900">{viewItem.data.contactName || 'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¿ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â½'}</p></div>
+                    <div><p className="text-gray-500 text-xs">{t('admin.email')}</p><p className="font-medium text-gray-900 break-all">{viewItem.data.contactEmail || 'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¿ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â½'}</p></div>
+                    <div><p className="text-gray-500 text-xs">{t('admin.phone')}</p><p className="font-medium text-gray-900">{viewItem.data.contactPhone || 'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¿ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â½'}</p></div>
+                    <div><p className="text-gray-500 text-xs">{t('admin.plan')}</p><p className="font-medium text-gray-900 capitalize">{viewItem.data.plan || 'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¿ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â½'}</p></div>
+                    <div><p className="text-gray-500 text-xs">{t('admin.amount')}</p><p className="font-medium text-gray-900">{Number(viewItem.data.amount || 0).toLocaleString()} {viewItem.data.currency || 'RWF'}</p></div>
+                    <div><p className="text-gray-500 text-xs">{t('admin.payment')}</p><p className="font-medium text-gray-900 capitalize">{viewItem.data.paymentStatus || 'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¿ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â½'}</p></div>
+                    <div><p className="text-gray-500 text-xs">{t('admin.status')}</p><p className="font-medium text-gray-900 capitalize">{viewItem.data.status} {viewItem.data.isActive ? '(active)' : ''}</p></div>
+                    <div><p className="text-gray-500 text-xs">{t('admin.starts')}</p><p className="font-medium text-gray-900">{viewItem.data.startsAt ? new Date(viewItem.data.startsAt).toLocaleString() : 'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¿ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â½'}</p></div>
+                    <div><p className="text-gray-500 text-xs">Expires</p><p className="font-medium text-gray-900">{viewItem.data.expiresAt ? new Date(viewItem.data.expiresAt).toLocaleString() : 'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¿ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â½'}</p></div>
+                    <div className="sm:col-span-2"><p className="text-gray-500 text-xs">Target URL</p><p className="font-medium text-gray-900 break-all">{viewItem.data.targetUrl || 'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¿ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â½'}</p></div>
+                    <div className="sm:col-span-2"><p className="text-gray-500 text-xs">{t('admin.title')}</p><p className="font-medium text-gray-900">{viewItem.data.title || 'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¿ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â½'}</p></div>
                   </div>
-                  {viewItem.data.description && <div><p className="text-gray-500 text-xs mb-1">Description</p><p className="text-gray-900 whitespace-pre-wrap">{viewItem.data.description}</p></div>}
+                  {viewItem.data.description && <div><p className="text-gray-500 text-xs mb-1">{t('admin.description')}</p><p className="text-gray-900 whitespace-pre-wrap">{viewItem.data.description}</p></div>}
                   {(viewItem.data.images?.length || viewItem.data.imageUrl) && (
                     <div>
                       <p className="text-gray-500 text-xs mb-1">Images</p>
@@ -1242,3 +1368,10 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
+
+
+
+
+
+
+

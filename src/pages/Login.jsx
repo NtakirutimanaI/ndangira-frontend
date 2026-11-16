@@ -3,14 +3,21 @@ import { useAuth } from '../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { Alert } from '../components/Alert';
-import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, X } from '../components/icons';
+import { useLanguage } from '../context/LanguageContext';
 
 const Login = () => {
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
   const { login } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
+
+  const close = () => {
+    if (window.history.length > 2) navigate(-1);
+    else navigate('/');
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -24,46 +31,76 @@ const Login = () => {
         navigate('/dashboard');
       }
     } catch (err) {
-      setError(err.response?.data?.error || 'Login failed');
+      setError(err.response?.data?.error || t('login.failed'));
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 pt-24 pb-24">
-      <div className="max-w-md w-full bg-white p-8 rounded-xl shadow border">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6 text-center">Welcome Back</h1>
-        {error && <Alert message={error} />}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-            <input type="email" className="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="you@example.com" />
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 overflow-y-auto" onClick={close} role="dialog" aria-modal="true" aria-label={t('login.title')}>
+      <div className="relative w-full max-w-md my-auto" onClick={(e) => e.stopPropagation()}>
+        <button type="button" onClick={close} className="absolute -top-3 -right-3 z-10 w-9 h-9 rounded-full bg-white text-gray-600 hover:text-gray-900 shadow-lg border border-gray-200 flex items-center justify-center" aria-label={t('jobs.close')}>
+          <X className="h-4 w-4" />
+        </button>
+        <div className="overflow-y-auto rounded-2xl shadow-2xl border border-white/60 bg-white max-h-[90vh]">
+          <div className="p-6 sm:p-7 lg:p-8 flex flex-col">
+            <div className="mb-4 flex justify-center">
+              <Link to="/" onClick={close} className="inline-flex items-center">
+                <img src="/ndangira-logo.png" alt="Ndangira Real Estate" className="h-10 sm:h-12 w-auto" />
+              </Link>
+            </div>
+            <div className="mb-5">
+              <p className="text-xs font-semibold text-green-600 uppercase tracking-wide mb-1.5">{t('login.accountLogin')}</p>
+              <h1 className="text-2xl font-bold text-gray-900">{t('login.signIn')}</h1>
+              <p className="text-gray-500 mt-1 text-sm">{t('login.subtitle')}</p>
+            </div>
+            {error && <Alert message={error} />}
+            <form onSubmit={handleSubmit} className="space-y-4 mt-1">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('auth.email')}</label>
+                <div className="relative">
+                  <Mail className="h-4 w-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="email"
+                    className="w-full border border-gray-200 rounded-lg pl-9 pr-3 py-2.5 text-sm bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 transition"
+                    required
+                    value={form.email}
+                    onChange={(e) => setForm({ ...form, email: e.target.value })}
+                    placeholder={t('auth.emailPlaceholder')}
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('auth.password')}</label>
+                <div className="relative">
+                  <Lock className="h-4 w-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    className="w-full border border-gray-200 rounded-lg pl-9 pr-10 py-2.5 text-sm bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 transition"
+                    required
+                    value={form.password}
+                    onChange={(e) => setForm({ ...form, password: e.target.value })}
+                    placeholder={t('login.passwordPlaceholder')}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-green-600 transition"
+                    aria-label={showPassword ? t('auth.hidePassword') : t('auth.showPassword')}
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
+              <button type="submit" className="w-full bg-green-600 text-white px-4 py-2.5 rounded-lg font-semibold shadow-md shadow-green-600/20 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500/40 transition">
+                {t('login.submit')}
+              </button>
+            </form>
+            <p className="mt-5 text-center text-sm text-gray-600">
+              {t('login.noAccount')}{' '}
+              <Link to="/register" className="text-green-600 font-semibold hover:text-green-700 hover:underline">{t('login.createAccount')}</Link>
+            </p>
           </div>
-          <div className="relative">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-            <input
-              type={showPassword ? 'text' : 'password'}
-              className="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 pr-10"
-              required
-              value={form.password}
-              onChange={(e) => setForm({ ...form, password: e.target.value })}
-              placeholder="Enter your password"
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-10 text-gray-400 hover:text-green-600"
-            >
-              {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-            </button>
-          </div>
-          <button type="submit" className="w-full bg-green-600 text-white px-4 py-2 rounded font-medium hover:bg-green-700">
-            Login
-          </button>
-        </form>
-        <p className="mt-6 text-center text-sm text-gray-600">
-          Don't have an account?{' '}
-          <Link to="/register" className="text-green-600 font-medium hover:underline">Register</Link>
-        </p>
+        </div>
       </div>
     </div>
   );
