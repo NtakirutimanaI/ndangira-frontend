@@ -31,8 +31,8 @@ export const translations = {
     'home.howItWorks': 'How it works',
     'home.searchByLocation': 'Search by location',
     'home.searchByLocationDesc': 'Find properties by area and city across Rwanda.',
-    'home.pay10percent': 'Pay 10% after sale',
-    'home.pay10percentDesc': 'No upfront fees. Platform takes 10% commission only when your property sells or rents.',
+    'home.pay10percent': 'No commission upfront. Pay 10% of the price after your property sells.',
+    'home.pay10percentDesc': 'List for free. Platform takes 10% commission only when your property sells or rents.',
     'home.directContact': 'Direct contact',
     'home.directContactDesc': 'Contact owners directly via phone or Plot UPI.',
 
@@ -554,8 +554,8 @@ export const translations = {
     'home.howItWorks': 'Uko bikora',
     'home.searchByLocation': 'Shakisha aho biherereye',
     'home.searchByLocationDesc': 'Shaka imitungo ukurikije akarere n\'umujyi mu Rwanda hose.',
-    'home.pay10percent': 'Ishyura 10% nyuma yo kugurisha',
-    'home.pay10percentDesc': 'Nta makungu yambere. Isange ishita 10% gusa nyuma ko umutungo wawe waguritswe cyangwa wakodese.',
+    'home.pay10percent': 'Nta Commissioner Ukenewe',
+    'home.pay10percentDesc': 'Hishyurwa 10% yikiguzi nyuma yo kugurisha umutungo wawe.',
     'home.directContact': 'Vugana mu buryo butaziguye',
     'home.directContactDesc': 'Vugana na ba nyir\'imitungo kuri telefone cyangwa UPI y\'ikibanza.',
 
