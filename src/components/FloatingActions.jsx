@@ -107,12 +107,12 @@ const Modal = ({ isOpen, onClose, triggerRef, title, children }) => {
       const btnRect = triggerRef.current.getBoundingClientRect();
       const modalWidth = Math.min(320, window.innerWidth - 20);
       const modalHeight = Math.min(480, window.innerHeight - 20);
-      // Center horizontally, position below header with margin
-      let x = (window.innerWidth - modalWidth) / 2;
-      let y = Math.max(80, btnRect.top - modalHeight - 16); // 80px from top (under header), or above button
+      // Position above button, horizontally centered on button
+      let x = btnRect.left + (btnRect.width / 2) - (modalWidth / 2);
+      let y = btnRect.top - modalHeight - 12; // 12px gap above button
       // Ensure modal stays fully in viewport
       x = Math.max(10, Math.min(window.innerWidth - modalWidth - 10, x));
-      y = Math.max(80, Math.min(window.innerHeight - modalHeight - 10, y));
+      y = Math.max(10, Math.min(window.innerHeight - modalHeight - 10, y));
       setPosition({ x, y });
     }
   }, [isOpen, triggerRef]);
@@ -121,7 +121,7 @@ const Modal = ({ isOpen, onClose, triggerRef, title, children }) => {
 
   const handleMouseDown = (e) => { if (e.target.closest('button, a, input, textarea')) return; setIsDragging(true); const rect = modalRef.current?.getBoundingClientRect(); if (rect) { dragOffset.current = { x: e.clientX - rect.left, y: e.clientY - rect.top }; } };
 
-  useEffect(() => { const handleMove = (e) => { if (!isDragging) return; const modalWidth = Math.min(320, window.innerWidth - 20); const modalHeight = Math.min(480, window.innerHeight - 20); let newX = e.clientX - dragOffset.current.x; let newY = e.clientY - dragOffset.current.y; newX = Math.max(10, Math.min(window.innerWidth - modalWidth - 10, newX)); newY = Math.max(80, Math.min(window.innerHeight - modalHeight - 10, newY)); setPosition({ x: newX, y: newY }); }; const handleUp = () => setIsDragging(false); if (isDragging) { window.addEventListener('mousemove', handleMove); window.addEventListener('mouseup', handleUp); } return () => { window.removeEventListener('mousemove', handleMove); window.removeEventListener('mouseup', handleUp); }; }, [isDragging]);
+  useEffect(() => { const handleMove = (e) => { if (!isDragging) return; const modalWidth = Math.min(320, window.innerWidth - 20); const modalHeight = Math.min(480, window.innerHeight - 20); let newX = e.clientX - dragOffset.current.x; let newY = e.clientY - dragOffset.current.y; newX = Math.max(10, Math.min(window.innerWidth - modalWidth - 10, newX)); newY = Math.max(10, Math.min(window.innerHeight - modalHeight - 10, newY)); setPosition({ x: newX, y: newY }); }; const handleUp = () => setIsDragging(false); if (isDragging) { window.addEventListener('mousemove', handleMove); window.addEventListener('mouseup', handleUp); } return () => { window.removeEventListener('mousemove', handleMove); window.removeEventListener('mouseup', handleUp); }; }, [isDragging]);
 
   if (!isOpen) return null;
 
