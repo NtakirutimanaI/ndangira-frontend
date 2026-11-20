@@ -40,7 +40,7 @@ forClients: [
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 mb-8">
           <div className="sm:col-span-2 lg:col-span-1">
 <div className="flex items-center mb-3">
-              <img src="/isange.png" alt="Isange - Aho ibyo ukeneye bihurira" className="h-12 w-auto max-w-[170px] object-contain" />
+              <img src="/isangeLogo.png" alt="Isange - Aho ibyo ukeneye bihurira" className="h-12 w-auto max-w-[170px] object-contain" />
             </div>
             <p className="text-sm text-gray-300 mb-3 leading-relaxed">
               {t('footer.tagline')}
