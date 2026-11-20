@@ -17,7 +17,7 @@ export const translations = {
     'nav.toggleMenu': 'Toggle menu',
 
 // Home
-    'home.heroTitle': 'Find homes, cars, and plots in Rwanda',
+    'home.heroTitle': 'Find homes, plots, and materials across Rwanda',
     'home.heroSubtitle': 'Isange connects property owners directly with renters and buyers — no middleman commissions.',
     'home.browseListings': 'Browse Listings',
     'home.joinAsOwner': 'Join as Owner',
@@ -239,6 +239,10 @@ export const translations = {
     'common.completedPayment': 'I have completed payment',
     'common.payment': 'Payment',
     'common.paymentMethod': 'Payment Method',
+
+    // Sidebar
+    'sidebar.topPosts': 'Top Posts',
+    'sidebar.noPosts': 'No Posts',
 
     // Dashboard
     'dash.title': 'Dashboard',
@@ -762,6 +766,10 @@ export const translations = {
     'common.completedPayment': 'Ndangije kwishyura',
     'common.payment': 'Kwishyura',
     'common.paymentMethod': 'Uburyo bwo Kwishyura',
+
+    // Sidebar
+    'sidebar.topPosts': 'Ibyanditswe Byihariye',
+    'sidebar.noPosts': 'Nta byanditswe',
 
     // Dashboard
     'dash.title': 'Ibiro',
