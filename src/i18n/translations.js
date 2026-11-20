@@ -16,7 +16,7 @@ export const translations = {
     'nav.switchToEn': 'Switch to English',
     'nav.toggleMenu': 'Toggle menu',
 
-    // Home
+// Home
     'home.heroTitle': 'Find homes, cars, and plots in Rwanda',
     'home.heroSubtitle': 'Isange connects property owners directly with renters and buyers — no middleman commissions.',
     'home.browseListings': 'Browse Listings',
@@ -31,8 +31,8 @@ export const translations = {
     'home.howItWorks': 'How it works',
     'home.searchByLocation': 'Search by location',
     'home.searchByLocationDesc': 'Find properties by area and city across Rwanda.',
-    'home.pay2000': 'Pay 2,000 RWF',
-    'home.pay2000Desc': 'Pay per property to publish your listing.',
+    'home.pay10percent': 'Pay 10% after sale',
+    'home.pay10percentDesc': 'No upfront fees. Platform takes 10% commission only when your property sells or rents.',
     'home.directContact': 'Direct contact',
     'home.directContactDesc': 'Contact owners directly via phone or Plot UPI.',
 
@@ -134,6 +134,10 @@ export const translations = {
     'search.transaction': 'Transaction',
     'search.condition': 'Condition',
     'search.all': 'All',
+    'search.forSale': 'For Sale',
+    'search.forRent': 'For Rent',
+    'search.new': 'New',
+    'search.used': 'Used',
     'search.house': 'House',
     'search.car': 'Car',
     'search.plot': 'Plot',
@@ -535,7 +539,7 @@ export const translations = {
     'nav.switchToEn': 'Hindura ujye mu Cyongereza',
     'nav.toggleMenu': 'Fungura/Funga menu',
 
-    // Home
+// Home
     'home.heroTitle': 'Shaka amazu, imodoka, n\'ibibanza mu Rwanda',
     'home.heroSubtitle': 'Isange ihuza ba nyir\'imitungo n\'abakodesha cyangwa abaguzi mu buryo butaziguye — nta komisiyo y\'umuhuza.',
     'home.browseListings': 'Reba Ibyamamazanywa',
@@ -550,8 +554,8 @@ export const translations = {
     'home.howItWorks': 'Uko bikora',
     'home.searchByLocation': 'Shakisha aho biherereye',
     'home.searchByLocationDesc': 'Shaka imitungo ukurikije akarere n\'umujyi mu Rwanda hose.',
-    'home.pay2000': 'Ishyura 2,000 RWF',
-    'home.pay2000Desc': 'Ishyura kuri buri mutungo kugira ngo uwutangaze.',
+    'home.pay10percent': 'Ishyura 10% nyuma yo kugurisha',
+    'home.pay10percentDesc': 'Nta makungu yambere. Isange ishita 10% gusa nyuma ko umutungo wawe waguritswe cyangwa wakodese.',
     'home.directContact': 'Vugana mu buryo butaziguye',
     'home.directContactDesc': 'Vugana na ba nyir\'imitungo kuri telefone cyangwa UPI y\'ikibanza.',
 
@@ -653,6 +657,10 @@ export const translations = {
     'search.transaction': 'Gikorwa',
     'search.condition': 'Imiterere',
     'search.all': 'Byose',
+    'search.forSale': 'Gukurisha',
+    'search.forRent': 'Gukodesha',
+    'search.new': 'Gishya',
+    'search.used': 'Yashize',
     'search.house': 'Inzu',
     'search.car': 'Imodoka',
     'search.plot': 'Ikibanza',

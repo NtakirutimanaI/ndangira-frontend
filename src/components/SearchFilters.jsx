@@ -4,13 +4,13 @@ import api from '../services/api';
 import { useLanguage } from '../context/LanguageContext';
 
 const defaultTransactionTypes = [
-  { slug: 'sale', name: 'For Sale' },
-  { slug: 'rent', name: 'For Rent' },
+  { slug: 'sale', name: 'search.forSale' },
+  { slug: 'rent', name: 'search.forRent' },
 ];
 
 const defaultConditions = [
-  { slug: 'new', name: 'New' },
-  { slug: 'used', name: 'Used' },
+  { slug: 'new', name: 'search.new' },
+  { slug: 'used', name: 'search.used' },
 ];
 
 const SearchFilters = ({ onSearch }) => {
@@ -70,7 +70,7 @@ const SearchFilters = ({ onSearch }) => {
           <select className="w-full border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" value={transactionType} onChange={(e) => setTransactionType(e.target.value)}>
             <option value="">{t('search.all')}</option>
             {transactionTypes.map((c) => (
-              <option key={c.slug} value={c.slug}>{c.name}</option>
+              <option key={c.slug} value={c.slug}>{t(c.name)}</option>
             ))}
           </select>
         </div>
@@ -79,7 +79,7 @@ const SearchFilters = ({ onSearch }) => {
           <select className="w-full border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" value={condition} onChange={(e) => setCondition(e.target.value)}>
             <option value="">{t('search.all')}</option>
             {conditions.map((c) => (
-              <option key={c.slug} value={c.slug}>{c.name}</option>
+              <option key={c.slug} value={c.slug}>{t(c.name)}</option>
             ))}
           </select>
         </div>

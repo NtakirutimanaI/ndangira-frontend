@@ -98,8 +98,8 @@ const Home = () => {
             </div>
             <div>
               <DollarSign className="h-10 w-10 mx-auto mb-4 text-green-600" />
-              <h3 className="font-semibold text-gray-900 mb-2">{t('home.pay2000')}</h3>
-              <p className="text-gray-600 text-sm">{t('home.pay2000Desc')}</p>
+              <h3 className="font-semibold text-gray-900 mb-2">{t('home.pay10percent')}</h3>
+              <p className="text-gray-600 text-sm">{t('home.pay10percentDesc')}</p>
             </div>
             <div>
               <Search className="h-10 w-10 mx-auto mb-4 text-green-600" />
