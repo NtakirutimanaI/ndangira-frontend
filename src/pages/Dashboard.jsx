@@ -10,7 +10,7 @@ import { useLanguage } from '../context/LanguageContext';
 const emptyForm = {
     title: '', description: '', type: 'house', transactionType: 'sale', condition: 'new',
     area: '', location: '', city: 'Kigali', address: '', contactPhone: '', contactEmail: '',
-    upi: '', ownerPrice: '', images: [], videos: []
+    upi: '', ownerPrice: '', images: [], videos: [], newImages: [], newVideos: []
   };
 
 const Dashboard = () => {
@@ -96,10 +96,11 @@ const Dashboard = () => {
     setForm({ ...emptyForm, contactPhone: user?.phone || '', contactEmail: user?.email || '' });
   };
 
-  const handleSubmit = async (e) => {
+const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null); setSuccess(null);
-    if (!editingId && (!form.images || form.images.length < 3)) {
+    const totalImages = (form.images?.length || 0) + (form.newImages?.length || 0);
+    if (!editingId && totalImages < 3) {
       setError(t('dash.uploadMin3'));
       return;
     }
@@ -107,23 +108,29 @@ const Dashboard = () => {
     try {
       if (editingId) {
         const formData = new FormData();
-        ['title', 'description', 'type', 'transactionType', 'condition', 'area', 'location', 'city', 'address', 'contactPhone', 'contactEmail', 'upi', 'ownerPrice', 'images', 'videos'].forEach((k) => {
+        // Text fields
+        ['title', 'description', 'type', 'transactionType', 'condition', 'area', 'location', 'city', 'address', 'contactPhone', 'contactEmail', 'upi', 'ownerPrice'].forEach((k) => {
           if (form[k] !== undefined && form[k] !== '') formData.append(k, form[k]);
         });
-        (form.images || []).forEach((f) => formData.append('images', f));
-        (form.videos || []).forEach((f) => formData.append('videos', f));
+        // Existing image/video URLs to keep (send as JSON arrays)
+        if (form.images && form.images.length > 0) formData.append('images', JSON.stringify(form.images));
+        if (form.videos && form.videos.length > 0) formData.append('videos', JSON.stringify(form.videos));
+        // New files to upload
+        (form.newImages || []).forEach((f) => formData.append('images', f));
+        (form.newVideos || []).forEach((f) => formData.append('videos', f));
         await api.put(`/properties/${editingId}`, formData);
         setSuccess(t('dash.propUpdated'));
         closeForm();
         loadMyProperties();
-} else {
+      } else {
         const formData = new FormData();
-        ['title', 'description', 'type', 'transactionType', 'condition', 'area', 'location', 'city', 'address', 'contactPhone', 'contactEmail', 'upi', 'ownerPrice', 'images', 'videos'].forEach((k) => {
+        ['title', 'description', 'type', 'transactionType', 'condition', 'area', 'location', 'city', 'address', 'contactPhone', 'contactEmail', 'upi', 'ownerPrice'].forEach((k) => {
           if (form[k] !== undefined && form[k] !== '') formData.append(k, form[k]);
         });
-        (form.images || []).forEach((f) => formData.append('images', f));
-        (form.videos || []).forEach((f) => formData.append('videos', f));
-await api.post('/properties', formData);
+        // New files only for create (no existing URLs)
+        (form.newImages || []).forEach((f) => formData.append('images', f));
+        (form.newVideos || []).forEach((f) => formData.append('videos', f));
+        await api.post('/properties', formData);
         closeForm();
         loadMyProperties();
         setShowProperties(true);
@@ -155,7 +162,9 @@ await api.post('/properties', formData);
       area: p.area || '', location: p.location || '', city: p.city || 'Kigali', address: p.address || '',
       contactPhone: p.contactPhone || '', contactEmail: p.contactEmail || '', upi: p.upi || '',
       ownerPrice: p.ownerPrice || '',
-      images: [], videos: [],
+      // Existing images/videos (URLs from server)
+      images: p.images || [],
+      videos: p.videos || [],
     });
     setShowForm(true);
   };
@@ -663,36 +672,78 @@ await api.post('/properties', formData);
                     value={form.ownerPrice} onChange={(e) => setForm(f => ({ ...f, ownerPrice: e.target.value }))} />
                   <p className="text-xs text-gray-500 mt-1">{t('dash.propOwnerPriceHint')}</p>
                 </div>
-                {!editingId && (
-                  <>
-                    <div className="xl:col-span-2">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">{t('dash.propImages')} <span className="text-xs font-normal text-gray-500">{t('dash.propImagesHint')}</span></label>
-                      <input type="file" multiple accept="image/*" className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-green-50 file:text-green-700"
-                        onChange={(e) => {
-                          const files = Array.from(e.target.files || []);
-                          if (files.length) setForm((f) => ({ ...f, images: [...(f.images || []), ...files] }));
-                          e.target.value = '';
-                        }}
-                      />
-                      <p className="text-xs text-gray-500 mt-1">{form.images?.length ? `${form.images.length} image(s) selected (minimum 3).` : 'Add images one by one or select multiple at once (minimum 3).'}</p>
-                      {form.images?.length > 0 && (
-                        <ul className="mt-2 space-y-1 max-h-32 overflow-y-auto">
-                          {form.images.map((file, idx) => (
-                            <li key={`${file.name}-${file.size}-${idx}`} className="flex items-center justify-between gap-2 text-xs bg-gray-50 border border-gray-200 rounded px-2 py-1.5">
-                              <span className="truncate">{file.name}</span>
-                              <button type="button" onClick={() => setForm((f) => ({ ...f, images: f.images.filter((_, i) => i !== idx) }))} className="text-red-600 hover:text-red-700 font-medium shrink-0">{t('common.remove')}</button>
-                            </li>
-                          ))}
-                        </ul>
-                      )}
+                <div className="xl:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('dash.propImages')} <span className="text-xs font-normal text-gray-500">{t('dash.propImagesHint')}</span></label>
+                  <input type="file" multiple accept="image/*" className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-green-50 file:text-green-700"
+                    onChange={(e) => {
+                      const files = Array.from(e.target.files || []);
+                      if (files.length) setForm((f) => ({ ...f, newImages: [...(f.newImages || []), ...files] }));
+                      e.target.value = '';
+                    }}
+                  />
+                  {/* Existing images from server */}
+                  {(form.images || []).length > 0 && (
+                    <div className="mt-2">
+                      <p className="text-xs text-gray-500 mb-1">Existing images:</p>
+                      <div className="flex flex-wrap gap-2">
+                        {form.images.map((imgUrl, idx) => (
+                          <div key={`existing-img-${idx}`} className="relative w-20 h-20 bg-gray-100 border border-gray-200 rounded overflow-hidden flex items-center justify-center">
+                            <img src={imgUrl.startsWith('http') ? imgUrl : `http://localhost:5000${imgUrl}`} alt="" className="w-full h-full object-cover" />
+                            <button type="button" onClick={() => setForm((f) => ({ ...f, images: f.images.filter((_, i) => i !== idx) }))} className="absolute top-1 right-1 w-5 h-5 bg-red-600 text-white rounded-full text-xs font-bold leading-none hover:bg-red-700">×</button>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">{t('dash.propVideos')} <span className="text-xs font-normal text-gray-500">{t('dash.propVideosHint')}</span></label>
-                      <input type="file" multiple accept="video/*" className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-green-50 file:text-green-700" onChange={(e) => setForm({ ...form, videos: Array.from(e.target.files || []) })} />
-                      <p className="text-xs text-gray-500 mt-1">{form.videos?.length ? `${form.videos.length} video(s) selected` : 'Optional'}</p>
+                  )}
+                  {/* New images selected for upload */}
+                  {(form.newImages || []).length > 0 && (
+                    <div className="mt-2">
+                      <p className="text-xs text-gray-500 mb-1">New images to upload:</p>
+                      <ul className="space-y-1 max-h-32 overflow-y-auto">
+                        {form.newImages.map((file, idx) => (
+                          <li key={`new-img-${file.name}-${file.size}-${idx}`} className="flex items-center justify-between gap-2 text-xs bg-gray-50 border border-gray-200 rounded px-2 py-1.5">
+                            <span className="truncate">{file.name}</span>
+                            <button type="button" onClick={() => setForm((f) => ({ ...f, newImages: f.newImages.filter((_, i) => i !== idx) }))} className="text-red-600 hover:text-red-700 font-medium shrink-0">{t('common.remove')}</button>
+                          </li>
+                        ))}
+                      </ul>
                     </div>
-                  </>
-                )}
+                  )}
+                  <p className="text-xs text-gray-500 mt-1">{(form.images?.length || 0) + (form.newImages?.length || 0)} image(s) total {(editingId ? '' : '(minimum 3)')}.</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('dash.propVideos')} <span className="text-xs font-normal text-gray-500">{t('dash.propVideosHint')}</span></label>
+                  <input type="file" multiple accept="video/*" className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-green-50 file:text-green-700" onChange={(e) => setForm({ ...form, newVideos: Array.from(e.target.files || []) })} />
+                  {/* Existing videos from server */}
+                  {(form.videos || []).length > 0 && (
+                    <div className="mt-2">
+                      <p className="text-xs text-gray-500 mb-1">Existing videos:</p>
+                      <div className="flex flex-wrap gap-2">
+                        {form.videos.map((vidUrl, idx) => (
+                          <div key={`existing-vid-${idx}`} className="relative w-20 h-20 bg-gray-100 border border-gray-200 rounded overflow-hidden flex items-center justify-center">
+                            <video src={vidUrl.startsWith('http') ? vidUrl : `http://localhost:5000${vidUrl}`} className="w-full h-full object-cover" muted />
+                            <button type="button" onClick={() => setForm((f) => ({ ...f, videos: f.videos.filter((_, i) => i !== idx) }))} className="absolute top-1 right-1 w-5 h-5 bg-red-600 text-white rounded-full text-xs font-bold leading-none hover:bg-red-700">×</button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {/* New videos selected for upload */}
+                  {(form.newVideos || []).length > 0 && (
+                    <div className="mt-2">
+                      <p className="text-xs text-gray-500 mb-1">New videos to upload:</p>
+                      <ul className="space-y-1 max-h-32 overflow-y-auto">
+                        {form.newVideos?.map((file, idx) => (
+                          <li key={`new-vid-${file.name}-${file.size}-${idx}`} className="flex items-center justify-between gap-2 text-xs bg-gray-50 border border-gray-200 rounded px-2 py-1.5">
+                            <span className="truncate">{file.name}</span>
+                            <button type="button" onClick={() => setForm((f) => ({ ...f, newVideos: f.newVideos.filter((_, i) => i !== idx) }))} className="text-red-600 hover:text-red-700 font-medium shrink-0">{t('common.remove')}</button>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  <p className="text-xs text-gray-500 mt-1">{(form.videos?.length || 0) + (form.newVideos?.length || 0)} video(s) total (optional).</p>
+                </div>
               </div>
               <div className="flex flex-col sm:flex-row gap-3 pt-2">
                 <button type="submit" disabled={submitting} className="flex-1 bg-green-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-green-700 disabled:opacity-60 flex items-center justify-center gap-2">
