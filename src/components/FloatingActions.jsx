@@ -127,7 +127,7 @@ const Modal = ({ isOpen, onClose, triggerRef, title, children }) => {
 
   return (
     <div className="modal-backdrop" onClick={handleBackdropClick}>
-      <div ref={modalRef} className="fixed z-50 modal-content" style={{ left: `${position.x}px`, top: `${position.y}px`, width: `calc(100vw - 20px)`, maxWidth: '320px', maxHeight: 'calc(100vh - 20px)', transformOrigin: 'center center' }} onMouseDown={handleMouseDown}>
+      <div ref={modalRef} className="fixed z-[60] modal-content" style={{ left: `${position.x}px`, top: `${position.y}px`, width: `calc(100vw - 20px)`, maxWidth: '320px', maxHeight: 'calc(100vh - 20px)', transformOrigin: 'center center' }} onMouseDown={handleMouseDown}>
         <div className="bg-white rounded-xl shadow-2xl flex flex-col overflow-hidden animate-fade-in" style={{ maxHeight: 'calc(100vh - 20px)', display: 'flex', flexDirection: 'column' }}>
           <div className="bg-orange-500 text-white p-3 rounded-t-xl flex items-center justify-between cursor-move select-none touch-none flex-shrink-0">
             <div className="flex items-center gap-2">
