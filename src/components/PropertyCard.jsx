@@ -9,9 +9,9 @@ const PropertyCard = ({ property, onView }) => {
   const typeLabel = { house: t('search.house'), car: t('search.car'), plot: t('search.plot'), material: t('search.material') }[property.type] || property.type;
   const transactionTypeText = property.transactionType === 'sale' ? t('dash.propForSale') : t('dash.propForRent');
   const conditionText = property.condition === 'new' ? t('dash.propNew') : t('dash.propUsed');
-  const title = (lang === 'rw' && property.titleRw) ? property.titleRw : property.title;
-  const description = (lang === 'rw' && property.descriptionRw) ? property.descriptionRw : property.description;
-  const locationText = (lang === 'rw' && property.locationRw) ? property.locationRw : [property.area, property.city].filter(Boolean).join(', ');
+  const title = property.title;
+  const description = property.description;
+  const locationText = [property.area, property.city].filter(Boolean).join(', ');
 
   return (
     <div className="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-md transition text-center">

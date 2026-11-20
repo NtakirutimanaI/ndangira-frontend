@@ -15,9 +15,9 @@ const PropertyDetailsModal = ({ property, onClose }) => {
 
   if (!property) return null;
 
-  const title = (lang === 'rw' && property.titleRw) ? property.titleRw : property.title;
-  const description = (lang === 'rw' && property.descriptionRw) ? property.descriptionRw : property.description;
-  const locationText = (lang === 'rw' && property.locationRw) ? property.locationRw : [property.area, property.city].filter(Boolean).join(', ');
+  const title = property.title;
+  const description = property.description;
+  const locationText = [property.area, property.city].filter(Boolean).join(', ');
   const imgUrl = (img) => (img ? (img.startsWith('http') ? img : `http://localhost:5000${img}`) : null);
   const current = imgUrl(images[idx]);
   const hasMulti = images.length > 1;

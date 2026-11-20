@@ -8,8 +8,8 @@ import { Plus, Building2, MapPin, Phone, Mail, Tag, User, CreditCard, CheckCircl
 import { useLanguage } from '../context/LanguageContext';
 
 const emptyForm = {
-    title: '', titleRw: '', description: '', descriptionRw: '', type: 'house', transactionType: 'sale', condition: 'new',
-    area: '', location: '', locationRw: '', city: 'Kigali', address: '', contactPhone: '', contactEmail: '',
+    title: '', description: '', type: 'house', transactionType: 'sale', condition: 'new',
+    area: '', location: '', city: 'Kigali', address: '', contactPhone: '', contactEmail: '',
     upi: '', ownerPrice: '', images: [], videos: []
   };
 
@@ -118,7 +118,7 @@ const Dashboard = () => {
         loadMyProperties();
 } else {
         const formData = new FormData();
-        ['title', 'titleRw', 'description', 'descriptionRw', 'type', 'transactionType', 'condition', 'area', 'location', 'locationRw', 'city', 'address', 'contactPhone', 'contactEmail', 'upi', 'ownerPrice', 'images', 'videos'].forEach((k) => {
+        ['title', 'description', 'type', 'transactionType', 'condition', 'area', 'location', 'city', 'address', 'contactPhone', 'contactEmail', 'upi', 'ownerPrice', 'images', 'videos'].forEach((k) => {
           if (form[k]) formData.append(k, form[k]);
         });
         (form.images || []).forEach((f) => formData.append('images', f));
