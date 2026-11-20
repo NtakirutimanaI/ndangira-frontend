@@ -69,6 +69,11 @@ export const Smartphone = (props) => base(props, <><rect x="7" y="2" width="10" 
 export const Landmark = (props) => base(props, <><path d="M3 21h18"/><path d="M4 17h16"/><path d="M12 3L3 8h18L12 3z"/><path d="M6 17v-6M10 17v-6M14 17v-6M18 17v-6"/></>);
 export const Car = (props) => base(props, <><path d="M5 11l1.5-4.5A2 2 0 0 1 8.4 5h7.2a2 2 0 0 1 1.9 1.5L19 11"/><path d="M3 11h18v5H3z"/><circle cx="7.5" cy="16" r="1.5"/><circle cx="16.5" cy="16" r="1.5"/><path d="M5 16H3M21 16h-2"/></>);
 export const Lock = (props) => base(props, <><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 1 1 8 0v3"/></>);
+export const Save = (props) => base(props, <><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/></>);
+export const RefreshCw = (props) => base(props, <><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M21 21v-5h-5"/></>);
+export const Sliders = (props) => base(props, <><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></>);
+export const Palette = (props) => base(props, <><circle cx="13.5" cy="6.5" r="2.5"/><path d="M12 2a10 10 0 1 0 10 10c0-1.6-1.2-3-2.8-3.5"/><circle cx="18.5" cy="10.5" r="1"/><circle cx="6.5" cy="18.5" r="1"/><circle cx="18.5" cy="18.5" r="1"/></>);
+export const Video = (props) => base(props, <><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></>);
 export const Facebook = ({ className = '', ...props }) => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" {...props} className={className}>
     <path d="M22 12a10 10 0 1 0-11.56 9.88v-6.99H7.9V12h2.54V9.8c0-2.5 1.49-3.89 3.77-3.89 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56V12h2.78l-.44 2.89h-2.34v6.99A10 10 0 0 0 22 12z"/>
@@ -93,8 +98,9 @@ export const LinkedIn = Linkedin;
 
 export default {
   Home, Search, LogOut, Shield, Building2, Building, Menu, X, Briefcase, Megaphone,
-  DollarSign, Phone, Mail, MapPin, Clock, Globe, Languages, CheckCircle2, CheckCircle, Image, PlayCircle, Play,
+  DollarSign, Phone, Mail, MapPin, Clock, Globe, Languages, CheckCircle2, CheckCircle, Image, PlayCircle,
   ArrowLeft, ChevronLeft, ChevronRight, ArrowUp, LayoutDashboard, Users, User, XCircle, CreditCard,
   FileText, Settings, Plus, Eye, EyeOff, Trash2, Download, Calendar, ExternalLink, Tag,
-  Sparkles, Bell, MessageSquare, Send, Smartphone, Landmark, Car, Lock, Facebook, Twitter, Instagram, Linkedin, LinkedIn,
+  Sparkles, Bell, MessageSquare, Send, Smartphone, Landmark, Car, Lock, Save, RefreshCw, Sliders, Palette, Video,
+  Facebook, Twitter, Instagram, Linkedin, LinkedIn,
 };

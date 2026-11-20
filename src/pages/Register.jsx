@@ -41,7 +41,7 @@ const Register = () => {
           <div className="p-6 sm:p-7 lg:p-8 flex flex-col">
             <div className="mb-4 flex justify-center">
               <Link to="/" onClick={close} className="inline-flex items-center">
-                <img src="/isange.png" alt="Isange - Aho ibyo ukeneye bihurira" className="h-10 sm:h-12 w-auto" />
+                <img src="/isangeLogo.png" alt="Isange - Aho ibyo ukeneye bihurira" className="h-10 sm:h-12 w-auto" />
               </Link>
             </div>
             <div className="mb-5">
