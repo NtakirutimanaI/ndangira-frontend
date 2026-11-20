@@ -60,7 +60,9 @@ function Modal({ isOpen, onClose, title, children }) {
     setIsDragging(true);
     const rect = modalRef.current?.getBoundingClientRect();
     if (rect) {
-      dragOffset.current = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      dragOffset.current = { x: clientX - rect.left, y: clientY - rect.top };
     }
   };
 
@@ -68,8 +70,10 @@ function Modal({ isOpen, onClose, title, children }) {
     const handleMove = (e) => {
       if (!isDragging || !modalRef.current) return;
       const rect = modalRef.current.getBoundingClientRect();
-      let newX = e.clientX - dragOffset.current.x;
-      let newY = e.clientY - dragOffset.current.y;
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      let newX = clientX - dragOffset.current.x;
+      let newY = clientY - dragOffset.current.y;
       const maxX = window.innerWidth - rect.width;
       const maxY = window.innerHeight - rect.height;
       newX = Math.max(0, Math.min(maxX, newX));
@@ -79,9 +83,13 @@ function Modal({ isOpen, onClose, title, children }) {
     const handleUp = () => setIsDragging(false);
     window.addEventListener('mousemove', handleMove);
     window.addEventListener('mouseup', handleUp);
+    window.addEventListener('touchmove', handleMove, { passive: false });
+    window.addEventListener('touchend', handleUp);
     return () => {
       window.removeEventListener('mousemove', handleMove);
       window.removeEventListener('mouseup', handleUp);
+      window.removeEventListener('touchmove', handleMove);
+      window.removeEventListener('touchend', handleUp);
     };
   }, [isDragging]);
 
@@ -93,6 +101,7 @@ function Modal({ isOpen, onClose, title, children }) {
         className="relative bg-white rounded-2xl shadow-2xl w-full max-w-[280px] max-h-[420px] flex flex-col overflow-hidden animate-fade-in"
         onClick={(e) => e.stopPropagation()}
         onMouseDown={handleMouseDown}
+        onTouchStart={handleMouseDown}
       >
         <div className="bg-orange-500 text-white p-4 rounded-t-2xl flex items-center justify-between cursor-move select-none touch-none">
           <div className="flex items-center gap-2">
