@@ -660,7 +660,7 @@ export const translations = {
     'search.forSale': 'Gukurisha',
     'search.forRent': 'Gukodesha',
     'search.new': 'Gishya',
-    'search.used': 'Yashize',
+    'search.used': 'Cyarakoreshejwe',
     'search.house': 'Inzu',
     'search.car': 'Imodoka',
     'search.plot': 'Ikibanza',
