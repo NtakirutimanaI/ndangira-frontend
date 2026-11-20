@@ -75,11 +75,12 @@ const AdvertiseBanner = () => {
   // Create display items including brand video
   const displayItems = useMemo(() => {
     const baseItems = items.filter(item => item.image);
+    let allItems = [...baseItems];
     if (brandVideo) {
-      // Insert brand video at the beginning
-      return [{ key: 'brand-video', video: brandVideo, label: 'Brand Video', type: 'video' }, ...baseItems];
+      // Add brand video as a card in the mix (will be shuffled with others)
+      allItems.push({ key: 'brand-video', video: brandVideo, label: 'Brand Video', type: 'video' });
     }
-    return baseItems;
+    return shuffle(allItems);
   }, [items, brandVideo]);
 
   useEffect(() => { setIndex(0); }, [displayItems.length]);
