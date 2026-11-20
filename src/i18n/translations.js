@@ -525,7 +525,7 @@ export const translations = {
   rw: {
     // Navbar
     'nav.home': 'Ahabanza',
-    'nav.listings': 'Ibyamamazanywa',
+    'nav.listings': 'Ibyamamazwa',
     'nav.search': 'Shakisha',
     'nav.jobs': 'Imirimo',
     'nav.advertise': 'Tangaza Hano',
@@ -542,7 +542,7 @@ export const translations = {
 // Home
     'home.heroTitle': 'Shaka amazu,ibibanza, n\'ibikoresho mu Rwanda hose',
     'home.heroSubtitle': 'Isange ihuza ba nyir\'imitungo n\'abakodesha cyangwa abaguzi mu buryo butaziguye — nta komisiyo y\'umuhuza.',
-    'home.browseListings': 'Reba Ibyamamazanywa',
+    'home.browseListings': 'Reba Ibyamamazwa',
     'home.joinAsOwner': 'Iyandikishe nka Nyir\'umutungo',
     'home.slide': 'Ifoto {n}',
     'home.searchByCategory': 'Shakisha ukurikije Icyiciro',
@@ -572,7 +572,7 @@ export const translations = {
     'footer.plans': 'Gahunda zo Kwishyura',
     'footer.dashboard': 'Ibiro',
     'footer.search': 'Shakisha',
-    'footer.listings': 'Ibyamamazanywa',
+    'footer.listings': 'Ibyamamazwa',
     'footer.rentHouse': 'Kodesha Inzu',
     'footer.help': 'Ubufasha',
     'footer.contact': 'Twandikire',
@@ -580,7 +580,7 @@ export const translations = {
     'footer.contactUs': 'Twandikire',
     'footer.platformFacts': 'Amakuru ku Rubuga',
     'footer.noCommission': 'Nta komisiyo isabwa',
-    'footer.verifiedListings': 'Ibyamamazanywa byemejwe n\'ubuyobozi',
+    'footer.verifiedListings': 'Ibyamamazwa byemejwe n\'ubuyobozi',
     'footer.propertyTypes': 'Amazu, Imodoka, Ibibanza, Ibikoresho',
     'footer.servingRwanda': 'Dukorera mu Rwanda hose',
     'footer.subscriptionPlans': 'Gahunda zo Kwiyandikisha',
@@ -610,7 +610,7 @@ export const translations = {
     'login.welcomeBack': 'Murakaza neza kuri Isange',
     'login.heroText': 'Injira kugira ngo ucunge ibyatangajwe, ukurikirane ibyifuzo, kandi uvugane n\'abakiriya mu Rwanda hose.',
     'login.trusted': 'Isoko ryizewe',
-    'login.trustedDesc': 'Ibyamamazanywa byemejwe n\'ubuyobozi kandi konti irinzwe.',
+    'login.trustedDesc': 'Ibyamamazwa byemejwe n\'ubuyobozi kandi konti irinzwe.',
     'login.allTypes': 'Ubwoko bwose bw\'imitungo',
     'login.allTypesDesc': 'Amazu, imodoka, ibibanza n\'ibikoresho.',
     'login.direct': 'Guhuza mu buryo butaziguye',
@@ -643,7 +643,7 @@ export const translations = {
     'register.simpleDesc': 'Iyandikishe mu minota mike utangire gukoresha serivisi.',
 
     // Listings
-    'listings.title': 'Ibyamamazanywa Bihari',
+    'listings.title': 'Ibyamamazwa Bihari',
     'listings.none': 'Nta byamamazanywa byabonetse.',
 
 // Search
