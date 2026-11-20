@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { ArrowUp, Sparkles, Phone, X, Send, MessageSquare } from '../components/icons';
+import { ArrowUp, Sparkles, Phone, X, Send, MessageSquare, Users, Bell } from '../components/icons';
 import { useLanguage } from '../context/LanguageContext';
 
 const INTENTS = {
@@ -183,6 +183,7 @@ const FloatingActions = () => {
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [showChatbot, setShowChatbot] = useState(false);
   const [showWhatsApp, setShowWhatsApp] = useState(false);
+  const [whatsappMode, setWhatsAppMode] = useState(null); // 'support' | 'group'
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -236,7 +237,7 @@ const FloatingActions = () => {
     <>
       <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3 sm:bottom-8 sm:right-8">
         <button onClick={() => { setShowWhatsApp(false); setShowChatbot(true); }} className="w-11 h-11 sm:w-12 sm:h-12 bg-orange-500 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-orange-600 transition-all hover:scale-105 active:scale-95" title="AI Assistant" aria-label="AI Assistant"><MessageSquare className="w-5 h-5 sm:w-6 sm:h-6 text-white" /></button>
-        <button onClick={() => { setShowChatbot(false); setShowWhatsApp(true); }} className="w-11 h-11 sm:w-12 sm:h-12 bg-[#25D366] text-white rounded-full shadow-lg flex items-center justify-center hover:bg-[#1DB954] transition-all hover:scale-105 active:scale-95" title="WhatsApp Support" aria-label="WhatsApp Support"><Phone className="w-5 h-5 sm:w-6 sm:h-6 text-white" /></button>
+        <button onClick={() => { setShowChatbot(false); setWhatsAppMode(null); setShowWhatsApp(true); }} className="w-11 h-11 sm:w-12 sm:h-12 bg-[#25D366] text-white rounded-full shadow-lg flex items-center justify-center hover:bg-[#1DB954] transition-all hover:scale-105 active:scale-95" title="WhatsApp" aria-label="WhatsApp"><Phone className="w-5 h-5 sm:w-6 sm:h-6 text-white" /></button>
         {showScrollTop && <button onClick={scrollToTop} className="w-11 h-11 sm:w-12 sm:h-12 bg-gray-800 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-700 transition-all hover:scale-105 active:scale-95" title="Back to Top" aria-label="Back to Top"><ArrowUp className="w-5 h-5 sm:w-6 sm:h-6 text-white" /></button>}
       </div>
 
@@ -258,8 +259,44 @@ const FloatingActions = () => {
         </div>
       </Modal>
 
-      <Modal isOpen={showWhatsApp} onClose={() => setShowWhatsApp(false)} title="WhatsApp Support">
-        <div className="space-y-3"><p className="text-sm text-gray-600">Contact us directly on WhatsApp for quick support.</p><a href="https://wa.me/250787832490?text=Hello%20Isange%2C%20I%20need%20support." target="_blank" rel="noopener noreferrer" className="block w-full bg-[#25D366] text-white text-center py-2.5 px-4 rounded-lg font-medium text-sm hover:bg-[#1DB954] transition">Open WhatsApp</a></div>
+      <Modal isOpen={showWhatsApp} onClose={() => { setShowWhatsApp(false); setWhatsAppMode(null); }} title="WhatsApp">
+        {whatsappMode === null ? (
+          <div className="space-y-3">
+            <p className="text-sm text-gray-600 text-center">Choose an option:</p>
+            <button onClick={() => setWhatsAppMode('support')} className="w-full bg-[#25D366] text-white py-2.5 px-4 rounded-lg font-medium text-sm flex items-center justify-center gap-2 hover:bg-[#1DB954] transition">
+              <MessageSquare className="w-4 h-4" />
+              <span>Contact Support</span>
+            </button>
+            <button onClick={() => setWhatsAppMode('group')} className="w-full bg-[#25D366] text-white py-2.5 px-4 rounded-lg font-medium text-sm flex items-center justify-center gap-2 hover:bg-[#1DB954] transition">
+              <Users className="w-4 h-4" />
+              <span>Join Updates Group</span>
+            </button>
+            <button onClick={() => setWhatsAppMode('notify')} className="w-full bg-[#128C7E] text-white py-2.5 px-4 rounded-lg font-medium text-sm flex items-center justify-center gap-2 hover:bg-[#0B6E5B] transition">
+              <Bell className="w-4 h-4" />
+              <span>Get Notifications (WhatsApp Business)</span>
+            </button>
+          </div>
+        ) : whatsappMode === 'support' ? (
+          <div className="space-y-3">
+            <p className="text-sm text-gray-600">Contact us directly on WhatsApp for quick support.</p>
+            <a href="https://wa.me/250787832490?text=Hello%20Isange%2C%20I%20need%20support." target="_blank" rel="noopener noreferrer" className="block w-full bg-[#25D366] text-white text-center py-2.5 px-4 rounded-lg font-medium text-sm hover:bg-[#1DB954] transition">Open WhatsApp Chat</a>
+            <button onClick={() => setWhatsAppMode(null)} className="w-full text-sm text-gray-500 hover:text-gray-700">← Back</button>
+          </div>
+        ) : whatsappMode === 'group' ? (
+          <div className="space-y-3">
+            <p className="text-sm text-gray-600">Join our WhatsApp group for instant updates on new properties, jobs, and ads.</p>
+            <p className="text-xs text-gray-500">Group invite link will be added by admin.</p>
+            <a href="https://chat.whatsapp.com/GROUP_INVITE_LINK_PLACEHOLDER" target="_blank" rel="noopener noreferrer" className="block w-full bg-[#25D366] text-white text-center py-2.5 px-4 rounded-lg font-medium text-sm hover:bg-[#1DB954] transition opacity-50 cursor-not-allowed">Join Group (Admin: add invite link)</a>
+            <button onClick={() => setWhatsAppMode(null)} className="w-full text-sm text-gray-500 hover:text-gray-700">← Back</button>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <p className="text-sm text-gray-600">Subscribe to receive WhatsApp notifications when new properties, jobs, or ads are published.</p>
+            <p className="text-xs text-gray-500">Requires WhatsApp Business API setup (admin only).</p>
+            <a href="https://wa.me/250787832490?text=Hello%20Isange%2C%20I%20want%20to%20subscribe%20to%20WhatsApp%20notifications%20for%20new%20listings." target="_blank" rel="noopener noreferrer" className="block w-full bg-[#128C7E] text-white text-center py-2.5 px-4 rounded-lg font-medium text-sm hover:bg-[#0B6E5B] transition">Request Subscription</a>
+            <button onClick={() => setWhatsAppMode(null)} className="w-full text-sm text-gray-500 hover:text-gray-700">← Back</button>
+          </div>
+        )}
       </Modal>
     </>
   );
