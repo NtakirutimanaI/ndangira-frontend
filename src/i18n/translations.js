@@ -557,7 +557,7 @@ export const translations = {
     'home.pay10percent': 'Nta Commissioner Ukenewe',
     'home.pay10percentDesc': 'Hishyurwa 10% yikiguzi nyuma yo kugurisha umutungo wawe.',
     'home.directContact': 'Vugana mu buryo butaziguye',
-    'home.directContactDesc': 'Vugana na ba nyir\'imitungo kuri telefone cyangwa UPI y\'ikibanza.',
+    'home.directContactDesc': 'Vugana na ba nyir\'imitungo cyangwa abagufasha byihuse',
 
 // Footer
     'footer.tagline': 'Aho ibyo ukeneye bihurira. Where everything you need comes together.',
