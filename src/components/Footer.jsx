@@ -105,16 +105,16 @@ forClients: [
 
         <div className="border-t border-gray-800 pt-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-            <div>
+<div>
               <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-3">{t('footer.contactUs')}</h4>
               <div className="space-y-2 text-sm text-gray-300">
                 <div className="flex items-start gap-2">
                   <MapPin className="h-4 w-4 mt-0.5 shrink-0" />
-                  <span>KG 123 St, Nyarugunga, Kigali, Rwanda</span>
+                  <span>Kigali, Nyarugenge, Rwanda</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Phone className="h-4 w-4 shrink-0" />
-                  <a href="tel:+250788000000" className="hover:text-green-400 transition break-all">+250 788 000 000</a>
+                  <a href="https://wa.me/250787832490" target="_blank" rel="noopener noreferrer" className="hover:text-green-400 transition break-all">+250 787 832 490 (WhatsApp)</a>
                 </div>
                 <div className="flex items-center gap-2">
                   <Mail className="h-4 w-4 shrink-0" />
@@ -145,16 +145,16 @@ forClients: [
               </div>
             </div>
 
-            <div>
+<div>
               <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-3">{t('footer.subscriptionPlans')}</h4>
               <div className="space-y-2 text-sm text-gray-300">
                 <div className="flex items-start gap-2">
                   <span className="text-green-500">●</span>
-                  <span>{t('footer.planPerProperty')}</span>
+                  <span>No upfront fees. Platform charges 10% commission to the buyer/renter.</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <span className="text-green-500">●</span>
-                  <span>{t('footer.planUnlimited')}</span>
+                  <span>Property owners list for free. Clients pay 10% on top of the listed price.</span>
                 </div>
               </div>
             </div>
