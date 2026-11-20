@@ -139,7 +139,7 @@ const FloatingActions = () => {
 
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
   const handleSend = () => { if (!input.trim()) return; const userMessage = input; setMessages(prev => [...prev, { text: userMessage, sender: 'user' }]); setInput(''); setIsTyping(true); setTimeout(() => { const intent = detectIntent(userMessage, lang); const responses = lang === 'rw' ? RESPONSES.rw : RESPONSES.en; const botResponse = responses[intent] || responses.default; setMessages(prev => [...prev, { text: botResponse, sender: 'bot' }]); setIsTyping(false); }, 600); };
-  const handleKeyPress = (e) => { if (e.key === 'Enter') handleSend(); };
+  const handleKeyPress = (e) => { if (e.key === 'Enter') { e.preventDefault(); handleSend(); } };
   const quickReplies = lang === 'rw' ? ['Imitungo','Imirimo','Amatangazo','10%','Kwishyura','Vugana'] : ['Properties','Jobs','Ads','10% fee','Payment','Contact'];
 
   return (
@@ -169,7 +169,7 @@ const FloatingActions = () => {
         </div>
         <div className="p-4 border-t border-gray-100 bg-white flex-shrink-0">
           <div className="flex gap-1.5 mb-2 flex-wrap">{quickReplies.map(reply => <button key={reply} onClick={()=>{setInput(reply);handleSend();}} className="px-2.5 py-1 text-[11px] bg-orange-50 text-orange-700 rounded-full hover:bg-orange-100 transition whitespace-nowrap">{reply}</button>)}</div>
-          <div className="flex gap-2"><input type="text" value={input} onChange={e=>setInput(e.target.value)} onKeyPress={handleKeyPress} placeholder="Type..." className="flex-1 px-3 py-2 border border-gray-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" /><button onClick={handleSend} disabled={!input.trim()||isTyping} className="w-9 h-9 bg-orange-500 text-white rounded-full flex items-center justify-center hover:bg-orange-600 transition disabled:opacity-50"><Send className="w-4 h-4 text-white"/></button></div>
+          <div className="flex gap-2"><input type="text" value={input} onChange={e=>setInput(e.target.value)} onKeyDown={handleKeyPress} placeholder="Type..." className="flex-1 px-3 py-2 border border-gray-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" /><button type="button" onClick={handleSend} disabled={!input.trim()||isTyping} className="w-9 h-9 bg-orange-500 text-white rounded-full flex items-center justify-center hover:bg-orange-600 transition disabled:opacity-50"><Send className="w-4 h-4 text-white"/></button></div>
         </div>
       </Modal>
 
