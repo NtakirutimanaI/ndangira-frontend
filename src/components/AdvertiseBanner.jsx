@@ -72,16 +72,8 @@ const AdvertiseBanner = () => {
     return mixed;
   }, [properties, jobs, ads]);
 
-  // Create display items including brand video
-  const displayItems = useMemo(() => {
-    const baseItems = items.filter(item => item.image);
-    let allItems = [...baseItems];
-    if (brandVideo) {
-      // Add brand video as a card in the mix (will be shuffled with others)
-      allItems.push({ key: 'brand-video', video: brandVideo, label: 'Brand Video', type: 'video' });
-    }
-    return shuffle(allItems);
-  }, [items, brandVideo]);
+  // Filter items with images for rotation
+  const displayItems = useMemo(() => items.filter(item => item.image), [items]);
 
   useEffect(() => { setIndex(0); }, [displayItems.length]);
 
@@ -106,20 +98,25 @@ const AdvertiseBanner = () => {
           <img src="/adds.png" alt="" className="h-5 w-5 sm:h-6 sm:w-6 shrink-0 object-contain banner-text-animate" />
           <span className="text-xs sm:text-sm md:text-base font-extrabold tracking-wide banner-text-animate whitespace-nowrap drop-shadow-sm truncate">Advertise Here</span>
         </div>
-        <div className="flex-1 h-full py-1 flex items-center justify-end overflow-hidden min-w-0">
+        <div className="flex-1 h-full py-1 flex items-center justify-end gap-2 overflow-hidden min-w-0">
+          {/* Permanent Brand Video Card */}
+          {brandVideo && (
+            <div className="h-[34px] w-[58px] sm:w-[82px] rounded overflow-hidden bg-white/20 border border-white/20 shadow-sm shrink-0 flex-shrink-0" title="Brand Video">
+              <video
+                src={brandVideo}
+                className="h-full w-full object-cover"
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="metadata"
+              />
+            </div>
+          )}
+          {/* Rotating Images Card */}
           {current && (
             <div className={`h-[34px] w-[58px] sm:w-[82px] rounded overflow-hidden bg-white/20 border border-white/20 shadow-sm shrink-0 transition-opacity duration-400 ${visible ? 'opacity-100' : 'opacity-0'}`}>
-              {current.type === 'video' ? (
-                <video
-                  src={current.video}
-                  className="h-full w-full object-cover"
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
-                  preload="metadata"
-                />
-              ) : current.image ? (
+              {current.image ? (
                 <img src={current.image} alt="" className="h-full w-full object-cover" />
               ) : (
                 <div className="h-full w-full flex items-center justify-center text-[9px] sm:text-[10px] font-semibold text-white/95 bg-black/10 px-1 text-center leading-tight truncate">
