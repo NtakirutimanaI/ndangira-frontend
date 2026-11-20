@@ -45,10 +45,10 @@ forClients: [
             <p className="text-sm text-gray-300 mb-3 leading-relaxed">
               {t('footer.tagline')}
             </p>
-            <div className="flex flex-wrap gap-3">
+<div className="flex flex-wrap gap-3">
               {socialLinks.map((s) => (
                 <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer" aria-label={s.label} title={s.label} className={`w-9 h-9 rounded-full flex items-center justify-center shadow-sm transition-transform duration-200 hover:scale-110 ${s.className}`}>
-                  <s.Icon className="w-4 h-4" />
+                  <s.Icon className="w-4 h-4 text-white" />
                 </a>
               ))}
             </div>
