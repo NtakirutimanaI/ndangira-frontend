@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { Search as SearchIcon } from '../components/icons';
 import api from '../services/api';
 import SearchFilters from '../components/SearchFilters';
@@ -15,6 +15,10 @@ const Search = () => {
   const [error, setError] = useState(null);
   const [selected, setSelected] = useState(null);
   const { t } = useLanguage();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const handleSearch = (filters) => {
     setLoading(true);
