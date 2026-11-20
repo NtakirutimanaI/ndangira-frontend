@@ -88,8 +88,7 @@ function Modal({ isOpen, onClose, title, children }) {
         onClick={(e) => e.stopPropagation()}
         style={{
           position: 'fixed',
-          left: `${position.x}px`,
-          top: `${position.y}px`,
+          transform: 'none',
         }}
         onMouseDown={handleMouseDown}
       >
@@ -106,6 +105,14 @@ function Modal({ isOpen, onClose, title, children }) {
       </div>
     </div>
   );
+
+  // Apply position via ref to avoid inline style warnings
+  useEffect(() => {
+    if (modalRef.current) {
+      modalRef.current.style.left = `${position.x}px`;
+      modalRef.current.style.top = `${position.y}px`;
+    }
+  }, [position.x, position.y]);
 
   return createPortal(modalContent, document.body);
 }
