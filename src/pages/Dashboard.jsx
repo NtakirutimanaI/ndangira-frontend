@@ -8,7 +8,7 @@ import { Plus, Building2, MapPin, Phone, Mail, Tag, User, CreditCard, CheckCircl
 import { useLanguage } from '../context/LanguageContext';
 
 const emptyForm = {
-    title: '', titleRw: '', description: '', descriptionRw: '', type: 'house', category: 'sale',
+    title: '', titleRw: '', description: '', descriptionRw: '', type: 'house', transactionType: 'sale', condition: 'new',
     area: '', location: '', locationRw: '', city: 'Kigali', address: '', contactPhone: '', contactEmail: '',
     upi: '', ownerPrice: '', images: [], videos: []
   };
@@ -116,9 +116,9 @@ const Dashboard = () => {
         setSuccess(t('dash.propUpdated'));
         closeForm();
         loadMyProperties();
-      } else {
-const formData = new FormData();
-        ['title', 'titleRw', 'description', 'descriptionRw', 'type', 'category', 'area', 'location', 'locationRw', 'city', 'address', 'contactPhone', 'contactEmail', 'upi', 'ownerPrice', 'images', 'videos'].forEach((k) => {
+} else {
+        const formData = new FormData();
+        ['title', 'titleRw', 'description', 'descriptionRw', 'type', 'transactionType', 'condition', 'area', 'location', 'locationRw', 'city', 'address', 'contactPhone', 'contactEmail', 'upi', 'ownerPrice', 'images', 'videos'].forEach((k) => {
           if (form[k]) formData.append(k, form[k]);
         });
         (form.images || []).forEach((f) => formData.append('images', f));
@@ -153,7 +153,7 @@ const formData = new FormData();
     setEditingId(p._id);
     setForm({
       title: p.title || '', titleRw: p.titleRw || '', description: p.description || '', descriptionRw: p.descriptionRw || '',
-      type: p.type || 'house', category: p.category || 'sale',
+      type: p.type || 'house', transactionType: p.transactionType || 'sale', condition: p.condition || 'new',
       area: p.area || '', location: p.location || '', locationRw: p.locationRw || '', city: p.city || 'Kigali', address: p.address || '',
       contactPhone: p.contactPhone || '', contactEmail: p.contactEmail || '', upi: p.upi || '',
       ownerPrice: p.ownerPrice || '',
@@ -618,12 +618,17 @@ const formData = new FormData();
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('dash.propCategory')}</label>
-                  <select className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>
-                    <option value="sale">For Sale</option>
-                    <option value="rent">For Rent</option>
-                    <option value="new">New</option>
-                    <option value="used">Used</option>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('dash.propTransactionType')}</label>
+                  <select className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" value={form.transactionType} onChange={(e) => setForm({ ...form, transactionType: e.target.value })}>
+                    <option value="sale">{t('dash.propForSale')}</option>
+                    <option value="rent">{t('dash.propForRent')}</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('dash.propCondition')}</label>
+                  <select className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" value={form.condition} onChange={(e) => setForm({ ...form, condition: e.target.value })}>
+                    <option value="new">{t('dash.propNew')}</option>
+                    <option value="used">{t('dash.propUsed')}</option>
                   </select>
                 </div>
                 <div>

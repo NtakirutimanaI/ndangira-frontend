@@ -7,7 +7,8 @@ const PropertyCard = ({ property, onView }) => {
   const img = property.images?.[0];
   const imgUrl = img ? (img.startsWith('http') ? img : `http://localhost:5000${img}`) : null;
   const typeLabel = { house: t('search.house'), car: t('search.car'), plot: t('search.plot'), material: t('search.material') }[property.type] || property.type;
-  const categoryText = { rent: t('admin.rent'), sale: t('admin.sale'), new: 'New', used: 'Used' }[property.category] || property.category || '—';
+  const transactionTypeText = property.transactionType === 'sale' ? t('dash.propForSale') : t('dash.propForRent');
+  const conditionText = property.condition === 'new' ? t('dash.propNew') : t('dash.propUsed');
   const title = (lang === 'rw' && property.titleRw) ? property.titleRw : property.title;
   const description = (lang === 'rw' && property.descriptionRw) ? property.descriptionRw : property.description;
   const locationText = (lang === 'rw' && property.locationRw) ? property.locationRw : [property.area, property.city].filter(Boolean).join(', ');
@@ -23,7 +24,7 @@ const PropertyCard = ({ property, onView }) => {
           </div>
         )}
         <span className="absolute top-1 right-1 bg-green-600 text-white text-[11px] font-medium px-1.5 py-0.5">
-          {typeLabel} · {categoryText}
+          {typeLabel} · {transactionTypeText} · {conditionText}
         </span>
       </div>
       <div className="p-2.5 flex flex-col items-center">

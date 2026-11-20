@@ -22,10 +22,10 @@ const Footer = () => {
       { label: t('footer.plans'), href: '/subscribe' },
       { label: t('footer.dashboard'), href: '/dashboard' },
     ],
-    forClients: [
+forClients: [
       { label: t('footer.search'), href: '/search' },
       { label: t('footer.listings'), href: '/listings' },
-      { label: t('footer.rentHouse'), href: '/search?type=house&category=rent' },
+      { label: t('footer.rentHouse'), href: '/search?type=house&transactionType=rent' },
     ],
     support: [
       { label: t('footer.help'), href: '/help' },
