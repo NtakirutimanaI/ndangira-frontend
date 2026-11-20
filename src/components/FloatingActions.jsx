@@ -45,9 +45,14 @@ function Modal({ isOpen, onClose, title, children }) {
   useEffect(() => {
     const modalWidth = 280;
     const modalHeight = 420;
-    const x = Math.max(10, Math.min(window.innerWidth - modalWidth - 10, window.innerWidth - modalWidth - 100));
-    const y = Math.max(10, Math.min(window.innerHeight - modalHeight - 10, window.innerHeight - modalHeight - 100));
-    setPosition({ x, y });
+    // On small screens, center the modal
+    if (window.innerWidth < 640) {
+      setPosition({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
+    } else {
+      const x = Math.max(10, Math.min(window.innerWidth - modalWidth - 10, window.innerWidth - modalWidth - 100));
+      const y = Math.max(10, Math.min(window.innerHeight - modalHeight - 10, window.innerHeight - modalHeight - 100));
+      setPosition({ x, y });
+    }
   }, []);
 
   const handleMouseDown = (e) => {
@@ -87,10 +92,6 @@ function Modal({ isOpen, onClose, title, children }) {
         ref={modalRef}
         className="relative bg-white rounded-2xl shadow-2xl w-full max-w-[280px] max-h-[420px] flex flex-col overflow-hidden animate-fade-in"
         onClick={(e) => e.stopPropagation()}
-        style={{
-          position: 'fixed',
-          transform: 'none',
-        }}
         onMouseDown={handleMouseDown}
       >
         <div className="bg-orange-500 text-white p-4 rounded-t-2xl flex items-center justify-between cursor-move select-none touch-none">
@@ -110,8 +111,17 @@ function Modal({ isOpen, onClose, title, children }) {
   // Apply position via ref to avoid inline style warnings
   useEffect(() => {
     if (modalRef.current) {
-      modalRef.current.style.left = `${position.x}px`;
-      modalRef.current.style.top = `${position.y}px`;
+      modalRef.current.style.position = 'fixed';
+      modalRef.current.style.transform = 'none';
+      // On small screens (< 640px), center the modal
+      if (window.innerWidth < 640) {
+        modalRef.current.style.left = '50%';
+        modalRef.current.style.top = '50%';
+        modalRef.current.style.transform = 'translate(-50%, -50%)';
+      } else {
+        modalRef.current.style.left = `${position.x}px`;
+        modalRef.current.style.top = `${position.y}px`;
+      }
     }
   }, [position.x, position.y]);
 
