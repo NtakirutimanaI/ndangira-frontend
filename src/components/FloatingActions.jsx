@@ -11,7 +11,8 @@ const INTENTS = {
   payment: { keywords: ['payment','pay','paying','paid','payments','momo','mobile money','mtm momo','airtel money','airtel','bank transfer','bank','transfer','card','credit card','debit card','visa','mastercard','cash','online payment','digital payment','kwishyura','gushyura','ubwishyu','imomo','mtn momo','airtel','banki','ikarita','krediti','debiti','verify','verification','confirmed','pending'], patterns: [/how.*pay/i,/payment.*method/i,/which.*payment/i,/accept.*payment/i,/uburyo.*bwo.*kwishyura/i,/shyiraho.*amafaranga/i] },
   contact: { keywords: ['contact','phone','telephone','call','whatsapp','email','mail','address','location','office','support','help','assist','assistance','talk','speak','vugana','telefone','imeyili','kuvugana','ubufasha','gufasha','kigali','nyarugenge','rwanda','visit','come','meet'], patterns: [/how.*contact/i,/phone.*number/i,/email.*address/i,/where.*(located|office)/i,/vugana.*na/i,/telefone.*ya/i] },
   how_it_works: { keywords: ['how','works','work','process','steps','procedure','guide','tutorial','explain','understand','mechanism','system','platform','marketplace','uko','bikora','uburyo','amabwiriza','amahugurwa','igidandazwa'], patterns: [/how.*(work|works)/i,/how.*(use|using)/i,/explain.*(platform|system)/i,/uko.*bikora/i,/sobanura.*urubuga/i] },
-  greeting: { keywords: ['hello','hi','hey','good morning','good afternoon','good evening','muraho','mwaramutse','mwiriwe','hi isange','hey isange','thanks','thank you','murakoze','urakoze','bye','goodbye','murabeho'], patterns: [/^(hello|hi|hey|muraho)/i,/^thanks/i,/^murakoze/i] }
+  greeting: { keywords: ['hello','hi','hey','good morning','good afternoon','good evening','muraho','mwaramutse','mwiriwe','hi isange','hey isange','thanks','thank you','murakoze','urakoze','bye','goodbye','murabeho'], patterns: [/^(hello|hi|hey|muraho)/i,/^thanks/i,/^murakoze/i] },
+  general_query: { keywords: ['i need','i want','i would like','i am looking','looking for','search','find','help me','can you','could you','please','nshaka','ndashaka','ndabona','ndaba','mfasha','nshakira'], patterns: [/i (need|want|would like|am looking)/i,/looking for/i,/help me/i,/can you|could you/i,/please/i,/nshaka|ndashaka|mfasha/i] }
 };
 
 const RESPONSES = {
@@ -20,17 +21,58 @@ const RESPONSES = {
 };
 
 function detectIntent(input, lang) {
-  const lower = input.toLowerCase();
+  const lower = input.toLowerCase().trim();
+  
+  // Direct pattern matches first (highest priority)
   for (const [intent, data] of Object.entries(INTENTS)) {
-    for (const pattern of data.patterns) { if (pattern.test(lower)) return intent; }
+    for (const pattern of data.patterns) { 
+      if (pattern.test(lower)) return intent; 
+    }
   }
-  let bestIntent = 'default', bestScore = 0;
+
+  // Enhanced keyword scoring with weights
+  const scores = {};
   for (const [intent, data] of Object.entries(INTENTS)) {
     let score = 0;
-    for (const keyword of data.keywords) { if (lower.includes(keyword.toLowerCase())) score += keyword.length; }
+    for (const keyword of data.keywords) {
+      if (lower.includes(keyword.toLowerCase())) {
+        // Weight by keyword specificity (longer = more specific)
+        score += keyword.length * 2;
+        // Bonus for exact word boundaries
+        const regex = new RegExp(`\\b${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
+        if (regex.test(lower)) score += 10;
+      }
+    }
+    // Context boosters
+    if (intent === 'greeting' && lower.length < 20) score += 50;
+    if (intent === 'general_query' && (lower.startsWith('i ') || lower.startsWith('can ') || lower.startsWith('could ') || lower.startsWith('please') || lower.startsWith('nshaka') || lower.startsWith('ndashaka'))) score += 30;
+    scores[intent] = score;
+  }
+
+  // Find highest scoring intent
+  let bestIntent = 'default', bestScore = 0;
+  for (const [intent, score] of Object.entries(scores)) {
     if (score > bestScore) { bestScore = score; bestIntent = intent; }
   }
-  if (lower.length < 30 && INTENTS.greeting.keywords.some(k => lower.includes(k))) return 'greeting';
+
+  // If general_query wins, try to infer specific intent from context
+  if (bestIntent === 'general_query' && bestScore > 0) {
+    // Check for property-related terms in the query
+    const propertyTerms = ['house','home','apartment','plot','land','material','inzu','ikibanza','ibibanza','gukura','kugura','kwita','kugodesha','kugurisha'];
+    const jobTerms = ['job','work','career','murimo','akazi','imirimo'];
+    const adTerms = ['advertise','ad','promote','matangazo','gutangaza'];
+    const commissionTerms = ['commission','fee','percent','10%','komisiyo','gishyura'];
+    const paymentTerms = ['pay','payment','momo','mobile money','bank','card','kwishyura','gushyura'];
+    const contactTerms = ['contact','phone','whatsapp','email','address','vugana','telefone','imeyili'];
+
+    if (propertyTerms.some(t => lower.includes(t))) return 'property';
+    if (jobTerms.some(t => lower.includes(t))) return 'jobs';
+    if (adTerms.some(t => lower.includes(t))) return 'advertise';
+    if (commissionTerms.some(t => lower.includes(t))) return 'commission';
+    if (paymentTerms.some(t => lower.includes(t))) return 'payment';
+    if (contactTerms.some(t => lower.includes(t))) return 'contact';
+  }
+
   return bestScore > 0 ? bestIntent : 'default';
 }
 
