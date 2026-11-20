@@ -4,33 +4,141 @@ import { useLanguage } from '../context/LanguageContext';
 
 const CHATBOT_RESPONSES = {
   en: {
-    greeting: "Hello! I'm Isange AI Assistant. How can I help you today?",
-    menu: "I can help you with:\n• Finding properties (houses, plots, materials)\n• Searching for jobs\n• Advertising on Isange\n• Understanding our 10% commission model\n• Payment methods\n• Contacting support",
-    property: "Isange connects property owners with buyers/renters. Owners list for FREE. Buyers/renters pay 10% commission on top of the listed price. Property types: Houses, Cars, Plots, Materials.",
-    jobs: "Employers post jobs (5,000 RWF fee). Isange adds 10% fee shown to applicants. Admin approves before publishing on /jobs page.",
-    advertise: "Ads start from 5,000 RWF/month, year, or custom period. Add images, videos, links. Admin approves after payment verification.",
-    commission: "Our model: Property owners set their price. Platform adds 10% for buyers/renters. Owner contact hidden, platform contact shown. No upfront fees for owners.",
-    payment: "Payment methods: MTN MoMo, Airtel Money, Bank Transfer, Card. Admin verifies payment before publishing.",
-    contact: "WhatsApp: +250 787 832 490\nEmail: info@isange.com\nLocation: Kigali, Nyarugenge, Rwanda",
-    default: "I'm here to help! Ask me about properties, jobs, ads, or how Isange works."
+    greeting: "Hello! I'm Isange AI Assistant. How can I help?",
+    menu: "I can help with:\n• Properties (houses, plots, materials)\n• Jobs search\n• Advertising\n• 10% commission model\n• Payment methods\n• Contact support",
+    property: "Owners list FREE. Buyers/renters pay 10% on top. Types: Houses, Cars, Plots, Materials.",
+    jobs: "Employers post jobs (5,000 RWF). Isange adds 10% for applicants. Admin approves.",
+    advertise: "Ads from 5,000 RWF/month, year, or custom. Images, videos, links. Admin approves.",
+    commission: "Owners set price. Platform adds 10% for buyers. Owner contact hidden, platform shown.",
+    payment: "MTN MoMo, Airtel Money, Bank Transfer, Card. Admin verifies before publishing.",
+    contact: "WhatsApp: +250 787 832 490\nEmail: info@isange.com\nKigali, Nyarugenge, Rwanda",
+    default: "Ask me about properties, jobs, ads, or how Isange works."
   },
   rw: {
-    greeting: "Muraho! Nd'umufasha w'Isange AI. Nkushobora kugufasha iki uyu munsi?",
-    menu: "Nkushobora kugufasha:\n• Gushakisha imitungo (amazu, ibibanza, ibikoresho)\n• Gushakisha imirimo\n• Gutangaza kuri Isange\n• Gukumbuza gahunda yo 10%\n• Iburyo bwo kwishyura\n• Kuvugana n'ubufasha",
-    property: "Isange ihuza ba nyir'imitungo n'abaguzi/abakodesha. Ba nyir'imitungo batangaza ntibishyura. Abaguzi/abakodesha bishyura 10% ku ncuro yikiguzi. Ubwoko: Amazu, Imodoka, Ibibanza, Ibikoresho.",
-    jobs: "Abakozi batangaza imirimo (5,000 RWF). Isange iyongera 10% ibonywa na basabiraho. Ubuyobozi bwemeza mbere yo gutangaza kuri /jobs.",
-    advertise: "Amatangazo tangura kuri 5,000 RWF/ukwezi, umwaka, cyangwa igihe kingana. Ongeraho amafoto, video, link. Ubuyobozi bwemeza nyuma yo kugenzura ubwishyu.",
-    commission: "Gahunda yacu: Ba nyir'imitungo bashyira igiciro cyawe. Isange iyongera 10% ku ba guza/ba kodesha. Amakuru ya nyirayo yarahishwe, ya Isange aragaragara. Nta makungu yambere.",
-    payment: "Uburyo bwo kwishyura: MTN MoMo, Airtel Money, Banki, Ikarita. Ubuyobozi bugenzura ubwishyu mbere yo gutangaza.",
-    contact: "WhatsApp: +250 787 832 490\nImeyili: info@isange.com\nAho: Kigali, Nyarugenge, Rwanda",
-    default: "Ndi hano kugufasha! Mbuze ibyo biri ku mitungo, imirimo, amatangazo, cyangwa uwo Isange bikora."
+    greeting: "Muraho! Nd'umufasha w'Isange AI. Nkushobora kugufasha iki?",
+    menu: "Nkushobora kugufasha:\n• Imitungo (amazu, ibibanza, ibikoresho)\n• Imirimo\n• Amatangazo\n• Gahunda yo 10%\n• Kwishyura\n• Vugana n'ubufasha",
+    property: "Ba nyir'imitungo batangaza ntibishyura. Abaguzi bishyura 10%. Ubwoko: Amazu, Imodoka, Ibibanza, Ibikoresho.",
+    jobs: "Abakozi batangaza (5,000 RWF). Isange iyongera 10%. Ubuyobozi bwemeza.",
+    advertise: "Amatangazo tangura 5,000 RWF/ukwezi, umwaka, cyangwa igihe kingana. Ubuyobozi bwemeza.",
+    commission: "Ba nyir'imitungo bashyira igiciro. Isange iyongera 10%. Amakuru ya nyirayo yarahishwe.",
+    payment: "MTN MoMo, Airtel Money, Banki, Ikarita. Ubuyobozi bugenzura ubwishyu.",
+    contact: "WhatsApp: +250 787 832 490\nImeyili: info@isange.com\nKigali, Nyarugenge, Rwanda",
+    default: "Mbuze ibyo biri ku mitungo, imirimo, amatangazo, cyangwa uwo Isange bikora."
   }
+};
+
+const DraggableModal = ({ isOpen, onClose, children, initialPosition, title }) => {
+  const [position, setPosition] = useState(initialPosition);
+  const [isDragging, setIsDragging] = useState(false);
+  const dragOffset = useRef({ x: 0, y: 0 });
+  const modalRef = useRef(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      setPosition(initialPosition);
+    }
+  }, [isOpen, initialPosition]);
+
+  const handleMouseDown = (e) => {
+    if (e.target.closest('button, a, input')) return;
+    setIsDragging(true);
+    const rect = modalRef.current?.getBoundingClientRect();
+    if (rect) {
+      dragOffset.current = {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+      };
+    }
+  };
+
+  useEffect(() => {
+    const handleMove = (e) => {
+      if (!isDragging) return;
+      const maxX = window.innerWidth - 320;
+      const maxY = window.innerHeight - 400;
+      let newX = e.clientX - dragOffset.current.x;
+      let newY = e.clientY - dragOffset.current.y;
+      newX = Math.max(10, Math.min(maxX, newX));
+      newY = Math.max(10, Math.min(maxY, newY));
+      setPosition({ x: newX, y: newY });
+    };
+
+    const handleUp = () => setIsDragging(false);
+
+    if (isDragging) {
+      window.addEventListener('mousemove', handleMove);
+      window.addEventListener('mouseup', handleUp);
+    }
+    return () => {
+      window.removeEventListener('mousemove', handleMove);
+      window.removeEventListener('mouseup', handleUp);
+    };
+  }, [isDragging]);
+
+  if (!isOpen) return null;
+
+  return (
+    <div
+      ref={modalRef}
+      className="fixed z-50 transition-all duration-200"
+      style={{
+        left: `${position.x}px`,
+        top: `${position.y}px`,
+        width: 'calc(100vw - 20px)',
+        maxWidth: '320px',
+        maxHeight: 'calc(100vh - 20px)'
+      }}
+      onMouseDown={handleMouseDown}
+    >
+      <div className="bg-white rounded-xl shadow-2xl flex flex-col overflow-hidden animate-slide-in">
+        <div className="bg-orange-500 text-white p-3 rounded-t-xl flex items-center justify-between cursor-move select-none touch-none">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+              <Sparkles className="w-4 h-4 text-white" />
+            </div>
+            <p className="font-semibold text-sm">{title}</p>
+          </div>
+          <button onClick={onClose} className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition">
+            <X className="w-4 h-4 text-white" />
+          </button>
+        </div>
+        <div className="flex-1 overflow-hidden flex flex-col min-h-0">
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const WhatsAppModal = ({ isOpen, onClose, initialPosition }) => {
+  return (
+    <DraggableModal
+      isOpen={isOpen}
+      onClose={onClose}
+      initialPosition={initialPosition}
+      title="WhatsApp Support"
+    >
+      <div className="p-4 space-y-3">
+        <p className="text-sm text-gray-600">Contact us directly on WhatsApp for quick support.</p>
+        <a
+          href="https://wa.me/250787832490?text=Hello%20Isange%2C%20I%20need%20support."
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block w-full bg-[#25D366] text-white text-center py-2.5 px-4 rounded-lg font-medium text-sm hover:bg-[#1DB954] transition"
+        >
+          Open WhatsApp
+        </a>
+      </div>
+    </DraggableModal>
+  );
 };
 
 const FloatingActions = () => {
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [showChatbot, setShowChatbot] = useState(false);
   const [showWhatsApp, setShowWhatsApp] = useState(false);
+  const [chatbotPos, setChatbotPos] = useState({ x: 20, y: 100 });
+  const [whatsappPos, setWhatsappPos] = useState({ x: 20, y: 100 });
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -106,141 +214,135 @@ const FloatingActions = () => {
   const quickReplies = lang === 'rw' ? [
     'Imitungo', 'Imirimo', 'Amatangazo', '10%', 'Kwishyura', 'Vugana'
   ] : [
-    'Properties', 'Jobs', 'Advertise', '10% fee', 'Payment', 'Contact'
+    'Properties', 'Jobs', 'Ads', '10% fee', 'Payment', 'Contact'
   ];
 
   return (
     <>
-      <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
+      <style jsx global>{`
+        @keyframes slide-in {
+          from { opacity: 0; transform: scale(0.95) translateY(10px); }
+          to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .animate-slide-in { animation: slide-in 0.2s ease-out; }
+      `}</style>
+
+      <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3 sm:bottom-8 sm:right-8">
         <button
-          onClick={() => setShowChatbot(true)}
-          className="w-12 h-12 bg-orange-500 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-orange-600 transition-all hover:scale-105"
+          onClick={() => { setChatbotPos({ x: 20, y: 100 }); setShowChatbot(true); }}
+          className="w-11 h-11 sm:w-12 sm:h-12 bg-orange-500 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-orange-600 transition-all hover:scale-105 active:scale-95"
           title="AI Assistant"
           aria-label="AI Assistant"
         >
-          <MessageSquare className="w-6 h-6 text-white" />
+          <MessageSquare className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
         </button>
 
         <button
-          onClick={() => setShowWhatsApp(true)}
-          className="w-12 h-12 bg-[#25D366] text-white rounded-full shadow-lg flex items-center justify-center hover:bg-[#1DB954] transition-all hover:scale-105"
+          onClick={() => { setWhatsappPos({ x: 20, y: 100 }); setShowWhatsApp(true); }}
+          className="w-11 h-11 sm:w-12 sm:h-12 bg-[#25D366] text-white rounded-full shadow-lg flex items-center justify-center hover:bg-[#1DB954] transition-all hover:scale-105 active:scale-95"
           title="WhatsApp Support"
           aria-label="WhatsApp Support"
         >
-          <Phone className="w-6 h-6 text-white" />
+          <Phone className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
         </button>
 
         {showScrollTop && (
           <button
             onClick={scrollToTop}
-            className="w-12 h-12 bg-gray-800 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-700 transition-all hover:scale-105"
+            className="w-11 h-11 sm:w-12 sm:h-12 bg-gray-800 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-700 transition-all hover:scale-105 active:scale-95"
             title="Back to Top"
             aria-label="Back to Top"
           >
-            <ArrowUp className="w-6 h-6 text-white" />
+            <ArrowUp className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
           </button>
         )}
       </div>
 
-      {showChatbot && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setShowChatbot(false)}>
-          <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full h-[85vh] max-h-[600px] flex flex-col overflow-hidden" onClick={(e) => e.stopPropagation()}>
-            <div className="bg-orange-500 text-white p-4 rounded-t-2xl flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                  <Sparkles className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <p className="font-semibold text-sm">Isange AI Assistant</p>
-                  <p className="text-xs opacity-80">Online</p>
-                </div>
-              </div>
-              <button onClick={() => setShowChatbot(false)} className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition">
-                <X className="w-5 h-5 text-white" />
-              </button>
-            </div>
+      <ChatbotModal
+        isOpen={showChatbot}
+        onClose={() => setShowChatbot(false)}
+        initialPosition={chatbotPos}
+        messages={messages}
+        input={input}
+        setInput={setInput}
+        isTyping={isTyping}
+        handleSend={handleSend}
+        handleKeyPress={handleKeyPress}
+        quickReplies={quickReplies}
+        messagesEndRef={messagesEndRef}
+        lang={lang}
+      />
 
-            <div className="flex-1 overflow-y-auto p-4 space-y-3" ref={messagesEndRef}>
-              {messages.map((msg, i) => (
-                <div key={i} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`max-w-[75%] px-4 py-2 rounded-2xl ${msg.sender === 'user' ? 'bg-orange-500 text-white rounded-br-none' : 'bg-gray-100 text-gray-900 rounded-bl-none'}`}>
-                    <p className="text-sm whitespace-pre-wrap">{msg.text}</p>
-                  </div>
-                </div>
-              ))}
-              {isTyping && (
-                <div className="flex justify-start">
-                  <div className="bg-gray-100 text-gray-900 px-4 py-2 rounded-2xl rounded-bl-none">
-                    <div className="flex gap-1">
-                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
-                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
-                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
-                    </div>
-                  </div>
-                </div>
-              )}
-              <div ref={messagesEndRef} />
-            </div>
-
-            <div className="p-4 border-t border-gray-100">
-              <div className="flex gap-2 mb-2 flex-wrap">
-                {quickReplies.map((reply) => (
-                  <button
-                    key={reply}
-                    onClick={() => {
-                      setInput(reply);
-                      handleSend();
-                    }}
-                    className="px-3 py-1.5 text-xs bg-orange-50 text-orange-700 rounded-full hover:bg-orange-100 transition"
-                  >
-                    {reply}
-                  </button>
-                ))}
-              </div>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  placeholder="Type a message..."
-                  className="flex-1 px-4 py-2 border border-gray-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
-                />
-                <button
-                  onClick={handleSend}
-                  disabled={!input.trim() || isTyping}
-                  className="w-10 h-10 bg-orange-500 text-white rounded-full flex items-center justify-center hover:bg-orange-600 transition disabled:opacity-50"
-                >
-                  <Send className="w-5 h-5 text-white" />
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showWhatsApp && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setShowWhatsApp(false)}>
-          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-bold text-gray-900">WhatsApp Support</h3>
-              <button onClick={() => setShowWhatsApp(false)} className="text-gray-400 hover:text-gray-600">
-                <X className="w-6 h-6 text-white" />
-              </button>
-            </div>
-            <p className="text-gray-600 mb-4">Contact us directly on WhatsApp for quick support.</p>
-            <a
-              href="https://wa.me/250787832490?text=Hello%20Isange%2C%20I%20need%20support."
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block w-full bg-[#25D366] text-white text-center py-3 px-4 rounded-lg font-medium hover:bg-[#1DB954] transition"
-            >
-              Open WhatsApp
-            </a>
-          </div>
-        </div>
-      )}
+      <WhatsAppModal
+        isOpen={showWhatsApp}
+        onClose={() => setShowWhatsApp(false)}
+        initialPosition={whatsappPos}
+      />
     </>
+  );
+};
+
+const ChatbotModal = ({ isOpen, onClose, initialPosition, messages, input, setInput, isTyping, handleSend, handleKeyPress, quickReplies, messagesEndRef, lang }) => {
+  return (
+    <DraggableModal
+      isOpen={isOpen}
+      onClose={onClose}
+      initialPosition={initialPosition}
+      title="Isange AI"
+    >
+      <div className="flex-1 overflow-y-auto p-3 space-y-2" ref={messagesEndRef}>
+        {messages.map((msg, i) => (
+          <div key={i} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+            <div className={`max-w-[80%] px-3 py-2 rounded-2xl text-xs ${msg.sender === 'user' ? 'bg-orange-500 text-white rounded-br-none' : 'bg-gray-100 text-gray-900 rounded-bl-none'}`}>
+              <p className="whitespace-pre-wrap">{msg.text}</p>
+            </div>
+          </div>
+        ))}
+        {isTyping && (
+          <div className="flex justify-start">
+            <div className="bg-gray-100 text-gray-900 px-3 py-2 rounded-2xl rounded-bl-none">
+              <div className="flex gap-1">
+                <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+              </div>
+            </div>
+          </div>
+        )}
+        <div ref={messagesEndRef} />
+      </div>
+
+      <div className="p-3 border-t border-gray-100 bg-white">
+        <div className="flex gap-1.5 mb-2 flex-wrap">
+          {quickReplies.map((reply) => (
+            <button
+              key={reply}
+              onClick={() => { setInput(reply); handleSend(); }}
+              className="px-2.5 py-1 text-[11px] bg-orange-50 text-orange-700 rounded-full hover:bg-orange-100 transition whitespace-nowrap"
+            >
+              {reply}
+            </button>
+          ))}
+        </div>
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyPress={handleKeyPress}
+            placeholder="Type..."
+            className="flex-1 px-3 py-2 border border-gray-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+          />
+          <button
+            onClick={handleSend}
+            disabled={!input.trim() || isTyping}
+            className="w-9 h-9 bg-orange-500 text-white rounded-full flex items-center justify-center hover:bg-orange-600 transition disabled:opacity-50"
+          >
+            <Send className="w-4 h-4 text-white" />
+          </button>
+        </div>
+      </div>
+    </DraggableModal>
   );
 };
 
