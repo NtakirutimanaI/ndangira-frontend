@@ -4,8 +4,10 @@ import api from '../services/api';
 import { useLanguage } from '../context/LanguageContext';
 
 const defaultCategories = [
-  { slug: 'rent', name: 'Rent' },
-  { slug: 'sale', name: 'Sale' },
+  { slug: 'sale', name: 'For Sale' },
+  { slug: 'rent', name: 'For Rent' },
+  { slug: 'new', name: 'New' },
+  { slug: 'used', name: 'Used' },
 ];
 
 const SearchFilters = ({ onSearch }) => {
@@ -18,7 +20,15 @@ const SearchFilters = ({ onSearch }) => {
   useEffect(() => {
     api.get('/categories').then((res) => {
       const list = res.data?.data || [];
-      if (list.length) setCategories(list.map((c) => ({ slug: c.slug || c.name, name: c.name })));
+      if (list.length) {
+        const apiCats = list.map((c) => ({ slug: c.slug || c.name, name: c.name }));
+        // Merge with defaults to ensure all 4 always visible
+        const merged = [...defaultCategories];
+        apiCats.forEach((ac) => {
+          if (!merged.some((dc) => dc.slug === ac.slug)) merged.push(ac);
+        });
+        setCategories(merged);
+      }
     }).catch(() => {});
   }, []);
 
