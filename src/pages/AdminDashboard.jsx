@@ -6,8 +6,18 @@ import { Alert } from '../components/Alert';
 import {
   LayoutDashboard, Users, Building2, Shield, CheckCircle2, XCircle,
   Home, CreditCard, FileText, Settings, Plus, Search, Phone, Mail, LogOut,
-  ChevronRight, ArrowLeft, Eye, Trash2, X, Download, Calendar, Menu, Briefcase, Megaphone
+  ChevronRight, ArrowLeft, Eye, Trash2, X, Download, Calendar, Menu, Briefcase, Megaphone,
+  Bell, Globe, Image, Video, Lock, DollarSign, Palette, Save, RefreshCw, Sliders
 } from '../components/icons';
+
+// Resolve media URL for both Cloudinary and local storage
+const resolveMediaUrl = (url) => {
+  if (!url) return '';
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  // For local storage URLs like /uploads/filename, prepend backend URL
+  const apiUrl = (import.meta.env.VITE_API_URL || 'http://localhost:5000').replace('/api', '');
+  return `${apiUrl}${url}`;
+};
 
 const sidebarLinks = [
   { id: 'dashboard', labelKey: 'nav.dashboard', icon: LayoutDashboard },
@@ -18,6 +28,7 @@ const sidebarLinks = [
   { id: 'ads', labelKey: 'admin.ads', icon: Megaphone },
   { id: 'subscribers', label: 'Subscribers', icon: Mail },
   { id: 'reports', labelKey: 'admin.reports', icon: FileText },
+  { id: 'settings', labelKey: 'admin.settings', icon: Sliders },
 ];
 
 const AdminDashboard = () => {
@@ -53,6 +64,46 @@ const AdminDashboard = () => {
   const [subscribers, setSubscribers] = useState([]);
   const [subscribersLoading, setSubscribersLoading] = useState(false);
 
+  // Settings state
+  const [settings, setSettings] = useState({
+    // Branding
+    siteName: 'Isange',
+    siteTagline: 'Aho ibyo ukeneye bihurira',
+    logoUrl: '/isangeLogo.png',
+    faviconUrl: '/favicon.ico',
+    primaryColor: '#16a34a',
+    secondaryColor: '#f59e0b',
+    // Brand Video (single uploaded video)
+    brandVideoUrl: '',
+    // Notifications
+    emailNotifications: true,
+    smsNotifications: false,
+    pushNotifications: true,
+    adminNewUserAlert: true,
+    adminNewPropertyAlert: true,
+    adminNewJobAlert: true,
+    adminNewAdAlert: true,
+    // Permissions
+    allowUserRegistration: true,
+    requireEmailVerification: true,
+    allowPropertyEditing: true,
+    allowJobPosting: true,
+    allowAdRequests: true,
+    // Contact
+    platformPhone: '+250 787 832 490',
+    platformEmail: 'info@isange.com',
+    platformUpi: 'isange@bank',
+    supportWhatsApp: 'https://wa.me/250787832490',
+    updatesGroupLink: 'https://chat.whatsapp.com/GROUP_INVITE',
+  });
+  const [settingsLoading, setSettingsLoading] = useState(false);
+  const [settingsSaved, setSettingsSaved] = useState(false);
+  const [brandVideoFile, setBrandVideoFile] = useState(null);
+  const [brandVideoUploading, setBrandVideoUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadStatus, setUploadStatus] = useState(null); // 'uploading', 'success', 'error'
+  const [videoUploadError, setVideoUploadError] = useState(null);
+
   const [reportFrom, setReportFrom] = useState('');
   const [reportTo, setReportTo] = useState('');
   const [reportType, setReportType] = useState('summary');
@@ -81,6 +132,33 @@ const AdminDashboard = () => {
     try { const res = await api.get('/admin/subscribers'); setSubscribers(res.data?.data || []); }
     catch (err) { setError(err.response?.data?.error || 'Failed to load subscribers'); }
     finally { setSubscribersLoading(false); }
+  };
+
+  const loadSettings = async () => {
+    setSettingsLoading(true);
+    try {
+      const res = await api.get('/admin/settings');
+      if (res.data?.data) setSettings(res.data.data);
+    } catch (err) {
+      // Settings might not exist yet on backend, use defaults
+      console.log('Settings not found on backend, using defaults');
+    } finally {
+      setSettingsLoading(false);
+    }
+  };
+
+  const saveSettings = async () => {
+    setSettingsLoading(true);
+    setSettingsSaved(false);
+    try {
+      await api.put('/admin/settings', settings);
+      setSettingsSaved(true);
+      setTimeout(() => setSettingsSaved(false), 3000);
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to save settings');
+    } finally {
+      setSettingsLoading(false);
+    }
   };
 
   const loadCategories = async () => {
@@ -1191,8 +1269,372 @@ const AdminDashboard = () => {
           </div>
         </div>
       </div>
+);
+  };
+
+  const renderSettings = () => {
+    const handleDirectChange = (key, value) => {
+      setSettings(prev => ({ ...prev, [key]: value }));
+    };
+
+    const handleBrandVideoUpload = async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      // Validate file type
+      if (!file.type.startsWith('video/')) {
+        setVideoUploadError('Please select a valid video file (MP4, WebM, MOV)');
+        return;
+      }
+      
+      // Validate file size (max 100MB)
+      if (file.size > 100 * 1024 * 1024) {
+        setVideoUploadError('Video file must be less than 100MB');
+        return;
+      }
+      
+      setVideoUploadError(null);
+      setBrandVideoFile(file);
+      setUploadProgress(0);
+      setUploadStatus('uploading');
+      
+      try {
+        const formData = new FormData();
+        formData.append('video', file);
+        
+        const res = await api.post('/admin/settings/upload-video', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+          onUploadProgress: (progressEvent) => {
+            const progress = Math.round((progressEvent.loaded * 100) / (progressEvent.total || 1));
+            setUploadProgress(Math.min(progress, 99));
+          }
+        });
+        
+        setUploadProgress(100);
+        
+        if (res.data?.data?.videoUrl) {
+          handleDirectChange('brandVideoUrl', res.data.data.videoUrl);
+          setUploadStatus('success');
+          setBrandVideoFile(null);
+          // Reset status after 3 seconds
+          setTimeout(() => setUploadStatus(null), 3000);
+        }
+      } catch (err) {
+        setUploadStatus('error');
+        const errorMsg = err.response?.data?.error || 'Video upload failed. Please try again.';
+        setVideoUploadError(errorMsg);
+        setTimeout(() => setUploadStatus(null), 3000);
+      }
+    };
+
+    const removeBrandVideo = () => {
+      handleDirectChange('brandVideoUrl', '');
+      setBrandVideoFile(null);
+      setUploadProgress(0);
+      setUploadStatus(null);
+      setVideoUploadError(null);
+    };
+
+    const sections = [
+      {
+        id: 'branding',
+        label: 'Branding & Appearance',
+        icon: Palette,
+        fields: [
+          { key: 'siteName', label: 'Site Name', type: 'text' },
+          { key: 'siteTagline', label: 'Site Tagline', type: 'text' },
+          { key: 'logoUrl', label: 'Logo URL', type: 'text', placeholder: '/isangeLogo.png' },
+          { key: 'faviconUrl', label: 'Favicon URL', type: 'text', placeholder: '/favicon.ico' },
+          { key: 'primaryColor', label: 'Primary Color', type: 'color' },
+          { key: 'secondaryColor', label: 'Secondary Color', type: 'color' },
+        ],
+      },
+      {
+        id: 'brandVideo',
+        label: 'Upload Brand Video',
+        icon: Video,
+        fields: [],
+      },
+      {
+        id: 'notifications',
+        label: 'Notifications',
+        icon: Bell,
+        fields: [
+          { key: 'emailNotifications', label: 'Email Notifications', type: 'checkbox' },
+          { key: 'smsNotifications', label: 'SMS Notifications', type: 'checkbox' },
+          { key: 'pushNotifications', label: 'Push Notifications', type: 'checkbox' },
+          { key: 'adminNewUserAlert', label: 'Alert Admin on New User', type: 'checkbox' },
+          { key: 'adminNewPropertyAlert', label: 'Alert Admin on New Property', type: 'checkbox' },
+          { key: 'adminNewJobAlert', label: 'Alert Admin on New Job', type: 'checkbox' },
+          { key: 'adminNewAdAlert', label: 'Alert Admin on New Ad', type: 'checkbox' },
+        ],
+      },
+      {
+        id: 'permissions',
+        label: 'Permissions & Access',
+        icon: Lock,
+        fields: [
+          { key: 'allowUserRegistration', label: 'Allow User Registration', type: 'checkbox' },
+          { key: 'requireEmailVerification', label: 'Require Email Verification', type: 'checkbox' },
+          { key: 'allowPropertyEditing', label: 'Allow Property Editing by Owners', type: 'checkbox' },
+          { key: 'allowJobPosting', label: 'Allow Job Posting', type: 'checkbox' },
+          { key: 'allowAdRequests', label: 'Allow Ad Requests', type: 'checkbox' },
+        ],
+      },
+      {
+        id: 'contact',
+        label: 'Platform Contact Info',
+        icon: Globe,
+        fields: [
+          { key: 'platformPhone', label: 'Platform Phone', type: 'tel' },
+          { key: 'platformEmail', label: 'Platform Email', type: 'email' },
+          { key: 'platformUpi', label: 'Platform UPI', type: 'text' },
+          { key: 'supportWhatsApp', label: 'Support WhatsApp Link', type: 'url' },
+          { key: 'updatesGroupLink', label: 'Updates Group Link', type: 'url' },
+        ],
+      },
+    ];
+
+    return (
+      <div className="space-y-4">
+        {/* Header with Save Button */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+          <h2 className="text-lg font-bold text-gray-900">{t('admin.settings')}</h2>
+          <button
+            onClick={saveSettings}
+            disabled={settingsLoading}
+            className="inline-flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 disabled:opacity-50 w-full sm:w-auto"
+          >
+            <Save className="h-4 w-4" />
+            {settingsLoading ? t('common.loading') : t('admin.save')}
+            {settingsSaved && <span className="text-green-100">✓ Saved</span>}
+          </button>
+        </div>
+
+        {/* Success/Error Messages */}
+        {settingsSaved && (
+          <div className="bg-green-50 border border-green-200 p-3 rounded-lg text-green-800 text-sm flex items-center gap-2">
+            <CheckCircle2 className="h-4 w-4 shrink-0" />
+            Settings saved successfully!
+          </div>
+        )}
+        {error && (
+          <div className="bg-red-50 border border-red-200 p-3 rounded-lg text-red-800 text-sm flex items-center gap-2">
+            <XCircle className="h-4 w-4 shrink-0" />
+            {error}
+          </div>
+        )}
+
+        {/* Compact Grid Layout - Sidebar + Content on desktop, stacked on mobile */}
+        <div className="grid lg:grid-cols-[240px_1fr] gap-4">
+          {/* Sidebar Navigation - Fixed on desktop, collapsible on mobile */}
+          <div className="lg:sticky lg:top-24 lg:h-fit">
+            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
+              <div className="px-3 py-2 bg-gray-50 border-b border-gray-100 font-medium text-gray-900 text-sm">
+                {t('admin.settingsSections') || 'Settings Sections'}
+              </div>
+              <nav className="p-2 space-y-1">
+                {sections.map((section) => {
+                  const Icon = section.icon;
+                  return (
+                    <button
+                      key={section.id}
+                      onClick={() => document.getElementById(section.id)?.scrollIntoView({ behavior: 'smooth' })}
+                      className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition"
+                    >
+                      <Icon className="h-4 w-4 shrink-0 text-green-600" />
+                      <span className="truncate">{section.label}</span>
+                    </button>
+                  );
+                })}
+              </nav>
+            </div>
+          </div>
+
+          {/* Settings Content */}
+          <div className="space-y-4">
+            {sections.map((section) => {
+              const Icon = section.icon;
+              return (
+                <div key={section.id} id={section.id} className="bg-white rounded-lg border border-gray-200 p-4 sm:p-5 shadow-sm">
+                  <div className="flex items-center gap-2 mb-4 pb-3 border-b border-gray-100">
+                    <div className="p-2 bg-green-50 rounded-lg"><Icon className="h-4 w-4 text-green-600" /></div>
+                    <h3 className="text-base font-semibold text-gray-900">{section.label}</h3>
+                  </div>
+                  <div className="space-y-3">
+                    {section.id === 'brandVideo' ? (
+                      // Brand Video Upload Section - Redesigned
+                      <div className="space-y-3">
+                        {!settings.brandVideoUrl ? (
+                          // Upload area - modern card design
+                          <div className="space-y-3">
+                            <div className="relative">
+                              <input
+                                type="file"
+                                accept="video/mp4,video/webm,video/quicktime,video/x-msvideo"
+                                onChange={handleBrandVideoUpload}
+                                disabled={brandVideoUploading || uploadStatus === 'uploading'}
+                                className="sr-only"
+                                id="brand-video-upload"
+                              />
+                              <label
+                                htmlFor="brand-video-upload"
+                                className={`cursor-pointer block border-2 border-dashed rounded-xl p-4 transition-all ${
+                                  brandVideoUploading || uploadStatus === 'uploading'
+                                    ? 'border-green-400 bg-green-50'
+                                    : videoUploadError
+                                      ? 'border-red-400 bg-red-50'
+                                      : 'border-gray-300 hover:border-green-500 hover:bg-gray-50'
+                                }`}
+                              >
+                                <div className="flex items-start gap-3">
+                                  <div className={`flex-shrink-0 w-12 h-12 rounded-lg flex items-center justify-center ${
+                                    videoUploadError ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'
+                                  }`}>
+                                    <Video className="h-6 w-6" />
+                                  </div>
+                                  <div className="flex-1 min-w-0 pt-1">
+                                    <p className="text-sm font-medium text-gray-900">
+                                      {brandVideoUploading || uploadStatus === 'uploading' ? 'Uploading video...' : 'Upload Brand Video'}
+                                    </p>
+                                    <p className="text-xs text-gray-500 mt-0.5">MP4, WebM, MOV • Max 100MB</p>
+                                  </div>
+                                  {(brandVideoUploading || uploadStatus === 'uploading') && (
+                                    <div className="flex-shrink-0 w-24 text-right">
+                                      <span className="text-xs font-mono text-green-600">{uploadProgress}%</span>
+                                    </div>
+                                  )}
+                                </div>
+                                
+                                {(brandVideoUploading || uploadStatus === 'uploading') && (
+                                  <div className="mt-3 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                                    <div
+                                      className={`h-full rounded-full transition-all duration-300 ${
+                                        uploadStatus === 'error' ? 'bg-red-500' : 'bg-green-600'
+                                      }`}
+                                      style={{ width: `${uploadProgress}%` }}
+                                    />
+                                  </div>
+                                )}
+                              </label>
+                            </div>
+                            
+                            {/* Inline error message */}
+                            {videoUploadError && (
+                              <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm animate-slide-down">
+                                <XCircle className="h-4 w-4 shrink-0" />
+                                <span>{videoUploadError}</span>
+                                <button
+                                  onClick={() => setVideoUploadError(null)}
+                                  className="ml-auto text-red-500 hover:text-red-700 text-lg leading-none p-1"
+                                  aria-label="Dismiss"
+                                >
+                                  ×
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          // Video preview - modern card with thumbnail
+                          <div className="bg-gray-50 rounded-xl border border-gray-200 p-3 space-y-3">
+                            <div className="flex items-start gap-3">
+                              <div className="relative w-28 h-16 shrink-0 rounded-lg overflow-hidden border border-gray-200 bg-black">
+                                <video
+                                  src={resolveMediaUrl(settings.brandVideoUrl)}
+                                  className="w-full h-full object-cover"
+                                  controls
+                                  preload="metadata"
+                                  muted
+                                />
+                                {uploadStatus === 'success' && (
+                                  <div className="absolute top-1 right-1">
+                                    <span className="flex items-center gap-1 px-2 py-0.5 bg-green-600 text-white text-xs rounded-full">
+                                      <CheckCircle2 className="h-3 w-3" />
+                                      Uploaded
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-gray-900">Brand video ready</p>
+                                <p className="text-xs text-gray-500 mt-0.5">Video will be saved with settings</p>
+                              </div>
+                              <button
+                                onClick={removeBrandVideo}
+                                className="flex-shrink-0 p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition"
+                                title="Remove video"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            </div>
+                            
+                            {/* Error after upload attempt */}
+                            {videoUploadError && uploadStatus === 'error' && (
+                              <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+                                <XCircle className="h-4 w-4 shrink-0" />
+                                <span>{videoUploadError}</span>
+                                <button
+                                  onClick={() => setVideoUploadError(null)}
+                                  className="ml-auto text-red-500 hover:text-red-700 text-lg leading-none p-1"
+                                >
+                                  ×
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      section.fields.map((field) => (
+                        <div key={field.key} className="sm:grid sm:grid-cols-[140px_1fr] sm:items-center gap-3">
+                          <label className="block text-sm font-medium text-gray-700 sm:text-right sm:pt-1.5">
+                            {field.label}
+                          </label>
+                          <div>
+                            {field.type === 'checkbox' ? (
+                              <label className="inline-flex items-center gap-2 cursor-pointer">
+                                <input
+                                  type="checkbox"
+                                  checked={settings[field.key]}
+                                  onChange={(e) => handleDirectChange(field.key, e.target.checked)}
+                                  className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-2 focus:ring-green-500"
+                                />
+                                <span className="text-sm text-gray-600">{field.label}</span>
+                              </label>
+                            ) : field.type === 'color' ? (
+                              <input
+                                type="color"
+                                value={settings[field.key]}
+                                onChange={(e) => handleDirectChange(field.key, e.target.value)}
+                                className="w-10 h-10 border border-gray-300 rounded-lg cursor-pointer"
+                                title={field.label}
+                              />
+                            ) : (
+                              <input
+                                type={field.type || 'text'}
+                                value={settings[field.key] || ''}
+                                onChange={(e) => handleDirectChange(field.key, e.target.value)}
+                                placeholder={field.placeholder || ''}
+                                min={field.min}
+                                max={field.max}
+                                step={field.step}
+                                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 transition"
+                              />
+                            )}
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
     );
   };
+
   const renderTab = () => {
     switch (activeTab) {
       case 'dashboard': return renderDashboard();
@@ -1203,6 +1645,7 @@ const AdminDashboard = () => {
       case 'ads': return renderAds();
       case 'subscribers': return renderSubscribers();
       case 'reports': return renderReports();
+      case 'settings': return renderSettings();
       default: return renderDashboard();
     }
   };

@@ -1,14 +1,23 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
-import { Home, Search, LogOut, Shield, Building2, Menu, X, Briefcase, Megaphone, Languages } from './icons';
+import { Home, Search, LogOut, Shield, Building2, Menu, X, Briefcase, Megaphone, Languages, Play } from './icons';
+import api from '../services/api';
+
+const resolveMediaUrl = (url) => {
+  if (!url) return '';
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  return `http://localhost:5000${url}`;
+};
 
 const Navbar = () => {
   const { user, logout } = useAuth();
   const { lang, toggleLang, t } = useLanguage();
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [adVideos, setAdVideos] = useState([]);
+  const [videoIndex, setVideoIndex] = useState(0);
 
   const isOwnerOrAdmin = user && (user.role === 'owner' || user.role === 'admin');
   const close = () => setMenuOpen(false);
@@ -18,6 +27,29 @@ const Navbar = () => {
       {label}
     </Link>
   );
+
+  useEffect(() => {
+    const fetchAdVideos = async () => {
+      try {
+        const res = await api.get('/ads');
+        const ads = res.data?.data || [];
+        const videos = ads.flatMap(ad => [
+          ...(ad.videos || []).map(v => ({ src: resolveMediaUrl(v), title: ad.title || ad.companyName || 'Advertisement' })),
+          ...(ad.videoLinks || []).map(v => ({ src: v, title: ad.title || ad.companyName || 'Advertisement', external: true }))
+        ]);
+        setAdVideos(videos);
+      } catch (_) {}
+    };
+    fetchAdVideos();
+  }, []);
+
+  useEffect(() => {
+    if (adVideos.length <= 1) return;
+    const id = setInterval(() => setVideoIndex(i => (i + 1) % adVideos.length), 5000);
+    return () => clearInterval(id);
+  }, [adVideos.length]);
+
+  const currentVideo = adVideos[videoIndex];
 
   return (
     <nav className="fixed top-12 w-full z-50 bg-white/80 backdrop-blur border-b">
@@ -46,6 +78,34 @@ const Navbar = () => {
               >
                 <Languages className="h-5 w-5" />
               </button>
+              {/* Video section - displays admin uploaded ad videos */}
+              {adVideos.length > 0 && (
+                <div className="relative w-32 sm:w-40 aspect-video bg-black rounded overflow-hidden border border-gray-200 shrink-0">
+                  {currentVideo.external ? (
+                    <iframe
+                      src={currentVideo.src}
+                      className="w-full h-full"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      title={currentVideo.title}
+                    />
+                  ) : (
+                    <video
+                      className="w-full h-full object-cover"
+                      src={currentVideo.src}
+                      autoPlay
+                      muted
+                      loop
+                      playsInline
+                      preload="metadata"
+                    />
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end justify-between p-1.5">
+                    <span className="text-white text-[10px] font-medium px-1.5 py-0.5 bg-black/60 rounded">{currentVideo.title}</span>
+                    <Play className="w-4 h-4 text-white/80" />
+                  </div>
+                </div>
+              )}
               {user ? (
                 <>
                   {isOwnerOrAdmin && (
