@@ -123,7 +123,7 @@ export const translations = {
     'listings.title': 'Available Listings',
     'listings.none': 'No listings found.',
 
-    // Search
+// Search
     'search.title': 'Search Properties',
     'search.results': 'Results',
     'search.failed': 'Search failed',
@@ -131,6 +131,8 @@ export const translations = {
     'search.area': 'Area / Location',
     'search.areaPlaceholder': 'e.g. Kigali, Gisenyi',
     'search.type': 'Type',
+    'search.transaction': 'Transaction',
+    'search.condition': 'Condition',
     'search.all': 'All',
     'search.house': 'House',
     'search.car': 'Car',
@@ -640,7 +642,7 @@ export const translations = {
     'listings.title': 'Ibyamamazanywa Bihari',
     'listings.none': 'Nta byamamazanywa byabonetse.',
 
-    // Search
+// Search
     'search.title': 'Shakisha Imitungo',
     'search.results': 'Ibisubizo',
     'search.failed': 'Gushakisha byanze',
@@ -648,6 +650,8 @@ export const translations = {
     'search.area': 'Akarere / Aho biherereye',
     'search.areaPlaceholder': 'urugero: Kigali, Gisenyi',
     'search.type': 'Ubwoko',
+    'search.transaction': 'Gikorwa',
+    'search.condition': 'Imiterere',
     'search.all': 'Byose',
     'search.house': 'Inzu',
     'search.car': 'Imodoka',

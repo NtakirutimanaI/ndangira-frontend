@@ -66,7 +66,7 @@ const SearchFilters = ({ onSearch }) => {
           </select>
         </div>
         <div>
-          <label className="block text-xs font-medium text-gray-700 mb-1">{t('search.transactionType')}</label>
+          <label className="block text-xs font-medium text-gray-700 mb-1">{t('search.transaction')}</label>
           <select className="w-full border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" value={transactionType} onChange={(e) => setTransactionType(e.target.value)}>
             <option value="">{t('search.all')}</option>
             {transactionTypes.map((c) => (
