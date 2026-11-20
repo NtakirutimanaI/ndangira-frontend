@@ -18,7 +18,7 @@ export const translations = {
 
     // Home
     'home.heroTitle': 'Find homes, cars, and plots in Rwanda',
-    'home.heroSubtitle': 'Ndangira connects property owners directly with renters and buyers — no middleman commissions.',
+    'home.heroSubtitle': 'Isange connects property owners directly with renters and buyers — no middleman commissions.',
     'home.browseListings': 'Browse Listings',
     'home.joinAsOwner': 'Join as Owner',
     'home.slide': 'Slide {n}',
@@ -36,8 +36,8 @@ export const translations = {
     'home.directContact': 'Direct contact',
     'home.directContactDesc': 'Contact owners directly via phone or Plot UPI.',
 
-    // Footer
-    'footer.tagline': 'Rwanda property marketplace connecting owners directly with renters and buyers.',
+// Footer
+    'footer.tagline': 'Aho ibyo ukeneye bihurira. Where everything you need comes together.',
     'footer.company': 'Company',
     'footer.forOwners': 'For Property Owners',
     'footer.forClients': 'For Clients',
@@ -65,7 +65,7 @@ export const translations = {
     'footer.planUnlimited': '10,000 RWF - Unlimited (30 days)',
     'footer.privacy': 'Privacy',
     'footer.terms': 'Terms',
-    'footer.copyright': 'Ndangira by MAKE IT SOLUTIONS Ltd.',
+    'footer.copyright': 'Isange by MAKE IT SOLUTIONS Ltd.',
 
     // Auth common
     'auth.email': 'Email address',
@@ -84,7 +84,7 @@ export const translations = {
     'login.noAccount': "Don't have an account?",
     'login.createAccount': 'Create account',
     'login.failed': 'Login failed',
-    'login.welcomeBack': 'Welcome back to Ndangira',
+    'login.welcomeBack': 'Welcome back to Isange',
     'login.heroText': 'Sign in to manage your listings, track requests, and connect directly with clients across Rwanda.',
     'login.trusted': 'Trusted marketplace',
     'login.trustedDesc': 'Admin-verified listings and secure access.',
@@ -97,7 +97,7 @@ export const translations = {
     'register.title': 'Register',
     'register.getStarted': 'Get Started',
     'register.createAccount': 'Create account',
-    'register.subtitle': 'Fill in your details to join Ndangira.',
+    'register.subtitle': 'Fill in your details to join Isange.',
     'register.fullName': 'Full name',
     'register.fullNamePlaceholder': 'John Doe',
     'register.createPassword': 'Create password',
@@ -110,7 +110,7 @@ export const translations = {
     'register.haveAccount': 'Already have an account?',
     'register.signIn': 'Sign in',
     'register.failed': 'Registration failed',
-    'register.joinTitle': 'Join Ndangira today',
+    'register.joinTitle': 'Join Isange today',
     'register.heroText': 'Create an account to publish properties, post jobs or ads, and connect directly with people across Rwanda.',
     'register.verified': 'Verified platform',
     'register.verifiedDesc': 'Listings reviewed through admin workflows.',
@@ -159,7 +159,7 @@ export const translations = {
     // Jobs
     'jobs.careers': 'Careers & Opportunities',
     'jobs.openPositions': 'Open Positions',
-    'jobs.subtitle': 'Browse published opportunities from Ndangira and our partners across Rwanda.',
+    'jobs.subtitle': 'Browse published opportunities from Isange and our partners across Rwanda.',
     'jobs.failed': 'Failed to load job opportunities',
     'jobs.none': 'No published job opportunities at the moment.',
     'jobs.general': 'General',
@@ -167,7 +167,7 @@ export const translations = {
     'jobs.applyNow': 'Apply Now',
     'jobs.applyFor': 'Apply for this job',
     'jobs.close': 'Close',
-    'jobs.handledByEmployer': 'Applications are handled by the employer. Ndangira does not collect applications on this platform. Use the official link or contact below to apply.',
+    'jobs.handledByEmployer': 'Applications are handled by the employer. Isange does not collect applications on this platform. Use the official link or contact below to apply.',
     'jobs.employerWebsite': 'Employer application website',
     'jobs.openWebsiteDesc': 'Open the job owner’s website to complete their application form.',
     'jobs.openForm': 'Open application form',
@@ -179,7 +179,7 @@ export const translations = {
     // Advertise
     'ads.partnerSpotlight': 'Partner Spotlight',
     'ads.featured': 'Featured Advertisements',
-    'ads.subtitle': 'Discover businesses and partners promoting homes, vehicles, plots, and machinery on Ndangira.',
+    'ads.subtitle': 'Discover businesses and partners promoting homes, vehicles, plots, and machinery on Isange.',
     'ads.failed': 'Failed to load advertisements',
     'ads.none': 'No active advertisements right now. Check back soon for partner offers.',
     'ads.active': 'Active',
@@ -526,7 +526,7 @@ export const translations = {
 
     // Home
     'home.heroTitle': 'Shaka amazu, imodoka, n\'ibibanza mu Rwanda',
-    'home.heroSubtitle': 'Ndangira ihuza ba nyir\'imitungo n\'abakodesha cyangwa abaguzi mu buryo butaziguye — nta komisiyo y\'umuhuza.',
+    'home.heroSubtitle': 'Isange ihuza ba nyir\'imitungo n\'abakodesha cyangwa abaguzi mu buryo butaziguye — nta komisiyo y\'umuhuza.',
     'home.browseListings': 'Reba Ibyamamazanywa',
     'home.joinAsOwner': 'Iyandikishe nka Nyir\'umutungo',
     'home.slide': 'Ifoto {n}',
@@ -544,8 +544,8 @@ export const translations = {
     'home.directContact': 'Vugana mu buryo butaziguye',
     'home.directContactDesc': 'Vugana na ba nyir\'imitungo kuri telefone cyangwa UPI y\'ikibanza.',
 
-    // Footer
-    'footer.tagline': 'Isoko ry\'imitungo mu Rwanda rihuza ba nyirayo n\'abakodesha cyangwa abaguzi mu buryo butaziguye.',
+// Footer
+    'footer.tagline': 'Aho ibyo ukeneye bihurira. Where everything you need comes together.',
     'footer.company': 'Ikigo',
     'footer.forOwners': 'Ku Ba Nyir\'Imitungo',
     'footer.forClients': 'Ku Bakiriya',
@@ -573,7 +573,7 @@ export const translations = {
     'footer.planUnlimited': '10,000 RWF - Ntamupaka (iminsi 30)',
     'footer.privacy': 'Ibanga',
     'footer.terms': 'Amabwiriza',
-    'footer.copyright': 'Ndangira ya MAKE IT SOLUTIONS Ltd.',
+    'footer.copyright': 'Isange ya MAKE IT SOLUTIONS Ltd.',
 
     // Auth common
     'auth.email': 'Imeyili',
@@ -592,7 +592,7 @@ export const translations = {
     'login.noAccount': 'Ntabwo ufite konti?',
     'login.createAccount': 'Fungura konti',
     'login.failed': 'Kwinjira byanze',
-    'login.welcomeBack': 'Murakaza neza kuri Ndangira',
+    'login.welcomeBack': 'Murakaza neza kuri Isange',
     'login.heroText': 'Injira kugira ngo ucunge ibyatangajwe, ukurikirane ibyifuzo, kandi uvugane n\'abakiriya mu Rwanda hose.',
     'login.trusted': 'Isoko ryizewe',
     'login.trustedDesc': 'Ibyamamazanywa byemejwe n\'ubuyobozi kandi konti irinzwe.',
@@ -605,7 +605,7 @@ export const translations = {
     'register.title': 'Iyandikishe',
     'register.getStarted': 'Tangira',
     'register.createAccount': 'Fungura konti',
-    'register.subtitle': 'Uzuza amakuru yawe kugira ngo winjire kuri Ndangira.',
+    'register.subtitle': 'Uzuza amakuru yawe kugira ngo winjire kuri Isange.',
     'register.fullName': 'Amazina yose',
     'register.fullNamePlaceholder': 'Amazina yawe',
     'register.createPassword': 'Shyiraho ijambo ry\'ibanga',
@@ -618,7 +618,7 @@ export const translations = {
     'register.haveAccount': 'Usanzwe ufite konti?',
     'register.signIn': 'Injira',
     'register.failed': 'Kwiyandikisha byanze',
-    'register.joinTitle': 'Iyandikishe kuri Ndangira uyu munsi',
+    'register.joinTitle': 'Iyandikishe kuri Isange uyu munsi',
     'register.heroText': 'Fungura konti kugira ngo utangaze imitungo, imirimo cyangwa amatangazo, kandi uvugane n\'abantu mu Rwanda hose.',
     'register.verified': 'Urubuga rwemewe',
     'register.verifiedDesc': 'Ibyatangajwe bisuzumwa n\'ubuyobozi.',
@@ -667,7 +667,7 @@ export const translations = {
     // Jobs
     'jobs.careers': 'Imirimo n\'Amahirwe',
     'jobs.openPositions': 'Imyanya Ifunguye',
-    'jobs.subtitle': 'Reba amahirwe y\'imirimo yatangajwe na Ndangira n\'abafatanyabikorwa bayo mu Rwanda.',
+    'jobs.subtitle': 'Reba amahirwe y\'imirimo yatangajwe na Isange n\'abafatanyabikorwa bayo mu Rwanda.',
     'jobs.failed': 'Gukurura imirimo byanze',
     'jobs.none': 'Nta mirimo yatangajwe muri iki gihe.',
     'jobs.general': 'Rusange',
@@ -675,7 +675,7 @@ export const translations = {
     'jobs.applyNow': 'Saba Ubu',
     'jobs.applyFor': 'Saba uyu murimo',
     'jobs.close': 'Funga',
-    'jobs.handledByEmployer': 'Gusaba akazi bikorwa n\'uwatanze akazi. Ndangira ntabwo yakira ubusabe kuri uru rubuga. Koresha link cyangwa amakuru ari hasi kugira ngo usabe.',
+    'jobs.handledByEmployer': 'Gusaba akazi bikorwa n\'uwatanze akazi. Isange ntabwo yakira ubusabe kuri uru rubuga. Koresha link cyangwa amakuru ari hasi kugira ngo usabe.',
     'jobs.employerWebsite': 'Urubuga rwo gusabiraho akazi',
     'jobs.openWebsiteDesc': 'Fungura urubuga rwa nyir\'akazi wuzuze ifishi yo gusaba.',
     'jobs.openForm': 'Fungura ifishi yo gusaba',
@@ -687,7 +687,7 @@ export const translations = {
     // Advertise
     'ads.partnerSpotlight': 'Abafatanyabikorwa',
     'ads.featured': 'Amatangazo Yatoranyijwe',
-    'ads.subtitle': 'Menya ubucuruzi n\'abafatanyabikorwa batangaza amazu, imodoka, ibibanza n\'ibikoresho kuri Ndangira.',
+    'ads.subtitle': 'Menya ubucuruzi n\'abafatanyabikorwa batangaza amazu, imodoka, ibibanza n\'ibikoresho kuri Isange.',
     'ads.failed': 'Gukurura amatangazo byanze',
     'ads.none': 'Nta matangazo ariho ubu. Garuka nyuma urebe amatangazo mashya.',
     'ads.active': 'Birakora',

@@ -707,7 +707,7 @@ const Dashboard = () => {
 
       <footer className="mt-12 pt-8 border-t border-gray-200 bg-white">
         <div className="max-w-7xl mx-auto px-4 text-center">
-          <p className="text-xs text-gray-500">&copy; {new Date().getFullYear()} Ndangira by MAKE IT SOLUTIONS Ltd. All rights reserved.</p>
+          <p className="text-xs text-gray-500">&copy; {new Date().getFullYear()} Isange by MAKE IT SOLUTIONS Ltd. All rights reserved.</p>
         </div>
       </footer>
     </div>

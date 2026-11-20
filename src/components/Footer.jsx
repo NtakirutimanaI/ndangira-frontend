@@ -3,10 +3,10 @@ import { Phone, Mail, MapPin, Globe, Building2, Shield, CheckCircle2, Facebook, 
 import { useLanguage } from '../context/LanguageContext';
 
 const socialLinks = [
-  { label: 'Facebook', href: 'https://facebook.com/ndangira', Icon: Facebook, className: 'bg-[#1877F2] hover:bg-[#166FE5] text-white' },
-  { label: 'X (Twitter)', href: 'https://twitter.com/ndangira', Icon: Twitter, className: 'bg-black hover:bg-neutral-800 text-white' },
-  { label: 'Instagram', href: 'https://instagram.com/ndangira', Icon: Instagram, className: 'bg-gradient-to-tr from-[#F58529] via-[#DD2A7B] to-[#515BD4] hover:brightness-110 text-white' },
-  { label: 'LinkedIn', href: 'https://linkedin.com/company/ndangira', Icon: Linkedin, className: 'bg-[#0A66C2] hover:bg-[#004182] text-white' },
+  { label: 'Facebook', href: 'https://facebook.com/isange', Icon: Facebook, className: 'bg-[#1877F2] hover:bg-[#166FE5] text-white' },
+  { label: 'X (Twitter)', href: 'https://twitter.com/isange', Icon: Twitter, className: 'bg-black hover:bg-neutral-800 text-white' },
+  { label: 'Instagram', href: 'https://instagram.com/isange', Icon: Instagram, className: 'bg-gradient-to-tr from-[#F58529] via-[#DD2A7B] to-[#515BD4] hover:brightness-110 text-white' },
+  { label: 'LinkedIn', href: 'https://linkedin.com/company/isange', Icon: Linkedin, className: 'bg-[#0A66C2] hover:bg-[#004182] text-white' },
 ];
 
 const Footer = () => {
@@ -39,8 +39,8 @@ const Footer = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 mb-8">
           <div className="sm:col-span-2 lg:col-span-1">
-            <div className="flex items-center mb-3">
-              <img src="/ndangira-logo.png" alt="Ndangira Real Estate" className="h-12 w-auto max-w-[170px] object-contain" />
+<div className="flex items-center mb-3">
+              <img src="/isange.png" alt="Isange - Aho ibyo ukeneye bihurira" className="h-12 w-auto max-w-[170px] object-contain" />
             </div>
             <p className="text-sm text-gray-300 mb-3 leading-relaxed">
               {t('footer.tagline')}
@@ -118,7 +118,7 @@ const Footer = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <Mail className="h-4 w-4 shrink-0" />
-                  <a href="mailto:info@ndangira.com" className="hover:text-green-400 transition break-all">info@ndangira.com</a>
+                  <a href="mailto:info@isange.com" className="hover:text-green-400 transition break-all">info@isange.com</a>
                 </div>
               </div>
             </div>
@@ -162,7 +162,7 @@ const Footer = () => {
 
           <div className="border-t border-gray-800 pt-4">
             <div className="flex flex-col md:flex-row justify-between items-center gap-3 text-sm text-gray-400 text-center md:text-left">
-              <p>&copy; {new Date().getFullYear()} {t('footer.copyright')}</p>
+              <p>&copy; {new Date().getFullYear()} Isange by MAKE IT SOLUTIONS Ltd. All rights reserved.</p>
               <div className="flex flex-wrap justify-center gap-4">
                 <Link to="/privacy" className="hover:text-green-400 transition">{t('footer.privacy')}</Link>
                 <Link to="/terms" className="hover:text-green-400 transition">{t('footer.terms')}</Link>

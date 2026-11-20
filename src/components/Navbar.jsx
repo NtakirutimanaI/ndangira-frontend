@@ -24,7 +24,7 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <Link to="/" onClick={close} className="flex items-center gap-2 py-1">
-            <img src="/ndangira-logo.png" alt="Ndangira Real Estate" className="h-12 sm:h-14 w-auto max-w-[180px] object-contain" />
+            <img src="/isange.png" alt="Isange - Aho ibyo ukeneye bihurira" className="h-12 sm:h-14 w-auto max-w-[180px] object-contain" />
           </Link>
 
           <div className="hidden md:flex items-center gap-6">

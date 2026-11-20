@@ -309,7 +309,7 @@ const AdminDashboard = () => {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `ndangira-report-${reportAppliedType}-${new Date().toISOString().slice(0,10)}.${ext}`;
+      a.download = `isange-report-${reportAppliedType}-${new Date().toISOString().slice(0,10)}.${ext}`;
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -1216,7 +1216,7 @@ const AdminDashboard = () => {
         <div className="p-3 border-b border-gray-200 flex items-center justify-between">
           <div className="flex items-center gap-4 overflow-hidden">
             <LayoutDashboard className="h-6 w-6 text-green-600 shrink-0" />
-            <span className={`font-bold text-xl tracking-tight text-gray-900 whitespace-nowrap transition-opacity duration-300 ${sidebarOpen ? 'opacity-100' : 'opacity-0 lg:group-hover:opacity-100'}`}>Ndangira</span>
+            <span className={`font-bold text-xl tracking-tight text-gray-900 whitespace-nowrap transition-opacity duration-300 ${sidebarOpen ? 'opacity-100' : 'opacity-0 lg:group-hover:opacity-100'}`}>Isange</span>
           </div>
           <button onClick={() => setSidebarOpen(false)} className="lg:hidden p-1 text-gray-500 hover:bg-gray-100"><X className="h-4 w-4" /></button>
         </div>
@@ -1360,7 +1360,7 @@ const AdminDashboard = () => {
 
       <footer className="mt-12 pt-8 border-t border-gray-200 bg-white">
         <div className="max-w-7xl mx-auto px-4 text-center">
-          <p className="text-xs text-gray-500">&copy; {new Date().getFullYear()} Ndangira by MAKE IT SOLUTIONS Ltd. All rights reserved.</p>
+          <p className="text-xs text-gray-500">&copy; {new Date().getFullYear()} Isange by MAKE IT SOLUTIONS Ltd. All rights reserved.</p>
         </div>
       </footer>
     </div>
