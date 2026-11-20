@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Building2, Car, Home as HomeIcon, DollarSign, MapPin, Search } from '../components/icons';
+import { Building2, Car, Home as HomeIcon, DollarSign, MapPin, Search, Play } from '../components/icons';
 import { useLanguage } from '../context/LanguageContext';
 
 const heroSlides = [
@@ -9,6 +9,9 @@ const heroSlides = [
   { type: 'image', src: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1600&q=80', alt: 'Plot of land for sale' },
   { type: 'image', src: 'https://images.unsplash.com/photo-1581092160562-40aa08e78837?auto=format&fit=crop&w=1600&q=80', alt: 'Machinery and equipment for rent or sale' },
 ];
+
+// ISANO promotional video - replace with actual video URL
+const isanoVideo = 'https://videos.pexels.com/video-files/2103099/2103099-hd_1920_1080_30fps.mp4';
 
 const Home = () => {
   const [current, setCurrent] = useState(0);
@@ -56,6 +59,37 @@ const Home = () => {
               {t('home.joinAsOwner')}
             </Link>
           </div>
+          
+          {/* ISANO Promotional Video Card - Centered */}
+          <div className="mt-10 flex justify-center">
+            <div className="w-full max-w-md sm:max-w-lg">
+              <div className="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 overflow-hidden shadow-2xl">
+                <div className="relative aspect-video bg-black">
+                  <video
+                    className="w-full h-full object-cover"
+                    src={isanoVideo}
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    preload="metadata"
+                    poster="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+                  <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between">
+                    <span className="text-xs font-medium text-white/90 bg-orange-500/80 backdrop-blur-sm px-2 py-1 rounded">ISANO • Computers New</span>
+                    <button className="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition">
+                      <Play className="w-4 h-4 ml-0.5" />
+                    </button>
+                  </div>
+                </div>
+                <div className="p-3 text-center">
+                  <p className="text-sm font-medium text-white/90">Featured Advertisement</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
           <div className="mt-8 flex justify-center gap-2">
             {heroSlides.map((_, i) => (
               <button key={i} type="button" aria-label={t('home.slide', { n: i + 1 })} onClick={() => setCurrent(i)} className={`h-2.5 rounded-full transition-all ${i === current ? 'w-8 bg-white' : 'w-2.5 bg-white/50 hover:bg-white/80'}`} />

@@ -41,6 +41,7 @@ export const CheckCircle2 = (props) => base(props, <><circle cx="12" cy="12" r="
 export const CheckCircle = CheckCircle2;
 export const Image = (props) => base(props, <><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9" r="1.5"/><path d="M21 16l-5-5-4 4-2-2-5 5"/></>);
 export const PlayCircle = (props) => base(props, <><circle cx="12" cy="12" r="9"/><path d="M10 8.5l6 3.5-6 3.5z" fill="currentColor" stroke="none"/></>);
+export const Play = (props) => base(props, <><polygon points="5 3 19 12 5 21 5 3"/></>);
 export const ArrowLeft = (props) => base(props, <><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></>);
 export const ChevronLeft = (props) => base(props, <><path d="M15 18l-6-6 6-6"/></>);
 export const ChevronRight = (props) => base(props, <><path d="M9 18l6-6-6-6"/></>);
@@ -92,7 +93,7 @@ export const LinkedIn = Linkedin;
 
 export default {
   Home, Search, LogOut, Shield, Building2, Building, Menu, X, Briefcase, Megaphone,
-  DollarSign, Phone, Mail, MapPin, Clock, Globe, Languages, CheckCircle2, CheckCircle, Image, PlayCircle,
+  DollarSign, Phone, Mail, MapPin, Clock, Globe, Languages, CheckCircle2, CheckCircle, Image, PlayCircle, Play,
   ArrowLeft, ChevronLeft, ChevronRight, ArrowUp, LayoutDashboard, Users, User, XCircle, CreditCard,
   FileText, Settings, Plus, Eye, EyeOff, Trash2, Download, Calendar, ExternalLink, Tag,
   Sparkles, Bell, MessageSquare, Send, Smartphone, Landmark, Car, Lock, Facebook, Twitter, Instagram, Linkedin, LinkedIn,
