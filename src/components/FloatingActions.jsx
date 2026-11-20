@@ -129,6 +129,7 @@ const FloatingActions = () => {
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef(null);
+  const messagesContainerRef = useRef(null);
   const chatbotTriggerRef = useRef(null);
   const whatsappTriggerRef = useRef(null);
   const { lang } = useLanguage();
@@ -144,7 +145,7 @@ const FloatingActions = () => {
 
   return (
     <>
-      <style jsx global>{`
+      <style>{`
         @keyframes fade-in { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
         .animate-fade-in { animation: fade-in 0.2s ease-out; }
       `}</style>
@@ -156,7 +157,7 @@ const FloatingActions = () => {
       </div>
 
       <Modal isOpen={showChatbot} onClose={() => setShowChatbot(false)} title="Isange AI" triggerRef={chatbotTriggerRef}>
-        <div className="space-y-2" ref={messagesEndRef}>
+        <div className="space-y-2" ref={messagesContainerRef}>
           {messages.map((msg, i) => (
             <div key={i} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
               <div className={`max-w-[80%] px-3 py-2 rounded-2xl text-xs ${msg.sender === 'user' ? 'bg-orange-500 text-white rounded-br-none' : 'bg-gray-100 text-gray-900 rounded-bl-none'}`}>
