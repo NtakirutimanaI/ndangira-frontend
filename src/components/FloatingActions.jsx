@@ -57,10 +57,10 @@ const FloatingActions = () => {
   return (
     <>
       <style jsx global>{`
-        @keyframes slide-in { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
-        @keyframes slide-out { from { opacity: 1; transform: scale(1) translateY(0); } to { opacity: 0; transform: scale(0.95) translateY(10px); } }
-        .animate-slide-in { animation: slide-in 0.25s ease-out; }
-        .animate-slide-out { animation: slide-out 0.2s ease-in; }
+        @keyframes fade-in { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        @keyframes fade-out { from { opacity: 1; transform: scale(1); } to { opacity: 0; transform: scale(0.95); } }
+        .animate-fade-in { animation: fade-in 0.2s ease-out; }
+        .animate-fade-out { animation: fade-out 0.15s ease-in; }
         .modal-backdrop { position: fixed; inset: 0; z-index: 40; background: transparent; }
         .modal-content { transition: transform 0.1s ease-out, left 0.1s ease-out, top 0.1s ease-out; }
       `}</style>
@@ -109,6 +109,7 @@ const Modal = ({ isOpen, onClose, triggerRef, title, children }) => {
       const modalHeight = Math.min(480, window.innerHeight - 20);
       let x = btnRect.right - modalWidth;
       let y = btnRect.top - modalHeight - 8;
+      // Ensure modal stays fully in viewport
       x = Math.max(10, Math.min(window.innerWidth - modalWidth - 10, x));
       y = Math.max(10, Math.min(window.innerHeight - modalHeight - 10, y));
       setPosition({ x, y });
@@ -125,8 +126,8 @@ const Modal = ({ isOpen, onClose, triggerRef, title, children }) => {
 
   return (
     <div className="modal-backdrop" onClick={handleBackdropClick}>
-      <div ref={modalRef} className="fixed z-50 modal-content" style={{ left: `${position.x}px`, top: `${position.y}px`, width: `calc(100vw - 20px)`, maxWidth: '320px', maxHeight: 'calc(100vh - 20px)' }} onMouseDown={handleMouseDown}>
-        <div className="bg-white rounded-xl shadow-2xl flex flex-col overflow-hidden animate-slide-in" style={{ maxHeight: 'calc(100vh - 20px)', display: 'flex', flexDirection: 'column' }}>
+      <div ref={modalRef} className="fixed z-50 modal-content" style={{ left: `${position.x}px`, top: `${position.y}px`, width: `calc(100vw - 20px)`, maxWidth: '320px', maxHeight: 'calc(100vh - 20px)', transformOrigin: 'center center' }} onMouseDown={handleMouseDown}>
+        <div className="bg-white rounded-xl shadow-2xl flex flex-col overflow-hidden animate-fade-in" style={{ maxHeight: 'calc(100vh - 20px)', display: 'flex', flexDirection: 'column' }}>
           <div className="bg-orange-500 text-white p-3 rounded-t-xl flex items-center justify-between cursor-move select-none touch-none flex-shrink-0">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center"><Sparkles className="w-4 h-4 text-white"/></div>
