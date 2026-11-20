@@ -18,7 +18,12 @@ const PropertyDetailsModal = ({ property, onClose }) => {
   const title = property.title;
   const description = property.description;
   const locationText = [property.area, property.city].filter(Boolean).join(', ');
-  const imgUrl = (img) => (img ? (img.startsWith('http') ? img : `http://localhost:5000${img}`) : null);
+  const imgUrl = (img) => {
+    if (!img) return null;
+    if (img.startsWith('http')) return img;
+    // Local storage: images served at /uploads/filename
+    return `http://localhost:5000/uploads/${img}`;
+  };
   const current = imgUrl(images[idx]);
   const hasMulti = images.length > 1;
   const prev = () => { setIdx((i) => (i - 1 + images.length) % images.length); setZoom(false); };
