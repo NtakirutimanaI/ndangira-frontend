@@ -150,11 +150,11 @@ forClients: [
               <div className="space-y-2 text-sm text-gray-300">
                 <div className="flex items-start gap-2">
                   <span className="text-green-500">●</span>
-                  <span>No upfront fees. Platform charges 10% commission to the buyer/renter.</span>
+                  <span>Properties: Free to list. 10% fee paid by buyer/renter.</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <span className="text-green-500">●</span>
-                  <span>Property owners list for free. Clients pay 10% on top of the listed price.</span>
+                  <span>Ads: 50,000 RWF/month or 500,000 RWF/year.</span>
                 </div>
               </div>
             </div>
