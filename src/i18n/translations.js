@@ -540,7 +540,7 @@ export const translations = {
     'nav.toggleMenu': 'Fungura/Funga menu',
 
 // Home
-    'home.heroTitle': 'Shaka amazu, imodoka, n\'ibibanza mu Rwanda',
+    'home.heroTitle': 'Shaka amazu,ibibanza, n\'ibikoresho mu Rwanda hose',
     'home.heroSubtitle': 'Isange ihuza ba nyir\'imitungo n\'abakodesha cyangwa abaguzi mu buryo butaziguye — nta komisiyo y\'umuhuza.',
     'home.browseListings': 'Reba Ibyamamazanywa',
     'home.joinAsOwner': 'Iyandikishe nka Nyir\'umutungo',
