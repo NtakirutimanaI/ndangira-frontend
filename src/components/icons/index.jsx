@@ -61,6 +61,8 @@ export const Calendar = (props) => base(props, <><rect x="3" y="4" width="18" he
 export const ExternalLink = (props) => base(props, <><path d="M14 3h7v7"/><path d="M10 14L21 3"/><path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5"/></>);
 export const Tag = (props) => base(props, <><path d="M20.59 13.41L12 22l-9-9V4h9z"/><circle cx="7.5" cy="7.5" r="1.5"/></>);
 export const Sparkles = (props) => base(props, <><path d="M12 3l1.8 4.2L18 9l-4.2 1.8L12 15l-1.8-4.2L6 9l4.2-1.8L12 3z"/><path d="M19 14l.8 1.8L22 16.5l-2.2.7L19 19l-.8-1.8-2.2-.7 2.2-.7.8-1.8z"/><path d="M5 15l.6 1.4L7 17l-1.4.6L5 19l-.6-1.4L3 17l1.4-.6L5 15z"/></>);
+export const MessageSquare = (props) => base(props, <><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M14 9h-4M14 13h-4"/></>);
+export const Send = (props) => base(props, <><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></>);
 export const Smartphone = (props) => base(props, <><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></>);
 export const Landmark = (props) => base(props, <><path d="M3 21h18"/><path d="M4 17h16"/><path d="M12 3L3 8h18L12 3z"/><path d="M6 17v-6M10 17v-6M14 17v-6M18 17v-6"/></>);
 export const Car = (props) => base(props, <><path d="M5 11l1.5-4.5A2 2 0 0 1 8.4 5h7.2a2 2 0 0 1 1.9 1.5L19 11"/><path d="M3 11h18v5H3z"/><circle cx="7.5" cy="16" r="1.5"/><circle cx="16.5" cy="16" r="1.5"/><path d="M5 16H3M21 16h-2"/></>);
@@ -92,5 +94,5 @@ export default {
   DollarSign, Phone, Mail, MapPin, Clock, Globe, Languages, CheckCircle2, CheckCircle, Image, PlayCircle,
   ArrowLeft, ChevronLeft, ChevronRight, ArrowUp, LayoutDashboard, Users, User, XCircle, CreditCard,
   FileText, Settings, Plus, Eye, EyeOff, Trash2, Download, Calendar, ExternalLink, Tag,
-  Sparkles, Smartphone, Landmark, Car, Lock, Facebook, Twitter, Instagram, Linkedin, LinkedIn,
+  Sparkles, MessageSquare, Send, Smartphone, Landmark, Car, Lock, Facebook, Twitter, Instagram, Linkedin, LinkedIn,
 };
