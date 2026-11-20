@@ -27,17 +27,29 @@ const CHATBOT_RESPONSES = {
   }
 };
 
-const DraggableModal = ({ isOpen, onClose, children, initialPosition, title }) => {
-  const [position, setPosition] = useState(initialPosition);
+const DraggableModal = ({ isOpen, onClose, children, title, buttonRef }) => {
+  const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const dragOffset = useRef({ x: 0, y: 0 });
   const modalRef = useRef(null);
 
   useEffect(() => {
-    if (isOpen) {
-      setPosition(initialPosition);
+    if (isOpen && buttonRef.current) {
+      const btnRect = buttonRef.current.getBoundingClientRect();
+      const modalWidth = 320;
+      const modalHeight = 400;
+      
+      // Position above the button, aligned to right edge
+      let x = btnRect.right - modalWidth;
+      let y = btnRect.top - modalHeight - 10;
+      
+      // Keep within viewport
+      x = Math.max(10, Math.min(window.innerWidth - modalWidth - 10, x));
+      y = Math.max(10, Math.min(window.innerHeight - modalHeight - 10, y));
+      
+      setPosition({ x, y });
     }
-  }, [isOpen, initialPosition]);
+  }, [isOpen, buttonRef]);
 
   const handleMouseDown = (e) => {
     if (e.target.closest('button, a, input')) return;
@@ -54,12 +66,12 @@ const DraggableModal = ({ isOpen, onClose, children, initialPosition, title }) =
   useEffect(() => {
     const handleMove = (e) => {
       if (!isDragging) return;
-      const maxX = window.innerWidth - 320;
-      const maxY = window.innerHeight - 400;
+      const modalWidth = 320;
+      const modalHeight = 400;
       let newX = e.clientX - dragOffset.current.x;
       let newY = e.clientY - dragOffset.current.y;
-      newX = Math.max(10, Math.min(maxX, newX));
-      newY = Math.max(10, Math.min(maxY, newY));
+      newX = Math.max(10, Math.min(window.innerWidth - modalWidth - 10, newX));
+      newY = Math.max(10, Math.min(window.innerHeight - modalHeight - 10, newY));
       setPosition({ x: newX, y: newY });
     };
 
@@ -80,7 +92,7 @@ const DraggableModal = ({ isOpen, onClose, children, initialPosition, title }) =
   return (
     <div
       ref={modalRef}
-      className="fixed z-50 transition-all duration-200"
+      className="fixed z-50 transition-all duration-150"
       style={{
         left: `${position.x}px`,
         top: `${position.y}px`,
@@ -110,12 +122,12 @@ const DraggableModal = ({ isOpen, onClose, children, initialPosition, title }) =
   );
 };
 
-const WhatsAppModal = ({ isOpen, onClose, initialPosition }) => {
+const WhatsAppModal = ({ isOpen, onClose, buttonRef }) => {
   return (
     <DraggableModal
       isOpen={isOpen}
       onClose={onClose}
-      initialPosition={initialPosition}
+      buttonRef={buttonRef}
       title="WhatsApp Support"
     >
       <div className="p-4 space-y-3">
@@ -137,8 +149,8 @@ const FloatingActions = () => {
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [showChatbot, setShowChatbot] = useState(false);
   const [showWhatsApp, setShowWhatsApp] = useState(false);
-  const [chatbotPos, setChatbotPos] = useState({ x: 20, y: 100 });
-  const [whatsappPos, setWhatsappPos] = useState({ x: 20, y: 100 });
+  const chatbotBtnRef = useRef(null);
+  const whatsappBtnRef = useRef(null);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -229,7 +241,8 @@ const FloatingActions = () => {
 
       <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3 sm:bottom-8 sm:right-8">
         <button
-          onClick={() => { setChatbotPos({ x: 20, y: 100 }); setShowChatbot(true); }}
+          ref={chatbotBtnRef}
+          onClick={() => setShowChatbot(true)}
           className="w-11 h-11 sm:w-12 sm:h-12 bg-orange-500 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-orange-600 transition-all hover:scale-105 active:scale-95"
           title="AI Assistant"
           aria-label="AI Assistant"
@@ -238,7 +251,8 @@ const FloatingActions = () => {
         </button>
 
         <button
-          onClick={() => { setWhatsappPos({ x: 20, y: 100 }); setShowWhatsApp(true); }}
+          ref={whatsappBtnRef}
+          onClick={() => setShowWhatsApp(true)}
           className="w-11 h-11 sm:w-12 sm:h-12 bg-[#25D366] text-white rounded-full shadow-lg flex items-center justify-center hover:bg-[#1DB954] transition-all hover:scale-105 active:scale-95"
           title="WhatsApp Support"
           aria-label="WhatsApp Support"
@@ -261,7 +275,7 @@ const FloatingActions = () => {
       <ChatbotModal
         isOpen={showChatbot}
         onClose={() => setShowChatbot(false)}
-        initialPosition={chatbotPos}
+        buttonRef={chatbotBtnRef}
         messages={messages}
         input={input}
         setInput={setInput}
@@ -276,18 +290,18 @@ const FloatingActions = () => {
       <WhatsAppModal
         isOpen={showWhatsApp}
         onClose={() => setShowWhatsApp(false)}
-        initialPosition={whatsappPos}
+        buttonRef={whatsappBtnRef}
       />
     </>
   );
 };
 
-const ChatbotModal = ({ isOpen, onClose, initialPosition, messages, input, setInput, isTyping, handleSend, handleKeyPress, quickReplies, messagesEndRef, lang }) => {
+const ChatbotModal = ({ isOpen, onClose, buttonRef, messages, input, setInput, isTyping, handleSend, handleKeyPress, quickReplies, messagesEndRef, lang }) => {
   return (
     <DraggableModal
       isOpen={isOpen}
       onClose={onClose}
-      initialPosition={initialPosition}
+      buttonRef={buttonRef}
       title="Isange AI"
     >
       <div className="flex-1 overflow-y-auto p-3 space-y-2" ref={messagesEndRef}>
