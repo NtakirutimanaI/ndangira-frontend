@@ -1,11 +1,16 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Image, MapPin } from './icons';
+import { Image, MapPin, ChevronLeft, ChevronRight } from './icons';
 import { useLanguage } from '../context/LanguageContext';
 
 const PropertyCard = ({ property, onView }) => {
   const { t, lang } = useLanguage();
-  const img = property.images?.[0];
-  const imgUrl = img ? (img.startsWith('http') ? img : `http://localhost:5000${img}`) : null;
+  const images = property.images || [];
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const getImageUrl = (img) => img ? (img.startsWith('http') ? img : `http://localhost:5000${img}`) : null;
+  const currentImgUrl = images.length > 0 ? getImageUrl(images[currentIndex]) : null;
+
   const typeLabel = { house: t('search.house'), car: t('search.car'), plot: t('search.plot'), material: t('search.material') }[property.type] || property.type;
   const transactionTypeText = property.transactionType === 'sale' ? t('dash.propForSale') : t('dash.propForRent');
   const conditionText = property.condition === 'new' ? t('dash.propNew') : t('dash.propUsed');
@@ -13,15 +18,39 @@ const PropertyCard = ({ property, onView }) => {
   const description = property.description;
   const locationText = [property.area, property.city].filter(Boolean).join(', ');
 
+  const goPrev = (e) => {
+    e.stopPropagation();
+    setCurrentIndex((i) => (i - 1 + images.length) % images.length);
+  };
+  const goNext = (e) => {
+    e.stopPropagation();
+    setCurrentIndex((i) => (i + 1) % images.length);
+  };
+
   return (
     <div className="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-md transition text-center">
       <div className="relative h-32">
-        {imgUrl ? (
-          <img src={imgUrl} alt={title} className="w-full h-full object-cover" />
+        {currentImgUrl ? (
+          <img src={currentImgUrl} alt={`${title} ${currentIndex + 1}`} className="w-full h-full object-cover" />
         ) : (
           <div className="w-full h-full bg-gray-100 flex items-center justify-center text-gray-400">
             <Image className="h-6 w-6" />
           </div>
+        )}
+        {images.length > 1 && (
+          <>
+            <button onClick={goPrev} className="absolute left-1 top-1/2 -translate-y-1/2 bg-black/50 text-white p-1 rounded hover:bg-black/70" aria-label={t('property.prevImage')}>
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <button onClick={goNext} className="absolute right-1 top-1/2 -translate-y-1/2 bg-black/50 text-white p-1 rounded hover:bg-black/70" aria-label={t('property.nextImage')}>
+              <ChevronRight className="h-4 w-4" />
+            </button>
+            <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex gap-1">
+              {images.map((_, i) => (
+                <span key={i} className={`w-1.5 h-1.5 rounded-full transition ${i === currentIndex ? 'bg-white' : 'bg-white/50'}`} />
+              ))}
+            </div>
+          </>
         )}
         <span className="absolute top-1 right-1 bg-green-600 text-white text-[11px] font-medium px-1.5 py-0.5">
           {typeLabel} · {transactionTypeText} · {conditionText}
