@@ -68,6 +68,10 @@ const Modal = ({ isOpen, onClose, title, children, triggerRef }) => {
   };
 
   useEffect(() => {
+    if (!isOpen) setIsDragging(false);
+  }, [isOpen]);
+
+  useEffect(() => {
     const handleMove = (e) => {
       if (!isDragging) return;
       const rect = modalRef.current?.getBoundingClientRect();
@@ -81,10 +85,8 @@ const Modal = ({ isOpen, onClose, title, children, triggerRef }) => {
       setPosition({ x: newX, y: newY });
     };
     const handleUp = () => setIsDragging(false);
-    if (isDragging) {
-      window.addEventListener('mousemove', handleMove);
-      window.addEventListener('mouseup', handleUp);
-    }
+    window.addEventListener('mousemove', handleMove);
+    window.addEventListener('mouseup', handleUp);
     return () => {
       window.removeEventListener('mousemove', handleMove);
       window.removeEventListener('mouseup', handleUp);
