@@ -44,6 +44,7 @@ export const PlayCircle = (props) => base(props, <><circle cx="12" cy="12" r="9"
 export const ArrowLeft = (props) => base(props, <><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></>);
 export const ChevronLeft = (props) => base(props, <><path d="M15 18l-6-6 6-6"/></>);
 export const ChevronRight = (props) => base(props, <><path d="M9 18l6-6-6-6"/></>);
+export const ArrowUp = (props) => base(props, <><path d="M18 15l-6-6-6 6"/><path d="M12 3v18"/></>);
 export const LayoutDashboard = (props) => base(props, <><rect x="3" y="3" width="8" height="8" rx="1"/><rect x="13" y="3" width="8" height="5" rx="1"/><rect x="13" y="10" width="8" height="11" rx="1"/><rect x="3" y="13" width="8" height="8" rx="1"/></>);
 export const Users = (props) => base(props, <><circle cx="9" cy="8" r="3"/><path d="M3 20v-1a5 5 0 0 1 5-5h2a5 5 0 0 1 5 5v1"/><circle cx="17" cy="9" r="2.5"/><path d="M17 14a4 4 0 0 1 4 4v2"/></>);
 export const User = (props) => base(props, <><circle cx="12" cy="8" r="4"/><path d="M4 20a8 8 0 0 1 16 0"/></>);
@@ -89,7 +90,7 @@ export const LinkedIn = Linkedin;
 export default {
   Home, Search, LogOut, Shield, Building2, Building, Menu, X, Briefcase, Megaphone,
   DollarSign, Phone, Mail, MapPin, Clock, Globe, Languages, CheckCircle2, CheckCircle, Image, PlayCircle,
-  ArrowLeft, ChevronLeft, ChevronRight, LayoutDashboard, Users, User, XCircle, CreditCard,
+  ArrowLeft, ChevronLeft, ChevronRight, ArrowUp, LayoutDashboard, Users, User, XCircle, CreditCard,
   FileText, Settings, Plus, Eye, EyeOff, Trash2, Download, Calendar, ExternalLink, Tag,
   Sparkles, Smartphone, Landmark, Car, Lock, Facebook, Twitter, Instagram, Linkedin, LinkedIn,
 };

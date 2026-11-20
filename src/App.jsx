@@ -14,6 +14,7 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdvertiseBanner from './components/AdvertiseBanner';
+import FloatingActions from './components/FloatingActions';
 
 const App = () => {
   const location = useLocation();
@@ -37,6 +38,7 @@ const App = () => {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       {!isDashboard && <Footer />}
+      {!isDashboard && <FloatingActions />}
     </>
   );
 };
