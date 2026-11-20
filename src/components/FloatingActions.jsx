@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef, createPortal } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { ArrowUp, Sparkles, Phone, X, Send, MessageSquare } from '../components/icons';
 import { useLanguage } from '../context/LanguageContext';
 
