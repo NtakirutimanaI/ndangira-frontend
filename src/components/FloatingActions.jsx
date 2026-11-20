@@ -118,7 +118,7 @@ const FloatingActions = () => {
           title="AI Assistant"
           aria-label="AI Assistant"
         >
-          <MessageSquare className="w-6 h-6" />
+          <MessageSquare className="w-6 h-6 text-white" />
         </button>
 
         <button
@@ -127,7 +127,7 @@ const FloatingActions = () => {
           title="WhatsApp Support"
           aria-label="WhatsApp Support"
         >
-          <Phone className="w-6 h-6" />
+          <Phone className="w-6 h-6 text-white" />
         </button>
 
         {showScrollTop && (
@@ -137,7 +137,7 @@ const FloatingActions = () => {
             title="Back to Top"
             aria-label="Back to Top"
           >
-            <ArrowUp className="w-6 h-6" />
+            <ArrowUp className="w-6 h-6 text-white" />
           </button>
         )}
       </div>
@@ -148,7 +148,7 @@ const FloatingActions = () => {
             <div className="bg-orange-500 text-white p-4 rounded-t-2xl flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                  <Sparkles className="w-5 h-5" />
+                  <Sparkles className="w-5 h-5 text-white" />
                 </div>
                 <div>
                   <p className="font-semibold text-sm">Isange AI Assistant</p>
@@ -156,7 +156,7 @@ const FloatingActions = () => {
                 </div>
               </div>
               <button onClick={() => setShowChatbot(false)} className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition">
-                <X className="w-5 h-5" />
+                <X className="w-5 h-5 text-white" />
               </button>
             </div>
 
@@ -211,7 +211,7 @@ const FloatingActions = () => {
                   disabled={!input.trim() || isTyping}
                   className="w-10 h-10 bg-orange-500 text-white rounded-full flex items-center justify-center hover:bg-orange-600 transition disabled:opacity-50"
                 >
-                  <Send className="w-5 h-5" />
+                  <Send className="w-5 h-5 text-white" />
                 </button>
               </div>
             </div>
@@ -225,7 +225,7 @@ const FloatingActions = () => {
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-xl font-bold text-gray-900">WhatsApp Support</h3>
               <button onClick={() => setShowWhatsApp(false)} className="text-gray-400 hover:text-gray-600">
-                <X className="w-6 h-6" />
+                <X className="w-6 h-6 text-white" />
               </button>
             </div>
             <p className="text-gray-600 mb-4">Contact us directly on WhatsApp for quick support.</p>
