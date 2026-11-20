@@ -45,7 +45,7 @@ const Modal = ({ isOpen, onClose, title, children, triggerRef }) => {
     if (triggerRef.current) {
       const btnRect = triggerRef.current.getBoundingClientRect();
       const modalWidth = Math.min(280, window.innerWidth - 20);
-      const modalHeight = Math.min(480, window.innerHeight - 20);
+      const modalHeight = Math.min(420, window.innerHeight - 20);
       // Position to the left of the button, vertically centered
       let x = btnRect.left - modalWidth - 12;
       let y = btnRect.top + (btnRect.height / 2) - (modalHeight / 2);
@@ -92,11 +92,11 @@ const Modal = ({ isOpen, onClose, title, children, triggerRef }) => {
   }, [isDragging]);
 
   return (
-    <div className="fixed inset-0 z-50 p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-[60] p-4" onClick={onClose}>
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
       <div
         ref={modalRef}
-        className="relative bg-white rounded-2xl shadow-2xl w-full max-w-[280px] max-h-[90vh] flex flex-col overflow-hidden animate-fade-in"
+        className="relative bg-white rounded-2xl shadow-2xl w-full max-w-[280px] max-h-[420px] flex flex-col overflow-hidden animate-fade-in"
         onClick={e => e.stopPropagation()}
         style={{
           position: 'fixed',
