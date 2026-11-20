@@ -106,13 +106,13 @@ const Dashboard = () => {
     setSubmitting(true);
     try {
       if (editingId) {
-        const payload = {
-          title: form.title, description: form.description,
-          type: form.type,
-          area: form.area, location: form.location, city: form.city, address: form.address,
-          contactPhone: form.contactPhone, contactEmail: form.contactEmail, upi: form.upi,
-        };
-        await api.put(`/properties/${editingId}`, payload);
+        const formData = new FormData();
+        ['title', 'description', 'type', 'transactionType', 'condition', 'area', 'location', 'city', 'address', 'contactPhone', 'contactEmail', 'upi', 'ownerPrice', 'images', 'videos'].forEach((k) => {
+          if (form[k] !== undefined && form[k] !== '') formData.append(k, form[k]);
+        });
+        (form.images || []).forEach((f) => formData.append('images', f));
+        (form.videos || []).forEach((f) => formData.append('videos', f));
+        await api.put(`/properties/${editingId}`, formData);
         setSuccess(t('dash.propUpdated'));
         closeForm();
         loadMyProperties();
