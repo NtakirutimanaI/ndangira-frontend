@@ -33,12 +33,85 @@ function detectIntent(input, lang) {
   return bestScore > 0 ? bestIntent : 'default';
 }
 
+const Modal = ({ isOpen, onClose, title, children }) => {
+  if (!isOpen) return null;
+
+  const [position, setPosition] = useState({ x: null, y: null });
+  const [isDragging, setIsDragging] = useState(false);
+  const dragOffset = useRef({ x: 0, y: 0 });
+  const modalRef = useRef(null);
+
+  useEffect(() => {
+    setPosition({ x: null, y: null });
+  }, [isOpen]);
+
+  const handleMouseDown = (e) => {
+    if (e.target.closest('button, a, input, textarea')) return;
+    setIsDragging(true);
+    const rect = modalRef.current?.getBoundingClientRect();
+    if (rect) {
+      dragOffset.current = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    }
+  };
+
+  useEffect(() => {
+    const handleMove = (e) => {
+      if (!isDragging) return;
+      const rect = modalRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      let newX = e.clientX - dragOffset.current.x;
+      let newY = e.clientY - dragOffset.current.y;
+      const maxX = window.innerWidth - rect.width;
+      const maxY = window.innerHeight - rect.height;
+      newX = Math.max(0, Math.min(maxX, newX));
+      newY = Math.max(0, Math.min(maxY, newY));
+      setPosition({ x: newX, y: newY });
+    };
+    const handleUp = () => setIsDragging(false);
+    if (isDragging) {
+      window.addEventListener('mousemove', handleMove);
+      window.addEventListener('mouseup', handleUp);
+    }
+    return () => {
+      window.removeEventListener('mousemove', handleMove);
+      window.removeEventListener('mouseup', handleUp);
+    };
+  }, [isDragging]);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+      <div
+        ref={modalRef}
+        className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm max-h-[90vh] flex flex-col overflow-hidden animate-fade-in"
+        onClick={e => e.stopPropagation()}
+        style={{
+          position: 'fixed',
+          left: position.x !== null ? `${position.x}px` : undefined,
+          top: position.y !== null ? `${position.y}px` : undefined,
+          transform: position.x === null ? 'translate(-50%, -50%)' : 'none',
+        }}
+        onMouseDown={handleMouseDown}
+      >
+        <div className="bg-orange-500 text-white p-4 rounded-t-2xl flex items-center justify-between cursor-move select-none touch-none">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center"><Sparkles className="w-4 h-4 text-white"/></div>
+            <p className="font-semibold text-sm truncate">{title}</p>
+          </div>
+          <button onClick={onClose} className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition text-white" aria-label="Close">
+            <X className="w-5 h-5 text-white" />
+          </button>
+        </div>
+        <div className="flex-1 overflow-y-auto p-4 min-h-0">{children}</div>
+      </div>
+    </div>
+  );
+};
+
 const FloatingActions = () => {
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [showChatbot, setShowChatbot] = useState(false);
   const [showWhatsApp, setShowWhatsApp] = useState(false);
-  const chatbotBtnRef = useRef(null);
-  const whatsappBtnRef = useRef(null);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -58,21 +131,17 @@ const FloatingActions = () => {
     <>
       <style jsx global>{`
         @keyframes fade-in { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-        @keyframes fade-out { from { opacity: 1; transform: scale(1); } to { opacity: 0; transform: scale(0.95); } }
         .animate-fade-in { animation: fade-in 0.2s ease-out; }
-        .animate-fade-out { animation: fade-out 0.15s ease-in; }
-        .modal-backdrop { position: fixed; inset: 0; z-index: 40; background: transparent; }
-        .modal-content { transition: transform 0.1s ease-out, left 0.1s ease-out, top 0.1s ease-out; }
       `}</style>
 
       <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3 sm:bottom-8 sm:right-8">
-        <button ref={chatbotBtnRef} onClick={() => { setShowWhatsApp(false); setShowChatbot(true); }} className="w-11 h-11 sm:w-12 sm:h-12 bg-orange-500 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-orange-600 transition-all hover:scale-105 active:scale-95" title="AI Assistant" aria-label="AI Assistant"><MessageSquare className="w-5 h-5 sm:w-6 sm:h-6 text-white" /></button>
-        <button ref={whatsappBtnRef} onClick={() => { setShowChatbot(false); setShowWhatsApp(true); }} className="w-11 h-11 sm:w-12 sm:h-12 bg-[#25D366] text-white rounded-full shadow-lg flex items-center justify-center hover:bg-[#1DB954] transition-all hover:scale-105 active:scale-95" title="WhatsApp Support" aria-label="WhatsApp Support"><Phone className="w-5 h-5 sm:w-6 sm:h-6 text-white" /></button>
+        <button onClick={() => { setShowWhatsApp(false); setShowChatbot(true); }} className="w-11 h-11 sm:w-12 sm:h-12 bg-orange-500 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-orange-600 transition-all hover:scale-105 active:scale-95" title="AI Assistant" aria-label="AI Assistant"><MessageSquare className="w-5 h-5 sm:w-6 sm:h-6 text-white" /></button>
+        <button onClick={() => { setShowChatbot(false); setShowWhatsApp(true); }} className="w-11 h-11 sm:w-12 sm:h-12 bg-[#25D366] text-white rounded-full shadow-lg flex items-center justify-center hover:bg-[#1DB954] transition-all hover:scale-105 active:scale-95" title="WhatsApp Support" aria-label="WhatsApp Support"><Phone className="w-5 h-5 sm:w-6 sm:h-6 text-white" /></button>
         {showScrollTop && <button onClick={scrollToTop} className="w-11 h-11 sm:w-12 sm:h-12 bg-gray-800 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-700 transition-all hover:scale-105 active:scale-95" title="Back to Top" aria-label="Back to Top"><ArrowUp className="w-5 h-5 sm:w-6 sm:h-6 text-white" /></button>}
       </div>
 
-      <Modal isOpen={showChatbot} onClose={() => setShowChatbot(false)} triggerRef={chatbotBtnRef} title="Isange AI">
-        <div className="flex-1 overflow-y-auto p-3 space-y-2" ref={messagesEndRef}>
+      <Modal isOpen={showChatbot} onClose={() => setShowChatbot(false)} title="Isange AI">
+        <div className="space-y-2" ref={messagesEndRef}>
           {messages.map((msg, i) => (
             <div key={i} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
               <div className={`max-w-[80%] px-3 py-2 rounded-2xl text-xs ${msg.sender === 'user' ? 'bg-orange-500 text-white rounded-br-none' : 'bg-gray-100 text-gray-900 rounded-bl-none'}`}>
@@ -83,63 +152,16 @@ const FloatingActions = () => {
           {isTyping && <div className="flex justify-start"><div className="bg-gray-100 text-gray-900 px-3 py-2 rounded-2xl rounded-bl-none"><div className="flex gap-1"><span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{animationDelay:'0ms'}}/><span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{animationDelay:'150ms'}}/><span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{animationDelay:'300ms'}}/></div></div></div>}
           <div ref={messagesEndRef} />
         </div>
-        <div className="p-3 border-t border-gray-100 bg-white flex-shrink-0">
+        <div className="p-4 border-t border-gray-100 bg-white flex-shrink-0">
           <div className="flex gap-1.5 mb-2 flex-wrap">{quickReplies.map(reply => <button key={reply} onClick={()=>{setInput(reply);handleSend();}} className="px-2.5 py-1 text-[11px] bg-orange-50 text-orange-700 rounded-full hover:bg-orange-100 transition whitespace-nowrap">{reply}</button>)}</div>
           <div className="flex gap-2"><input type="text" value={input} onChange={e=>setInput(e.target.value)} onKeyPress={handleKeyPress} placeholder="Type..." className="flex-1 px-3 py-2 border border-gray-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" /><button onClick={handleSend} disabled={!input.trim()||isTyping} className="w-9 h-9 bg-orange-500 text-white rounded-full flex items-center justify-center hover:bg-orange-600 transition disabled:opacity-50"><Send className="w-4 h-4 text-white"/></button></div>
         </div>
       </Modal>
 
-      <Modal isOpen={showWhatsApp} onClose={() => setShowWhatsApp(false)} triggerRef={whatsappBtnRef} title="WhatsApp Support">
-        <div className="p-4 space-y-3"><p className="text-sm text-gray-600">Contact us directly on WhatsApp for quick support.</p><a href="https://wa.me/250787832490?text=Hello%20Isange%2C%20I%20need%20support." target="_blank" rel="noopener noreferrer" className="block w-full bg-[#25D366] text-white text-center py-2.5 px-4 rounded-lg font-medium text-sm hover:bg-[#1DB954] transition">Open WhatsApp</a></div>
+      <Modal isOpen={showWhatsApp} onClose={() => setShowWhatsApp(false)} title="WhatsApp Support">
+        <div className="space-y-3"><p className="text-sm text-gray-600">Contact us directly on WhatsApp for quick support.</p><a href="https://wa.me/250787832490?text=Hello%20Isange%2C%20I%20need%20support." target="_blank" rel="noopener noreferrer" className="block w-full bg-[#25D366] text-white text-center py-2.5 px-4 rounded-lg font-medium text-sm hover:bg-[#1DB954] transition">Open WhatsApp</a></div>
       </Modal>
     </>
-  );
-};
-
-const Modal = ({ isOpen, onClose, triggerRef, title, children }) => {
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [isDragging, setIsDragging] = useState(false);
-  const dragOffset = useRef({ x: 0, y: 0 });
-  const modalRef = useRef(null);
-
-  useEffect(() => {
-    if (isOpen && triggerRef.current) {
-      const btnRect = triggerRef.current.getBoundingClientRect();
-      const modalWidth = Math.min(320, window.innerWidth - 20);
-      const modalHeight = Math.min(480, window.innerHeight - 20);
-      // Position above button, horizontally centered on button
-      let x = btnRect.left + (btnRect.width / 2) - (modalWidth / 2);
-      let y = btnRect.top - modalHeight - 12; // 12px gap above button
-      // Ensure modal stays fully in viewport
-      x = Math.max(10, Math.min(window.innerWidth - modalWidth - 10, x));
-      y = Math.max(10, Math.min(window.innerHeight - modalHeight - 10, y));
-      setPosition({ x, y });
-    }
-  }, [isOpen, triggerRef]);
-
-  const handleBackdropClick = (e) => { if (e.target === e.currentTarget) onClose(); };
-
-  const handleMouseDown = (e) => { if (e.target.closest('button, a, input, textarea')) return; setIsDragging(true); const rect = modalRef.current?.getBoundingClientRect(); if (rect) { dragOffset.current = { x: e.clientX - rect.left, y: e.clientY - rect.top }; } };
-
-  useEffect(() => { const handleMove = (e) => { if (!isDragging) return; const modalWidth = Math.min(320, window.innerWidth - 20); const modalHeight = Math.min(480, window.innerHeight - 20); let newX = e.clientX - dragOffset.current.x; let newY = e.clientY - dragOffset.current.y; newX = Math.max(10, Math.min(window.innerWidth - modalWidth - 10, newX)); newY = Math.max(10, Math.min(window.innerHeight - modalHeight - 10, newY)); setPosition({ x: newX, y: newY }); }; const handleUp = () => setIsDragging(false); if (isDragging) { window.addEventListener('mousemove', handleMove); window.addEventListener('mouseup', handleUp); } return () => { window.removeEventListener('mousemove', handleMove); window.removeEventListener('mouseup', handleUp); }; }, [isDragging]);
-
-  if (!isOpen) return null;
-
-  return (
-    <div className="modal-backdrop" onClick={handleBackdropClick}>
-      <div ref={modalRef} className="fixed z-50 modal-content" style={{ left: `${position.x}px`, top: `${position.y}px`, width: `calc(100vw - 20px)`, maxWidth: '320px', maxHeight: 'calc(100vh - 20px)', transformOrigin: 'center center' }} onMouseDown={handleMouseDown}>
-        <div className="bg-white rounded-xl shadow-2xl flex flex-col overflow-hidden animate-fade-in" style={{ maxHeight: 'calc(100vh - 20px)', display: 'flex', flexDirection: 'column' }}>
-          <div className="bg-orange-500 text-white p-3 rounded-t-xl flex items-center justify-between cursor-move select-none touch-none flex-shrink-0">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center"><Sparkles className="w-4 h-4 text-white"/></div>
-              <p className="font-semibold text-sm truncate">{title}</p>
-            </div>
-            <button onClick={onClose} className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition flex-shrink-0"><X className="w-4 h-4 text-white"/></button>
-          </div>
-          <div className="flex-1 overflow-y-auto min-h-0">{children}</div>
-        </div>
-      </div>
-    </div>
   );
 };
 
