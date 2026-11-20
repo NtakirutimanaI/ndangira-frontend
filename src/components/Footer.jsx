@@ -154,7 +154,7 @@ forClients: [
                 </div>
                 <div className="flex items-start gap-2">
                   <span className="text-green-500">●</span>
-                  <span>Ads: 50,000 RWF/month or 500,000 RWF/year.</span>
+                  <span>Ads: From 5,000 RWF/month, year, or custom period.</span>
                 </div>
               </div>
             </div>
