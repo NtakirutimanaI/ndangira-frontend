@@ -9,9 +9,9 @@ import { useLanguage } from '../context/LanguageContext';
 
 const emptyForm = {
     title: '', titleRw: '', description: '', descriptionRw: '', type: 'house', category: 'sale',
-  area: '', location: '', locationRw: '', city: 'Kigali', address: '', contactPhone: '', contactEmail: '',
-  upi: '', images: [], videos: []
-};
+    area: '', location: '', locationRw: '', city: 'Kigali', address: '', contactPhone: '', contactEmail: '',
+    upi: '', ownerPrice: '', images: [], videos: []
+  };
 
 const Dashboard = () => {
   const { t, lang: userLang } = useLanguage();
@@ -30,7 +30,7 @@ const Dashboard = () => {
   const [showJobForm, setShowJobForm] = useState(false);
   const [showAdForm, setShowAdForm] = useState(false);
   const [categories, setCategories] = useState([{ slug: 'rent', name: 'Rent' }, { slug: 'sale', name: 'Sale' }]);
-  const [jobForm, setJobForm] = useState({ title: '', company: '', location: '', type: 'Full-time', category: '', description: '', applyEmail: '', applyUrl: '', image: null });
+  const [jobForm, setJobForm] = useState({ title: '', company: '', location: '', type: 'Full-time', category: '', description: '', applyEmail: '', applyUrl: '', employerAmount: '', image: null });
   const [editingJobId, setEditingJobId] = useState(null);
   const [myJobs, setMyJobs] = useState([]);
   const [showMyJobs, setShowMyJobs] = useState(false);
@@ -117,8 +117,8 @@ const Dashboard = () => {
         closeForm();
         loadMyProperties();
       } else {
-        const formData = new FormData();
-        ['title', 'titleRw', 'description', 'descriptionRw', 'type', 'category', 'area', 'location', 'locationRw', 'city', 'address', 'contactPhone', 'contactEmail', 'upi'].forEach((k) => {
+const formData = new FormData();
+        ['title', 'titleRw', 'description', 'descriptionRw', 'type', 'category', 'area', 'location', 'locationRw', 'city', 'address', 'contactPhone', 'contactEmail', 'upi', 'ownerPrice', 'images', 'videos'].forEach((k) => {
           if (form[k]) formData.append(k, form[k]);
         });
         (form.images || []).forEach((f) => formData.append('images', f));
@@ -156,6 +156,7 @@ const Dashboard = () => {
       type: p.type || 'house', category: p.category || 'sale',
       area: p.area || '', location: p.location || '', locationRw: p.locationRw || '', city: p.city || 'Kigali', address: p.address || '',
       contactPhone: p.contactPhone || '', contactEmail: p.contactEmail || '', upi: p.upi || '',
+      ownerPrice: p.ownerPrice || '',
       images: [], videos: [],
     });
     setShowForm(true);
@@ -165,24 +166,24 @@ const Dashboard = () => {
     setJobMsg(null); setError(null);
     if (job) {
       setEditingJobId(job._id);
-      setJobForm({ title: job.title || '', company: job.company || '', location: job.location || '', type: job.type || 'Full-time', category: job.category || '', description: job.description || '', applyEmail: job.applyEmail || '', applyUrl: job.applyUrl || '', image: null });
+      setJobForm({ title: job.title || '', company: job.company || '', location: job.location || '', type: job.type || 'Full-time', category: job.category || '', description: job.description || '', applyEmail: job.applyEmail || '', applyUrl: job.applyUrl || '', employerAmount: job.employerAmount || '', image: null });
     } else {
       setEditingJobId(null);
-      setJobForm({ title: '', company: '', location: '', type: 'Full-time', category: '', description: '', applyEmail: '', applyUrl: '', image: null });
+      setJobForm({ title: '', company: '', location: '', type: 'Full-time', category: '', description: '', applyEmail: '', applyUrl: '', employerAmount: '', image: null });
     }
     setShowJobForm(true);
   };
   const closeJobForm = () => {
     setShowJobForm(false);
     setEditingJobId(null);
-    setJobForm({ title: '', company: '', location: '', type: 'Full-time', category: '', description: '', applyEmail: '', applyUrl: '', image: null });
+    setJobForm({ title: '', company: '', location: '', type: 'Full-time', category: '', description: '', applyEmail: '', applyUrl: '', employerAmount: '', image: null });
   };
   const submitJobRequest = async (e) => {
     e.preventDefault();
     setJobMsg(null); setError(null); setJobSubmitting(true);
     try {
       const fd = new FormData();
-      ['title','company','location','type','category','description','applyEmail','applyUrl'].forEach((k) => { if (jobForm[k]) fd.append(k, jobForm[k]); });
+      ['title','company','location','type','category','description','applyEmail','applyUrl','employerAmount'].forEach((k) => { if (jobForm[k]) fd.append(k, jobForm[k]); });
       if (jobForm.image instanceof File) fd.append('image', jobForm.image);
       if (editingJobId) {
         await api.put(`/jobs/${editingJobId}`, fd);
@@ -452,6 +453,7 @@ const Dashboard = () => {
                 <div><label className="block text-xs font-medium text-gray-700 mb-1">{t('dash.category')}</label><input className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" value={jobForm.category} onChange={(e) => setJobForm({ ...jobForm, category: e.target.value })} placeholder={t('dash.ph.category')} /></div>
                 <div><label className="block text-xs font-medium text-gray-700 mb-1">{t('dash.applyEmail')}</label><input type="email" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" value={jobForm.applyEmail} onChange={(e) => setJobForm({ ...jobForm, applyEmail: e.target.value })} placeholder={t('dash.ph.applyEmail')} /></div>
                 <div className="sm:col-span-2"><label className="block text-xs font-medium text-gray-700 mb-1">{t('dash.applyUrl')}</label><input className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" value={jobForm.applyUrl} onChange={(e) => setJobForm({ ...jobForm, applyUrl: e.target.value })} placeholder={t('dash.ph.url')} /></div>
+                <div><label className="block text-xs font-medium text-gray-700 mb-1">{t('dash.jobEmployerAmount')}</label><input type="number" min="1000" step="1000" required className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" value={jobForm.employerAmount} onChange={(e) => setJobForm({ ...jobForm, employerAmount: e.target.value })} /><p className="text-xs text-gray-500 mt-1">{t('dash.jobEmployerAmountHint')}</p></div>
                 <div className="sm:col-span-2">
                   <label className="block text-xs font-medium text-gray-700 mb-1">Job Image <span className="text-xs font-normal text-gray-500">(optional)</span></label>
                   <input type="file" accept="image/*" className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-green-50 file:text-green-700"
@@ -659,9 +661,16 @@ const Dashboard = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">{t('dash.propContactEmail')}</label>
                   <input type="email" className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" value={form.contactEmail} onChange={(e) => setForm({ ...form, contactEmail: e.target.value })} />
                 </div>
-                <div>
+<div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">{t('dash.propUpi')}</label>
-                  <input className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" value={form.upi} onChange={(e) => setForm({ ...form, upi: e.target.value })} />
+                  <input className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                    value={form.upi} onChange={(e) => setForm(f => ({ ...f, upi: e.target.value }))} />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('dash.propOwnerPrice')}</label>
+                  <input type="number" min="0" step="1000" className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                    value={form.ownerPrice} onChange={(e) => setForm(f => ({ ...f, ownerPrice: e.target.value }))} />
+                  <p className="text-xs text-gray-500 mt-1">{t('dash.propOwnerPriceHint')}</p>
                 </div>
                 {!editingId && (
                   <>
