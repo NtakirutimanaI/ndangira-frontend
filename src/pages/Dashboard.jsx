@@ -123,13 +123,11 @@ const Dashboard = () => {
         });
         (form.images || []).forEach((f) => formData.append('images', f));
         (form.videos || []).forEach((f) => formData.append('videos', f));
-        await api.post('/properties', formData);
+await api.post('/properties', formData);
         closeForm();
         loadMyProperties();
         setShowProperties(true);
-        const goPay = window.confirm(t('dash.propSubmittedPay'));
-        if (goPay) navigate('/subscribe');
-        else setSuccess(t('dash.propSubmitted'));
+        setSuccess('Property submitted! Our team will review it. Keep your phone and email active — we\'ll contact you when a client shows interest or for transaction updates.');
       }
     } catch (err) {
       setError(err.response?.data?.error || t('dash.failedSaveProp'));
