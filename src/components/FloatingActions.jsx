@@ -96,13 +96,14 @@ const Modal = ({ isOpen, onClose, title, children, triggerRef }) => {
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
       <div
         ref={modalRef}
-        className="relative bg-white rounded-2xl shadow-2xl w-full max-w-[280px] max-h-[420px] flex flex-col overflow-hidden animate-fade-in"
+        className="relative bg-white rounded-2xl shadow-2xl w-full max-w-[280px] max-h-[420px] flex flex-col overflow-hidden"
         onClick={e => e.stopPropagation()}
         style={{
           position: 'fixed',
           left: position.x !== null ? `${position.x}px` : '50%',
           top: position.y !== null ? `${position.y}px` : '50%',
           transform: position.x === null ? 'translate(-50%, -50%)' : 'none',
+          animation: 'fade-in 0.2s ease-out',
         }}
         onMouseDown={handleMouseDown}
       >
@@ -145,11 +146,6 @@ const FloatingActions = () => {
 
   return (
     <>
-      <style>{`
-        @keyframes fade-in { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-        .animate-fade-in { animation: fade-in 0.2s ease-out; }
-      `}</style>
-
       <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3 sm:bottom-8 sm:right-8">
         <button ref={chatbotTriggerRef} onClick={() => { setShowWhatsApp(false); setShowChatbot(true); }} className="w-11 h-11 sm:w-12 sm:h-12 bg-orange-500 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-orange-600 transition-all hover:scale-105 active:scale-95" title="AI Assistant" aria-label="AI Assistant"><MessageSquare className="w-5 h-5 sm:w-6 sm:h-6 text-white" /></button>
         <button ref={whatsappTriggerRef} onClick={() => { setShowChatbot(false); setShowWhatsApp(true); }} className="w-11 h-11 sm:w-12 sm:h-12 bg-[#25D366] text-white rounded-full shadow-lg flex items-center justify-center hover:bg-[#1DB954] transition-all hover:scale-105 active:scale-95" title="WhatsApp Support" aria-label="WhatsApp Support"><Phone className="w-5 h-5 sm:w-6 sm:h-6 text-white" /></button>
