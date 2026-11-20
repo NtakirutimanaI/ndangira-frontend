@@ -20,13 +20,14 @@ const Search = () => {
     window.scrollTo(0, 0);
   }, []);
 
-  const handleSearch = (filters) => {
+const handleSearch = (filters) => {
     setLoading(true);
     setError(null);
     const params = new URLSearchParams();
     if (filters.area) params.append('area', filters.area);
     if (filters.type) params.append('type', filters.type);
-    if (filters.category) params.append('category', filters.category);
+    if (filters.transactionType) params.append('transactionType', filters.transactionType);
+    if (filters.condition) params.append('condition', filters.condition);
     api.get(`/search/properties?${params.toString()}`)
       .then((res) => setProperties(res.data.data))
       .catch(() => setError(t('search.failed')))
