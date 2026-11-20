@@ -540,7 +540,7 @@ export const translations = {
     'nav.toggleMenu': 'Fungura/Funga menu',
 
 // Home
-    'home.heroTitle': 'Shaka amazu, imodoka, n\'ibibanza mu Rwanda',
+    'home.heroTitle': 'Shaka amazu,ibibanza, n\'ibikoresho mu Rwanda hose',
     'home.heroSubtitle': 'Isange ihuza ba nyir\'imitungo n\'abakodesha cyangwa abaguzi mu buryo butaziguye — nta komisiyo y\'umuhuza.',
     'home.browseListings': 'Reba Ibyamamazanywa',
     'home.joinAsOwner': 'Iyandikishe nka Nyir\'umutungo',
@@ -557,7 +557,7 @@ export const translations = {
     'home.pay10percent': 'Nta Commissioner Ukenewe',
     'home.pay10percentDesc': 'Hishyurwa 10% yikiguzi nyuma yo kugurisha umutungo wawe.',
     'home.directContact': 'Vugana mu buryo butaziguye',
-    'home.directContactDesc': 'Vugana na ba nyir\'imitungo kuri telefone cyangwa UPI y\'ikibanza.',
+    'home.directContactDesc': 'Vugana na ba nyir\'imitungo cyangwa abagufasha byihuse',
 
 // Footer
     'footer.tagline': 'Aho ibyo ukeneye bihurira. Where everything you need comes together.',
