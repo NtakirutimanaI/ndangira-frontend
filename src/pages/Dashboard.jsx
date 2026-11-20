@@ -107,9 +107,9 @@ const Dashboard = () => {
     try {
       if (editingId) {
         const payload = {
-          title: form.title, titleRw: form.titleRw, description: form.description, descriptionRw: form.descriptionRw,
+          title: form.title, description: form.description,
           type: form.type, category: form.category,
-          area: form.area, location: form.location, locationRw: form.locationRw, city: form.city, address: form.address,
+          area: form.area, location: form.location, city: form.city, address: form.address,
           contactPhone: form.contactPhone, contactEmail: form.contactEmail, upi: form.upi,
         };
         await api.put(`/properties/${editingId}`, payload);
@@ -152,9 +152,9 @@ const Dashboard = () => {
   const handleEdit = (p) => {
     setEditingId(p._id);
     setForm({
-      title: p.title || '', titleRw: p.titleRw || '', description: p.description || '', descriptionRw: p.descriptionRw || '',
+      title: p.title || '', description: p.description || '',
       type: p.type || 'house', transactionType: p.transactionType || 'sale', condition: p.condition || 'new',
-      area: p.area || '', location: p.location || '', locationRw: p.locationRw || '', city: p.city || 'Kigali', address: p.address || '',
+      area: p.area || '', location: p.location || '', city: p.city || 'Kigali', address: p.address || '',
       contactPhone: p.contactPhone || '', contactEmail: p.contactEmail || '', upi: p.upi || '',
       ownerPrice: p.ownerPrice || '',
       images: [], videos: [],
@@ -607,10 +607,6 @@ const Dashboard = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">{t('dash.propTitle')}</label>
                   <input className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder={t('dash.ph.propTitle')} />
                 </div>
-                <div className="xl:col-span-3">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('dash.propTitleRw')}</label>
-                  <input className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" value={form.titleRw || ''} onChange={(e) => setForm({ ...form, titleRw: e.target.value })} placeholder={t('dash.ph.propTitle')} />
-                </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">{t('dash.propType')}</label>
                   <select className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}>
@@ -635,17 +631,9 @@ const Dashboard = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">{t('search.area')}</label>
                   <input className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" required value={form.area} onChange={(e) => setForm({ ...form, area: e.target.value })} placeholder={t('dash.ph.area')} />
                 </div>
-                <div className="xl:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('dash.propLocationRw')}</label>
-                  <input className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" value={form.locationRw || ''} onChange={(e) => setForm({ ...form, locationRw: e.target.value })} placeholder="Urugero: Kimironko, Kigali" />
-                </div>
                 <div className="xl:col-span-3">
                   <label className="block text-sm font-medium text-gray-700 mb-1">{t('dash.propDescription')}</label>
                   <textarea className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" rows="4" required value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
-                </div>
-                <div className="xl:col-span-3">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('dash.propDescriptionRw')}</label>
-                  <textarea className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" rows="4" value={form.descriptionRw || ''} onChange={(e) => setForm({ ...form, descriptionRw: e.target.value })} />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">{t('dash.propCity')}</label>
