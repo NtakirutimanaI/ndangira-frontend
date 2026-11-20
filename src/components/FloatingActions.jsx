@@ -58,13 +58,16 @@ const FloatingActions = () => {
     <>
       <style jsx global>{`
         @keyframes slide-in { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
-        .animate-slide-in { animation: slide-in 0.2s ease-out; }
+        @keyframes slide-out { from { opacity: 1; transform: scale(1) translateY(0); } to { opacity: 0; transform: scale(0.95) translateY(10px); } }
+        .animate-slide-in { animation: slide-in 0.25s ease-out; }
+        .animate-slide-out { animation: slide-out 0.2s ease-in; }
         .modal-backdrop { position: fixed; inset: 0; z-index: 40; background: transparent; }
+        .modal-content { transition: transform 0.1s ease-out, left 0.1s ease-out, top 0.1s ease-out; }
       `}</style>
 
       <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3 sm:bottom-8 sm:right-8">
-        <button ref={chatbotBtnRef} onClick={() => setShowChatbot(true)} className="w-11 h-11 sm:w-12 sm:h-12 bg-orange-500 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-orange-600 transition-all hover:scale-105 active:scale-95" title="AI Assistant" aria-label="AI Assistant"><MessageSquare className="w-5 h-5 sm:w-6 sm:h-6 text-white" /></button>
-        <button ref={whatsappBtnRef} onClick={() => setShowWhatsApp(true)} className="w-11 h-11 sm:w-12 sm:h-12 bg-[#25D366] text-white rounded-full shadow-lg flex items-center justify-center hover:bg-[#1DB954] transition-all hover:scale-105 active:scale-95" title="WhatsApp Support" aria-label="WhatsApp Support"><Phone className="w-5 h-5 sm:w-6 sm:h-6 text-white" /></button>
+        <button ref={chatbotBtnRef} onClick={() => { setShowWhatsApp(false); setShowChatbot(true); }} className="w-11 h-11 sm:w-12 sm:h-12 bg-orange-500 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-orange-600 transition-all hover:scale-105 active:scale-95" title="AI Assistant" aria-label="AI Assistant"><MessageSquare className="w-5 h-5 sm:w-6 sm:h-6 text-white" /></button>
+        <button ref={whatsappBtnRef} onClick={() => { setShowChatbot(false); setShowWhatsApp(true); }} className="w-11 h-11 sm:w-12 sm:h-12 bg-[#25D366] text-white rounded-full shadow-lg flex items-center justify-center hover:bg-[#1DB954] transition-all hover:scale-105 active:scale-95" title="WhatsApp Support" aria-label="WhatsApp Support"><Phone className="w-5 h-5 sm:w-6 sm:h-6 text-white" /></button>
         {showScrollTop && <button onClick={scrollToTop} className="w-11 h-11 sm:w-12 sm:h-12 bg-gray-800 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-700 transition-all hover:scale-105 active:scale-95" title="Back to Top" aria-label="Back to Top"><ArrowUp className="w-5 h-5 sm:w-6 sm:h-6 text-white" /></button>}
       </div>
 
@@ -122,7 +125,7 @@ const Modal = ({ isOpen, onClose, triggerRef, title, children }) => {
 
   return (
     <div className="modal-backdrop" onClick={handleBackdropClick}>
-      <div ref={modalRef} className="fixed z-50 transition-all duration-150" style={{ left: `${position.x}px`, top: `${position.y}px`, width: `calc(100vw - 20px)`, maxWidth: '320px', maxHeight: 'calc(100vh - 20px)' }} onMouseDown={handleMouseDown}>
+      <div ref={modalRef} className="fixed z-50 modal-content" style={{ left: `${position.x}px`, top: `${position.y}px`, width: `calc(100vw - 20px)`, maxWidth: '320px', maxHeight: 'calc(100vh - 20px)' }} onMouseDown={handleMouseDown}>
         <div className="bg-white rounded-xl shadow-2xl flex flex-col overflow-hidden animate-slide-in" style={{ maxHeight: 'calc(100vh - 20px)', display: 'flex', flexDirection: 'column' }}>
           <div className="bg-orange-500 text-white p-3 rounded-t-xl flex items-center justify-between cursor-move select-none touch-none flex-shrink-0">
             <div className="flex items-center gap-2">
