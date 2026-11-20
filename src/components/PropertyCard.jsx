@@ -7,7 +7,7 @@ const PropertyCard = ({ property, onView }) => {
   const img = property.images?.[0];
   const imgUrl = img ? (img.startsWith('http') ? img : `http://localhost:5000${img}`) : null;
   const typeLabel = { house: t('search.house'), car: t('search.car'), plot: t('search.plot'), material: t('search.material') }[property.type] || property.type;
-  const categoryText = property.category === 'rent' ? t('admin.rent') : property.category === 'sale' ? t('admin.sale') : (property.category || '—');
+  const categoryText = { rent: t('admin.rent'), sale: t('admin.sale'), new: 'New', used: 'Used' }[property.category] || property.category || '—';
   const title = (lang === 'rw' && property.titleRw) ? property.titleRw : property.title;
   const description = (lang === 'rw' && property.descriptionRw) ? property.descriptionRw : property.description;
   const locationText = (lang === 'rw' && property.locationRw) ? property.locationRw : [property.area, property.city].filter(Boolean).join(', ');

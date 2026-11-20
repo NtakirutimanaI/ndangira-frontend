@@ -61,7 +61,7 @@ const PropertyDetailsModal = ({ property, onClose }) => {
           </div>
           <p className="text-[11px] text-gray-500">{current ? t('property.clickZoom') : ''}{hasMulti ? t('property.useArrows') : ''}</p>
           <div className="flex items-center gap-2 text-xs">
-            <span className="bg-green-100 text-green-700 px-2 py-0.5 font-medium capitalize">{({ house: t('search.house'), car: t('search.car'), plot: t('search.plot'), material: t('search.material') }[property.type] || property.type)} · {(property.category === 'rent' ? t('admin.rent') : property.category === 'sale' ? t('admin.sale') : property.category)}</span>
+            <span className="bg-green-100 text-green-700 px-2 py-0.5 font-medium capitalize">{({ house: t('search.house'), car: t('search.car'), plot: t('search.plot'), material: t('search.material') }[property.type] || property.type)} · {({ rent: t('admin.rent'), sale: t('admin.sale'), new: 'New', used: 'Used' }[property.category] || property.category)}</span>
             <span className="text-gray-600">{locationText}</span>
           </div>
           <p className="text-gray-700">{description || t('property.noDescription')}</p>

@@ -376,7 +376,7 @@ const Dashboard = () => {
                       </div>
                       <div className="p-3 flex flex-col flex-1">
                         <h3 className="text-sm font-semibold text-gray-900 leading-tight line-clamp-2 mb-1">{(userLang === 'rw' && p.titleRw) ? p.titleRw : p.title}</h3>
-                        <p className="text-xs text-gray-600 capitalize mb-1">{({ house: t('search.house'), car: t('search.car'), plot: t('search.plot'), material: t('search.material') }[p.type] || p.type)} · {({ rent: 'For Rent', sale: 'For Sale', other: 'Other' }[p.category] || p.category)}</p>
+                        <p className="text-xs text-gray-600 capitalize mb-1">{({ house: t('search.house'), car: t('search.car'), plot: t('search.plot'), material: t('search.material') }[p.type] || p.type)} · {({ rent: 'For Rent', sale: 'For Sale', new: 'New', used: 'Used' }[p.category] || p.category)}</p>
                         <div className="mb-2">{statusBadge(p)}</div>
                         <div className="text-xs text-gray-700 space-y-1 mb-2">
                           <div className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5 text-gray-400" /><span className="truncate">{(userLang === 'rw' && p.locationRw) ? p.locationRw : [p.area, p.city].filter(Boolean).join(', ')}</span></div>
@@ -620,7 +620,8 @@ const Dashboard = () => {
                   <select className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>
                     <option value="sale">For Sale</option>
                     <option value="rent">For Rent</option>
-                    <option value="other">Other</option>
+                    <option value="new">New</option>
+                    <option value="used">Used</option>
                   </select>
                 </div>
                 <div>
