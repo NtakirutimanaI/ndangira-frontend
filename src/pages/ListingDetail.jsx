@@ -4,6 +4,7 @@ import api from '../services/api';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { Alert } from '../components/Alert';
 import { useLanguage } from '../context/LanguageContext';
+import { resolveMediaUrl } from '../utils/media';
 
 const ListingDetail = () => {
   const { id } = useParams();
@@ -23,7 +24,7 @@ const ListingDetail = () => {
   if (error) return <Alert message={error} />;
   if (!property) return null;
 
-  const imgUrl = (img) => (img ? (img.startsWith('http') ? img : `http://localhost:5000${img}`) : null);
+  const imgUrl = (img) => (img ? resolveMediaUrl(img) : null);
   const title = (lang === 'rw' && property.titleRw) ? property.titleRw : property.title;
   const description = (lang === 'rw' && property.descriptionRw) ? property.descriptionRw : property.description;
   const locationText = (lang === 'rw' && property.locationRw) ? property.locationRw : [property.area, property.city, property.country].filter(Boolean).join(', ');

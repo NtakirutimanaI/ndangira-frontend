@@ -4,13 +4,7 @@ import api from '../services/api';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { useLanguage } from '../context/LanguageContext';
 import SidebarTopPosts from '../components/SidebarTopPosts';
-
-const API_BASE = 'http://localhost:5000';
-const resolveMediaUrl = (url) => {
-  if (!url) return '';
-  if (url.startsWith('http://') || url.startsWith('https://')) return url;
-  return `${API_BASE}${url}`;
-};
+import { resolveMediaUrl } from '../utils/media';
 
 const Jobs = () => {
   const [jobs, setJobs] = useState([]);

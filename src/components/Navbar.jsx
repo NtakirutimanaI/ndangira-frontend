@@ -4,12 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { Home, Search, LogOut, Shield, Building2, Menu, X, Briefcase, Megaphone, Languages, Play } from './icons';
 import api from '../services/api';
-
-const resolveMediaUrl = (url) => {
-  if (!url) return '';
-  if (url.startsWith('http://') || url.startsWith('https://')) return url;
-  return `http://localhost:5000${url}`;
-};
+import { resolveMediaUrl } from '../utils/media';
 
 const Navbar = () => {
   const { user, logout } = useAuth();

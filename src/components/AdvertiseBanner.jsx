@@ -1,12 +1,6 @@
 ﻿import { useEffect, useMemo, useState } from 'react';
 import api from '../services/api';
-
-const resolveMediaUrl = (url) => {
-  if (!url) return '';
-  if (url.startsWith('http://') || url.startsWith('https://')) return url;
-  const apiUrl = (import.meta.env.VITE_API_URL || 'http://localhost:5000').replace('/api', '');
-  return `${apiUrl}${url}`;
-};
+import { resolveMediaUrl } from '../utils/media';
 
 const shuffle = (arr) => {
   const a = [...arr];

@@ -2,19 +2,14 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Image, MapPin, ChevronLeft, ChevronRight } from './icons';
 import { useLanguage } from '../context/LanguageContext';
+import { resolveMediaUrl } from '../utils/media';
 
 const PropertyCard = ({ property, onView }) => {
   const { t, lang } = useLanguage();
   const images = property.images || [];
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  const getImageUrl = (img) => {
-    if (!img) return null;
-    if (img.startsWith('http')) return img;
-    // Local storage: images served at /uploads/filename
-    return `http://localhost:5000/uploads/${img}`;
-  };
-  const currentImgUrl = images.length > 0 ? getImageUrl(images[currentIndex]) : null;
+  const currentImgUrl = images.length > 0 ? resolveMediaUrl(images[currentIndex]) : null;
 
   const typeLabel = { house: t('search.house'), car: t('search.car'), plot: t('search.plot'), material: t('search.material') }[property.type] || property.type;
   const transactionTypeText = property.transactionType === 'sale' ? t('dash.propForSale') : t('dash.propForRent');

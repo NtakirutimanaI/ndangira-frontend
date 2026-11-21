@@ -9,15 +9,7 @@ import {
   ChevronRight, ArrowLeft, Eye, Trash2, X, Download, Calendar, Menu, Briefcase, Megaphone,
   Bell, Globe, Image, Video, Lock, DollarSign, Palette, Save, RefreshCw, Sliders
 } from '../components/icons';
-
-// Resolve media URL for both Cloudinary and local storage
-const resolveMediaUrl = (url) => {
-  if (!url) return '';
-  if (url.startsWith('http://') || url.startsWith('https://')) return url;
-  // For local storage URLs like /uploads/filename, prepend backend URL
-  const apiUrl = (import.meta.env.VITE_API_URL || 'http://localhost:5000').replace('/api', '');
-  return `${apiUrl}${url}`;
-};
+import { resolveMediaUrl } from '../utils/media';
 
 const sidebarLinks = [
   { id: 'dashboard', labelKey: 'nav.dashboard', icon: LayoutDashboard },
@@ -1780,7 +1772,7 @@ const AdminDashboard = () => {
                       <p className="text-gray-500 text-xs mb-1">Images</p>
                       <div className="flex flex-wrap gap-2">
                         {(viewItem.data.images?.length ? viewItem.data.images : [viewItem.data.imageUrl]).filter(Boolean).map((src, i) => {
-                          const url = src.startsWith('http') ? src : `http://localhost:5000${src}`;
+                          const url = resolveMediaUrl(src);
                           return <a key={i} href={url} target="_blank" rel="noreferrer"><img src={url} alt="" className="h-20 w-28 object-cover rounded border border-gray-200" /></a>;
                         })}
                       </div>

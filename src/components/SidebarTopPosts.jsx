@@ -2,6 +2,7 @@
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import api from '../services/api';
+import { resolveMediaUrl } from '../utils/media';
 
 const SidebarTopPosts = ({ accent = 'green' }) => {
   const { t, lang } = useLanguage();
@@ -73,10 +74,10 @@ const SidebarTopPosts = ({ accent = 'green' }) => {
           <p className={`text-sm ${textSub}`}>{t('sidebar.noPosts')}</p>
         ) : (
           <ul className="space-y-3">
-            {properties.map((p) => {
+{properties.map((p) => {
               const title = (lang === 'rw' && p.titleRw) ? p.titleRw : p.title;
               const img = p.images?.[0];
-              const imgUrl = img ? (img.startsWith('http') ? img : `http://localhost:5000${img}`) : null;
+              const imgUrl = img ? resolveMediaUrl(img) : null;
               return (
                 <li key={p._id}>
                   <Link to={`/listings/${p._id}`} className="flex items-center gap-3 group">

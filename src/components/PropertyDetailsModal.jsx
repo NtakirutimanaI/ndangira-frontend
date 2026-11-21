@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ArrowLeft, ChevronLeft, ChevronRight } from './icons';
 import { useLanguage } from '../context/LanguageContext';
+import { resolveMediaUrl } from '../utils/media';
 
 const PropertyDetailsModal = ({ property, onClose }) => {
   const images = property?.images || [];
@@ -18,13 +19,7 @@ const PropertyDetailsModal = ({ property, onClose }) => {
   const title = property.title;
   const description = property.description;
   const locationText = [property.area, property.city].filter(Boolean).join(', ');
-  const imgUrl = (img) => {
-    if (!img) return null;
-    if (img.startsWith('http')) return img;
-    // Local storage: images served at /uploads/filename
-    return `http://localhost:5000/uploads/${img}`;
-  };
-  const current = imgUrl(images[idx]);
+  const current = resolveMediaUrl(images[idx]);
   const hasMulti = images.length > 1;
   const prev = () => { setIdx((i) => (i - 1 + images.length) % images.length); setZoom(false); };
   const next = () => { setIdx((i) => (i + 1) % images.length); setZoom(false); };

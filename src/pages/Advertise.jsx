@@ -3,13 +3,7 @@ import { Megaphone, ExternalLink, Calendar, PlayCircle, ChevronLeft, ChevronRigh
 import api from '../services/api';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { useLanguage } from '../context/LanguageContext';
-
-const resolveMediaUrl = (url) => {
-  if (!url) return '';
-  if (url.startsWith('http://') || url.startsWith('https://')) return url;
-  const apiUrl = (import.meta.env.VITE_API_URL || 'http://localhost:5000').replace('/api', '');
-  return `${apiUrl}${url}`;
-};
+import { resolveMediaUrl } from '../utils/media';
 
 const toEmbedUrl = (url) => {
   if (!url) return '';
@@ -186,6 +180,7 @@ const Advertise = () => {
                       loop
                       playsInline
                       preload="metadata"
+                      crossOrigin="anonymous"
                     />
                   ) : current?.type === 'embed' ? (
                     <iframe key={current.key} src={current.src} title={current.ad?.title || 'Ad video'} className="w-full h-full" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />

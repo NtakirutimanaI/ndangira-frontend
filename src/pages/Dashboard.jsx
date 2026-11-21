@@ -6,6 +6,7 @@ import { Alert } from '../components/Alert';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { Plus, Building2, MapPin, Phone, Mail, Tag, User, CreditCard, CheckCircle2, CheckCircle, Clock, Home, X, Menu, Briefcase, Megaphone, Smartphone, Landmark } from '../components/icons';
 import { useLanguage } from '../context/LanguageContext';
+import { resolveMediaUrl } from '../utils/media';
 
 const emptyForm = {
     title: '', description: '', type: 'house', transactionType: 'sale', condition: 'new',
@@ -376,7 +377,7 @@ const handleSubmit = async (e) => {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {myProperties.map((p) => {
                   const imgSrc = p.images?.[0];
-                  const imgUrl = imgSrc ? (imgSrc.startsWith('http') ? imgSrc : `http://localhost:5000${imgSrc}`) : null;
+                  const imgUrl = imgSrc ? resolveMediaUrl(imgSrc) : null;
                   return (
                     <div key={p._id} className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden flex flex-col">
                       <div className="h-32 bg-gray-100 shrink-0">
@@ -414,7 +415,7 @@ const handleSubmit = async (e) => {
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {myJobs.map((j) => {
-                  const imgUrl = j.image ? (j.image.startsWith('http') ? j.image : `http://localhost:5000${j.image}`) : null;
+                  const imgUrl = j.image ? resolveMediaUrl(j.image) : null;
                   return (
                     <div key={j._id} className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden flex flex-col">
                       <div className="h-32 bg-gray-100 shrink-0">
@@ -688,7 +689,7 @@ const handleSubmit = async (e) => {
                       <div className="flex flex-wrap gap-2">
                         {form.images.map((imgUrl, idx) => (
                           <div key={`existing-img-${idx}`} className="relative w-20 h-20 bg-gray-100 border border-gray-200 rounded overflow-hidden flex items-center justify-center">
-                            <img src={imgUrl.startsWith('http') ? imgUrl : `http://localhost:5000${imgUrl}`} alt="" className="w-full h-full object-cover" />
+                            <img src={resolveMediaUrl(imgUrl)} alt="" className="w-full h-full object-cover" />
                             <button type="button" onClick={() => setForm((f) => ({ ...f, images: f.images.filter((_, i) => i !== idx) }))} className="absolute top-1 right-1 w-5 h-5 bg-red-600 text-white rounded-full text-xs font-bold leading-none hover:bg-red-700">×</button>
                           </div>
                         ))}
@@ -721,7 +722,7 @@ const handleSubmit = async (e) => {
                       <div className="flex flex-wrap gap-2">
                         {form.videos.map((vidUrl, idx) => (
                           <div key={`existing-vid-${idx}`} className="relative w-20 h-20 bg-gray-100 border border-gray-200 rounded overflow-hidden flex items-center justify-center">
-                            <video src={vidUrl.startsWith('http') ? vidUrl : `http://localhost:5000${vidUrl}`} className="w-full h-full object-cover" muted />
+                            <video src={resolveMediaUrl(vidUrl)} className="w-full h-full object-cover" muted />
                             <button type="button" onClick={() => setForm((f) => ({ ...f, videos: f.videos.filter((_, i) => i !== idx) }))} className="absolute top-1 right-1 w-5 h-5 bg-red-600 text-white rounded-full text-xs font-bold leading-none hover:bg-red-700">×</button>
                           </div>
                         ))}
