@@ -63,78 +63,79 @@ const Navbar = () => {
           </div>
 
           <div className="flex items-center gap-2">
-            <div className="hidden md:flex items-center gap-3">
-              <button
-                type="button"
-                onClick={toggleLang}
-                className="inline-flex items-center justify-center p-2 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 hover:text-green-700"
-                title={lang === 'en' ? t('nav.switchToRw') : t('nav.switchToEn')}
-                aria-label={lang === 'en' ? t('nav.switchToRw') : t('nav.switchToEn')}
-              >
-                <Languages className="h-5 w-5" />
-              </button>
-              {/* Video section - displays admin uploaded ad videos */}
-              {adVideos.length > 0 && (
-                <div className="relative w-32 sm:w-40 aspect-video bg-black rounded overflow-hidden border border-gray-200 shrink-0">
-                  {currentVideo.external ? (
-                    <iframe
-                      src={currentVideo.src}
-                      className="w-full h-full"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                      title={currentVideo.title}
-                    />
-                  ) : (
-                    <video
-                      className="w-full h-full object-cover"
-                      src={currentVideo.src}
-                      autoPlay
-                      muted
-                      loop
-                      playsInline
-                      preload="metadata"
-                    />
-                  )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end justify-between p-1.5">
-                    <span className="text-white text-[10px] font-medium px-1.5 py-0.5 bg-black/60 rounded">{currentVideo.title}</span>
-                    <Play className="w-4 h-4 text-white/80" />
-                  </div>
+            {/* Video section - displays admin uploaded ad videos */}
+            {adVideos.length > 0 && (
+              <div className="relative w-32 sm:w-40 aspect-video bg-black rounded overflow-hidden border border-gray-200 shrink-0">
+                {currentVideo.external ? (
+                  <iframe
+                    src={currentVideo.src}
+                    className="w-full h-full"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    title={currentVideo.title}
+                  />
+                ) : (
+                  <video
+                    className="w-full h-full object-cover"
+                    src={currentVideo.src}
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    preload="metadata"
+                  />
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end justify-between p-1.5">
+                  <span className="text-white text-[10px] font-medium px-1.5 py-0.5 bg-black/60 rounded">{currentVideo.title}</span>
+                  <Play className="w-4 h-4 text-white/80" />
                 </div>
-              )}
-              {user ? (
-                <>
-                  {isOwnerOrAdmin && (
-                    <Link to="/dashboard" className="inline-flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900">
-                      <Building2 className="h-4 w-4" /> {t('nav.myProperties')}
-                    </Link>
-                  )}
-                  {user.role === 'admin' && (
-                    <Link to="/admin" className="inline-flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900">
-                      <Shield className="h-4 w-4" /> {t('nav.admin')}
-                    </Link>
-                  )}
-                  <button onClick={logout} className="inline-flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900">
-                    <LogOut className="h-4 w-4" /> {t('nav.logout')}
-                  </button>
-                </>
-              ) : (
-                <>
-                  <Link to="/login" className="text-sm text-gray-600 hover:text-gray-900">{t('nav.login')}</Link>
-                  <Link to="/register" className="bg-green-600 text-white px-4 py-1.5 rounded text-sm hover:bg-green-700">{t('nav.join')}</Link>
-                </>
-              )}
-            </div>
+              </div>
+            )}
+            {user ? (
+              <>
+                {isOwnerOrAdmin && (
+                  <Link to="/dashboard" className="inline-flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900">
+                    <Building2 className="h-4 w-4" /> {t('nav.myProperties')}
+                  </Link>
+                )}
+                {user.role === 'admin' && (
+                  <Link to="/admin" className="inline-flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900">
+                    <Shield className="h-4 w-4" /> {t('nav.admin')}
+                  </Link>
+                )}
+                {/* Language button near logout */}
+                <button
+                  type="button"
+                  onClick={toggleLang}
+                  className="inline-flex items-center justify-center p-2 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 hover:text-green-700"
+                  title={lang === 'en' ? t('nav.switchToRw') : t('nav.switchToEn')}
+                  aria-label={lang === 'en' ? t('nav.switchToRw') : t('nav.switchToEn')}
+                >
+                  <Languages className="h-5 w-5" />
+                </button>
+                <button onClick={logout} className="inline-flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900">
+                  <LogOut className="h-4 w-4" /> {t('nav.logout')}
+                </button>
+              </>
+            ) : (
+              <>
+                {/* Language button near login/register */}
+                <button
+                  type="button"
+                  onClick={toggleLang}
+                  className="inline-flex items-center justify-center p-2 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 hover:text-green-700"
+                  title={lang === 'en' ? t('nav.switchToRw') : t('nav.switchToEn')}
+                  aria-label={lang === 'en' ? t('nav.switchToRw') : t('nav.switchToEn')}
+                >
+                  <Languages className="h-5 w-5" />
+                </button>
+                <Link to="/login" className="text-sm text-gray-600 hover:text-gray-900">{t('nav.login')}</Link>
+                <Link to="/register" className="bg-green-600 text-white px-4 py-1.5 rounded text-sm hover:bg-green-700">{t('nav.join')}</Link>
+              </>
+            )}
 
             <button
               type="button"
-              onClick={toggleLang}
-              className="md:hidden inline-flex items-center justify-center p-2 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50"
-              title={lang === 'en' ? t('nav.switchToRw') : t('nav.switchToEn')}
-              aria-label={lang === 'en' ? t('nav.switchToRw') : t('nav.switchToEn')}
-            >
-              <Languages className="h-5 w-5" />
-            </button>
-            <button
               onClick={() => setMenuOpen((v) => !v)}
               className="md:hidden p-2 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50"
               aria-label={t('nav.toggleMenu')}
