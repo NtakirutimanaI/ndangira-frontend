@@ -126,6 +126,7 @@ const AdvertiseBanner = () => {
             <div className="h-[34px] w-[58px] sm:w-[82px] rounded overflow-hidden bg-white/20 border border-white/20 shadow-sm shrink-0 flex-shrink-0" title="Brand Video">
               <video
                 src={brandVideo}
+                type="video/mp4"
                 className="h-full w-full object-cover"
                 autoPlay
                 muted
