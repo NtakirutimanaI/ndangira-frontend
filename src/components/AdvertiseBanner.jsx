@@ -17,6 +17,16 @@ const shuffle = (arr) => {
   return a;
 };
 
+const fetchBrandVideo = async () => {
+  try {
+    const res = await api.get('/settings');
+    if (res.data?.data?.brandVideoUrl) {
+      return resolveMediaUrl(res.data.data.brandVideoUrl);
+    }
+  } catch (_) {}
+  return null;
+};
+
 const AdvertiseBanner = () => {
   const [properties, setProperties] = useState([]);
   const [jobs, setJobs] = useState([]);
@@ -25,26 +35,38 @@ const AdvertiseBanner = () => {
   const [index, setIndex] = useState(0);
   const [visible, setVisible] = useState(true);
 
-  useEffect(() => {
+  const loadInitialData = async () => {
     let mounted = true;
-    (async () => {
-      try {
-        const [pRes, jRes, aRes, sRes] = await Promise.allSettled([
-          api.get('/properties'),
-          api.get('/jobs'),
-          api.get('/ads'),
-          api.get('/settings'),
-        ]);
-        if (!mounted) return;
-        if (pRes.status === 'fulfilled') setProperties(pRes.value.data?.data || []);
-        if (jRes.status === 'fulfilled') setJobs(jRes.value.data?.data || []);
-        if (aRes.status === 'fulfilled') setAds(aRes.value.data?.data || []);
-        if (sRes.status === 'fulfilled' && sRes.value.data?.data?.brandVideoUrl) {
-          setBrandVideo(resolveMediaUrl(sRes.value.data.data.brandVideoUrl));
-        }
-      } catch (_) {}
-    })();
-    return () => { mounted = false; };
+    try {
+      const [pRes, jRes, aRes, sRes] = await Promise.allSettled([
+        api.get('/properties'),
+        api.get('/jobs'),
+        api.get('/ads'),
+        api.get('/settings'),
+      ]);
+      if (!mounted) return;
+      if (pRes.status === 'fulfilled') setProperties(pRes.value.data?.data || []);
+      if (jRes.status === 'fulfilled') setJobs(jRes.value.data?.data || []);
+      if (aRes.status === 'fulfilled') setAds(aRes.value.data?.data || []);
+      if (sRes.status === 'fulfilled' && sRes.value.data?.data?.brandVideoUrl) {
+        setBrandVideo(resolveMediaUrl(sRes.value.data.data.brandVideoUrl));
+      }
+    } catch (_) {}
+  };
+
+  useEffect(() => {
+    loadInitialData();
+    
+    // Listen for settings updates from AdminDashboard
+    const handleSettingsUpdate = async () => {
+      const videoUrl = await fetchBrandVideo();
+      setBrandVideo(videoUrl);
+    };
+    
+    window.addEventListener('settings-updated', handleSettingsUpdate);
+    return () => {
+      window.removeEventListener('settings-updated', handleSettingsUpdate);
+    };
   }, []);
 
   const items = useMemo(() => {

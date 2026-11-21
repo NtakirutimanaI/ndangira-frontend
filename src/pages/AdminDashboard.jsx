@@ -153,6 +153,8 @@ const AdminDashboard = () => {
     try {
       await api.put('/admin/settings', settings);
       setSettingsSaved(true);
+      // Notify other components (like AdvertiseBanner) that settings changed
+      window.dispatchEvent(new CustomEvent('settings-updated'));
       setTimeout(() => setSettingsSaved(false), 3000);
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to save settings');
