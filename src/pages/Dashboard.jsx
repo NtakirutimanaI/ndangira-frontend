@@ -229,7 +229,7 @@ const handleSubmit = async (e) => {
       });
       (adForm.images || []).forEach((f) => formData.append('images', f));
       (adForm.videos || []).forEach((f) => formData.append('videos', f));
-      const res = await api.post('/ads/request', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+      const res = await api.post('/ads/request', formData);
       const created = res.data?.data;
       const amount = created?.amount || (adForm.plan === 'yearly' ? 500000 : 50000);
       const plan = created?.plan || adForm.plan;

@@ -4,12 +4,11 @@ import api from '../services/api';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { useLanguage } from '../context/LanguageContext';
 
-const API_BASE = 'http://localhost:5000';
-
 const resolveMediaUrl = (url) => {
   if (!url) return '';
   if (url.startsWith('http://') || url.startsWith('https://')) return url;
-  return `${API_BASE}${url}`;
+  const apiUrl = (import.meta.env.VITE_API_URL || 'http://localhost:5000').replace('/api', '');
+  return `${apiUrl}${url}`;
 };
 
 const toEmbedUrl = (url) => {
