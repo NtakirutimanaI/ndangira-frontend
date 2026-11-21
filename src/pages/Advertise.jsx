@@ -62,7 +62,15 @@ const VideoThumb = ({ slide, active }) => {
         {thumb ? (
           <img src={thumb} alt="" className="w-full h-full object-cover" />
         ) : slide.type === 'file' ? (
-          <video src={slide.src} className="w-full h-full object-cover" muted preload="metadata" />
+          <video
+            src={slide.src}
+            className="w-full h-full object-cover"
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+          />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-gray-800">
             <PlayCircle className="h-6 w-6 text-amber-400" />
@@ -169,7 +177,16 @@ const Advertise = () => {
               <div className="relative w-full max-w-2xl mx-auto aspect-video bg-black rounded-xl overflow-hidden border border-gray-800 shadow-xl">
                 <div className={`absolute inset-0 transition-opacity duration-300 ${visible ? 'opacity-100' : 'opacity-0'}`}>
                   {current?.type === 'file' ? (
-                    <video key={current.key} src={current.src} className="w-full h-full object-contain bg-black" controls autoPlay muted playsInline />
+                    <video
+                      key={current.key}
+                      src={current.src}
+                      className="w-full h-full object-contain bg-black"
+                      autoPlay
+                      muted
+                      loop
+                      playsInline
+                      preload="metadata"
+                    />
                   ) : current?.type === 'embed' ? (
                     <iframe key={current.key} src={current.src} title={current.ad?.title || 'Ad video'} className="w-full h-full" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
                   ) : current?.type === 'link' ? (
