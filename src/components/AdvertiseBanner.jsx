@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState, useRef } from 'react';
+﻿import { useEffect, useMemo, useState } from 'react';
 import api from '../services/api';
 
 const resolveMediaUrl = (url) => {
@@ -17,16 +17,6 @@ const shuffle = (arr) => {
   return a;
 };
 
-const fetchBrandVideo = async () => {
-  try {
-    const res = await api.get('/settings');
-    if (res.data?.data?.brandVideoUrl) {
-      return resolveMediaUrl(res.data.data.brandVideoUrl);
-    }
-  } catch (_) {}
-  return null;
-};
-
 const AdvertiseBanner = () => {
   const [properties, setProperties] = useState([]);
   const [jobs, setJobs] = useState([]);
@@ -34,43 +24,29 @@ const AdvertiseBanner = () => {
   const [brandVideo, setBrandVideo] = useState(null);
   const [index, setIndex] = useState(0);
   const [visible, setVisible] = useState(true);
-  const videoRef = useRef(null);
-
-  const loadInitialData = async () => {
-    let mounted = true;
-    try {
-      const [pRes, jRes, aRes, sRes] = await Promise.allSettled([
-        api.get('/properties'),
-        api.get('/jobs'),
-        api.get('/ads'),
-        api.get('/settings'),
-      ]);
-      if (!mounted) return;
-      if (pRes.status === 'fulfilled') setProperties(pRes.value.data?.data || []);
-      if (jRes.status === 'fulfilled') setJobs(jRes.value.data?.data || []);
-      if (aRes.status === 'fulfilled') setAds(aRes.value.data?.data || []);
-      if (sRes.status === 'fulfilled' && sRes.value.data?.data?.brandVideoUrl) {
-        setBrandVideo(resolveMediaUrl(sRes.value.data.data.brandVideoUrl));
-      }
-    } catch (_) {}
-  };
 
   useEffect(() => {
-    loadInitialData();
-    
-    // Listen for settings updates from AdminDashboard
-    const handleSettingsUpdate = async () => {
-      const videoUrl = await fetchBrandVideo();
-      setBrandVideo(videoUrl);
-    };
-    
-    window.addEventListener('settings-updated', handleSettingsUpdate);
-    return () => {
-      window.removeEventListener('settings-updated', handleSettingsUpdate);
-    };
+    let mounted = true;
+    (async () => {
+      try {
+        const [pRes, jRes, aRes, sRes] = await Promise.allSettled([
+          api.get('/properties'),
+          api.get('/jobs'),
+          api.get('/ads'),
+          api.get('/settings'),
+        ]);
+        if (!mounted) return;
+        if (pRes.status === 'fulfilled') setProperties(pRes.value.data?.data || []);
+        if (jRes.status === 'fulfilled') setJobs(jRes.value.data?.data || []);
+        if (aRes.status === 'fulfilled') setAds(aRes.value.data?.data || []);
+        if (sRes.status === 'fulfilled' && sRes.value.data?.data?.brandVideoUrl) {
+          setBrandVideo(resolveMediaUrl(sRes.value.data.data.brandVideoUrl));
+        }
+      } catch (_) {}
+    })();
+    return () => { mounted = false; };
   }, []);
 
-  // Build rotating images from properties/jobs/ads
   const items = useMemo(() => {
     const propItems = properties.flatMap((p) => {
       const imgs = (p.images && p.images.length ? p.images : []).map(resolveMediaUrl).filter(Boolean);
@@ -98,10 +74,11 @@ const AdvertiseBanner = () => {
     return mixed;
   }, [properties, jobs, ads]);
 
+  // Filter items with images for rotation
   const displayItems = useMemo(() => items.filter(item => item.image), [items]);
-  const currentImage = displayItems[index % displayItems.length];
 
-  // Rotate images every 3 seconds
+  useEffect(() => { setIndex(0); }, [displayItems.length]);
+
   useEffect(() => {
     if (displayItems.length <= 1) return;
     const id = setInterval(() => {
@@ -114,17 +91,7 @@ const AdvertiseBanner = () => {
     return () => clearInterval(id);
   }, [displayItems.length]);
 
-  // Handle brand video ended - loop it
-  const handleVideoEnded = () => {
-    if (videoRef.current) {
-      videoRef.current.currentTime = 0;
-      videoRef.current.play().catch(() => {});
-    }
-  };
-
-  const handleVideoError = () => {
-    console.warn('Brand video failed to load');
-  };
+  const current = displayItems[index % displayItems.length];
 
   return (
     <div className="fixed top-0 left-0 right-0 z-[60] h-12 bg-gradient-to-r from-amber-600 via-orange-500 to-amber-600 text-white overflow-hidden border-b border-amber-700/30">
@@ -138,27 +105,24 @@ const AdvertiseBanner = () => {
           {brandVideo && (
             <div className="h-[34px] w-[58px] sm:w-[82px] rounded overflow-hidden bg-white/20 border border-white/20 shadow-sm shrink-0 flex-shrink-0" title="Brand Video">
               <video
-                ref={videoRef}
                 src={brandVideo}
-                type="video/mp4"
                 className="h-full w-full object-cover"
                 autoPlay
                 muted
+                loop
                 playsInline
                 preload="metadata"
-                onEnded={handleVideoEnded}
-                onError={handleVideoError}
               />
             </div>
           )}
           {/* Rotating Images Card - from properties/jobs/ads */}
-          {currentImage && (
+          {current && (
             <div className={`h-[34px] w-[58px] sm:w-[82px] rounded overflow-hidden bg-white/20 border border-white/20 shadow-sm shrink-0 transition-opacity duration-400 ${visible ? 'opacity-100' : 'opacity-0'}`}>
-              {currentImage.image ? (
-                <img src={currentImage.image} alt="" className="h-full w-full object-cover" />
+              {current.image ? (
+                <img src={current.image} alt="" className="h-full w-full object-cover" />
               ) : (
                 <div className="h-full w-full flex items-center justify-center text-[9px] sm:text-[10px] font-semibold text-white/95 bg-black/10 px-1 text-center leading-tight truncate">
-                  {currentImage.label}
+                  {current.label}
                 </div>
               )}
             </div>
