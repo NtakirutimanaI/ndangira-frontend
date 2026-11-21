@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from 'react';
+﻿import { useEffect, useMemo, useState, useRef } from 'react';
 import api from '../services/api';
 
 const resolveMediaUrl = (url) => {
@@ -32,8 +32,9 @@ const AdvertiseBanner = () => {
   const [jobs, setJobs] = useState([]);
   const [ads, setAds] = useState([]);
   const [brandVideo, setBrandVideo] = useState(null);
-  const [index, setIndex] = useState(0);
-  const [visible, setVisible] = useState(true);
+  const [videoPlaylist, setVideoPlaylist] = useState([]);
+  const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
+  const videoRef = useRef(null);
 
   const loadInitialData = async () => {
     let mounted = true;
@@ -54,6 +55,73 @@ const AdvertiseBanner = () => {
     } catch (_) {}
   };
 
+  // Build video playlist from all sources
+  const buildVideoPlaylist = useMemo(() => {
+    const videos = [];
+    
+    // Add brand video first
+    if (brandVideo) {
+      videos.push({ 
+        key: 'brand-video', 
+        src: brandVideo, 
+        label: 'Brand Video',
+        type: 'video'
+      });
+    }
+    
+    // Add property videos
+    properties.forEach(p => {
+      if (p.videos && p.videos.length) {
+        p.videos.forEach((v, i) => {
+          videos.push({
+            key: `p-${p._id}-v${i}`,
+            src: resolveMediaUrl(v),
+            label: p.title || 'Property',
+            type: 'video'
+          });
+        });
+      }
+    });
+    
+    // Add job videos
+    jobs.forEach(j => {
+      if (j.videos && j.videos.length) {
+        j.videos.forEach((v, i) => {
+          videos.push({
+            key: `j-${j._id}-v${i}`,
+            src: resolveMediaUrl(v),
+            label: j.title || j.company || 'Job',
+            type: 'video'
+          });
+        });
+      }
+    });
+    
+    // Add ad videos
+    ads.forEach(a => {
+      if (a.videos && a.videos.length) {
+        a.videos.forEach((v, i) => {
+          videos.push({
+            key: `a-${a._id}-v${i}`,
+            src: resolveMediaUrl(v),
+            label: a.title || a.companyName || 'Ad',
+            type: 'video'
+          });
+        });
+      }
+    });
+    
+    return shuffle(videos);
+  }, [properties, jobs, ads, brandVideo]);
+
+  // Initialize video playlist when data loads
+  useEffect(() => {
+    if (buildVideoPlaylist.length > 0) {
+      setVideoPlaylist(buildVideoPlaylist);
+      setCurrentVideoIndex(0);
+    }
+  }, [buildVideoPlaylist]);
+
   useEffect(() => {
     loadInitialData();
     
@@ -69,17 +137,37 @@ const AdvertiseBanner = () => {
     };
   }, []);
 
+  // Handle video ended - play next
+  const handleVideoEnded = () => {
+    if (videoPlaylist.length > 0) {
+      setCurrentVideoIndex((prev) => (prev + 1) % videoPlaylist.length);
+    }
+  };
+
+  // Handle video error - skip to next
+  const handleVideoError = () => {
+    console.warn('Video failed to load, skipping:', videoPlaylist[currentVideoIndex]?.src);
+    handleVideoEnded();
+  };
+
+  const currentVideo = videoPlaylist[currentVideoIndex];
+
+  // Build rotating images from properties/jobs/ads (fallback)
   const items = useMemo(() => {
     const propItems = properties.flatMap((p) => {
       const imgs = (p.images && p.images.length ? p.images : []).map(resolveMediaUrl).filter(Boolean);
       if (imgs.length) return imgs.map((img, i) => ({ key: `p-${p._id}-${i}`, image: img, label: p.title || 'Property', type: 'image' }));
-      return [{ key: `p-${p._id}`, image: '', label: p.title || 'Property', type: 'none' }];
+      return [];
     });
-    const jobItems = jobs.map((j) => ({ key: `j-${j._id}`, image: '', label: j.title || j.company || 'Job', type: 'none' }));
+    const jobItems = jobs.flatMap((j) => {
+      const imgs = (j.images && j.images.length ? j.images : []).map(resolveMediaUrl).filter(Boolean);
+      if (imgs.length) return imgs.map((img, i) => ({ key: `j-${j._id}-${i}`, image: img, label: j.title || j.company || 'Job', type: 'image' }));
+      return [];
+    });
     const adItems = ads.flatMap((a) => {
       const imgs = (a.images && a.images.length ? a.images : (a.imageUrl ? [a.imageUrl] : [])).map(resolveMediaUrl).filter(Boolean);
       if (imgs.length) return imgs.map((img, i) => ({ key: `a-${a._id}-${i}`, image: img, label: a.title || a.companyName || 'Ad', type: 'image' }));
-      return [{ key: `a-${a._id}`, image: '', label: a.title || a.companyName || 'Ad', type: 'none' }];
+      return [];
     });
     const mixed = shuffle([...propItems, ...adItems, ...jobItems]);
     if (mixed.length === 0) {
@@ -87,31 +175,28 @@ const AdvertiseBanner = () => {
         { key: 'f1', image: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=300&q=60', label: 'Homes', type: 'image' },
         { key: 'f2', image: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=300&q=60', label: 'Cars', type: 'image' },
         { key: 'f3', image: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=300&q=60', label: 'Plots', type: 'image' },
-        { key: 'f4', image: '', label: 'Jobs', type: 'none' },
-        { key: 'f5', image: '', label: 'Ads', type: 'none' },
       ];
     }
     return mixed;
   }, [properties, jobs, ads]);
 
-  // Filter items with images for rotation
   const displayItems = useMemo(() => items.filter(item => item.image), [items]);
+  const [imageIndex, setImageIndex] = useState(0);
+  const [imageVisible, setImageVisible] = useState(true);
+  const currentImage = displayItems[imageIndex % displayItems.length];
 
-  useEffect(() => { setIndex(0); }, [displayItems.length]);
-
+  // Rotate images every 3 seconds
   useEffect(() => {
     if (displayItems.length <= 1) return;
     const id = setInterval(() => {
-      setVisible(false);
+      setImageVisible(false);
       setTimeout(() => {
-        setIndex((i) => (i + 1) % displayItems.length);
-        setVisible(true);
+        setImageIndex((i) => (i + 1) % displayItems.length);
+        setImageVisible(true);
       }, 400);
     }, 3000);
     return () => clearInterval(id);
   }, [displayItems.length]);
-
-  const current = displayItems[index % displayItems.length];
 
   return (
     <div className="fixed top-0 left-0 right-0 z-[60] h-12 bg-gradient-to-r from-amber-600 via-orange-500 to-amber-600 text-white overflow-hidden border-b border-amber-700/30">
@@ -121,29 +206,31 @@ const AdvertiseBanner = () => {
           <span className="text-xs sm:text-sm md:text-base font-extrabold tracking-wide banner-text-animate whitespace-nowrap drop-shadow-sm truncate">Advertise Here</span>
         </div>
         <div className="flex-1 h-full py-1 flex items-center justify-end gap-2 overflow-hidden min-w-0">
-          {/* Permanent Brand Video Card */}
-          {brandVideo && (
-            <div className="h-[34px] w-[58px] sm:w-[82px] rounded overflow-hidden bg-white/20 border border-white/20 shadow-sm shrink-0 flex-shrink-0" title="Brand Video">
+          {/* Video Playlist - plays one after another, muted */}
+          {videoPlaylist.length > 0 && currentVideo && (
+            <div className="h-[34px] w-[58px] sm:w-[82px] rounded overflow-hidden bg-white/20 border border-white/20 shadow-sm shrink-0 flex-shrink-0" title={currentVideo.label}>
               <video
-                src={brandVideo}
+                ref={videoRef}
+                src={currentVideo.src}
                 type="video/mp4"
                 className="h-full w-full object-cover"
                 autoPlay
                 muted
-                loop
                 playsInline
                 preload="metadata"
+                onEnded={handleVideoEnded}
+                onError={handleVideoError}
               />
             </div>
           )}
-          {/* Rotating Images Card */}
-          {current && (
-            <div className={`h-[34px] w-[58px] sm:w-[82px] rounded overflow-hidden bg-white/20 border border-white/20 shadow-sm shrink-0 transition-opacity duration-400 ${visible ? 'opacity-100' : 'opacity-0'}`}>
-              {current.image ? (
-                <img src={current.image} alt="" className="h-full w-full object-cover" />
+          {/* Rotating Images Card (fallback when no videos) */}
+          {videoPlaylist.length === 0 && currentImage && (
+            <div className={`h-[34px] w-[58px] sm:w-[82px] rounded overflow-hidden bg-white/20 border border-white/20 shadow-sm shrink-0 transition-opacity duration-400 ${imageVisible ? 'opacity-100' : 'opacity-0'}`}>
+              {currentImage.image ? (
+                <img src={currentImage.image} alt="" className="h-full w-full object-cover" />
               ) : (
                 <div className="h-full w-full flex items-center justify-center text-[9px] sm:text-[10px] font-semibold text-white/95 bg-black/10 px-1 text-center leading-tight truncate">
-                  {current.label}
+                  {currentImage.label}
                 </div>
               )}
             </div>
