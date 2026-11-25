@@ -31,10 +31,11 @@ const AdvertiseBanner = () => {
   const [properties, setProperties] = useState([]);
   const [jobs, setJobs] = useState([]);
   const [ads, setAds] = useState([]);
-  const [brandVideo, setBrandVideo] = useState(null);
-  const [index, setIndex] = useState(0);
-  const [visible, setVisible] = useState(true);
-  const videoRef = useRef(null);
+const [brandVideo, setBrandVideo] = useState(null);
+const [brandVideoError, setBrandVideoError] = useState(false);
+const [index, setIndex] = useState(0);
+const [visible, setVisible] = useState(true);
+const videoRef = useRef(null);
 
   const loadInitialData = async () => {
     let mounted = true;
@@ -122,10 +123,6 @@ const AdvertiseBanner = () => {
     }
   };
 
-  const handleVideoError = () => {
-    console.warn('Brand video failed to load');
-  };
-
   return (
     <div className="fixed top-0 left-0 right-0 z-[60] h-12 bg-gradient-to-r from-amber-600 via-orange-500 to-amber-600 text-white overflow-hidden border-b border-amber-700/30">
       <div className="h-full max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 flex items-center gap-2 sm:gap-3">
@@ -135,7 +132,7 @@ const AdvertiseBanner = () => {
         </div>
         <div className="flex-1 h-full py-1 flex items-center justify-end gap-2 overflow-hidden min-w-0">
           {/* Permanent Brand Video Card - from Settings page */}
-          {brandVideo && (
+          {brandVideo && !brandVideoError && (
             <div className="h-[34px] w-[58px] sm:w-[82px] rounded overflow-hidden bg-white/20 border border-white/20 shadow-sm shrink-0 flex-shrink-0" title="Brand Video">
               <video
                 ref={videoRef}
@@ -144,10 +141,11 @@ const AdvertiseBanner = () => {
                 className="h-full w-full object-cover"
                 autoPlay
                 muted
+                loop
                 playsInline
                 preload="metadata"
                 onEnded={handleVideoEnded}
-                onError={handleVideoError}
+                onError={() => setBrandVideoError(true)}
               />
             </div>
           )}
